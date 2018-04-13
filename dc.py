@@ -1,7 +1,18 @@
 import sys
+import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from dc_ui import Ui_MainWindow
+# Here is how you try to import compiled UI files and fall back to processing them
+# at load time via PyQt5.uic. But for now, with frequent changes, let's process all
+# at load time.
+# try:
+#     from dc_ui import Ui_MainWindow
+# except ImportError:
+#     Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
+
+Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
+Ui_Dialog, _ = PyQt5.uic.loadUiType("host_port.ui")
+    
 
 
 class MainWindow(QtWidgets.QMainWindow):
