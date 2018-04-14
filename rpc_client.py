@@ -16,7 +16,6 @@ class JSONClient(object):
 
     def call(self, name, params):
         request = self._message(name, params)
-        print "jwf sending request :<%s>"%request
         id = request.get('id')
         msg = self._codec.dumps(request)
         self._socket.sendall(msg.encode())
@@ -31,7 +30,8 @@ class JSONClient(object):
                               response.get('error')))
 
         if response.get('error') is not None:
-            print "Yikes! Reponse is: ", response
+            print "Yikes! Request is: ", request
+            print "Reponse is: ", response
             raise Exception(response.get('error'))
 
         return response.get('result')

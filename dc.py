@@ -4,6 +4,7 @@ import sys
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+import socket
 import rpc_client
 
 # Here is how you try to import compiled UI files and fall back to processing them
@@ -20,19 +21,66 @@ Ui_Dialog, _ = PyQt5.uic.loadUiType("host_port.ui")
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+    def __init__(self, rpc_client, parent=None):
+        self.client = rpc_client
+
+        QtWidgets.QMainWindow.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.reconnect = False
         self.ui.disconnectButton.clicked.connect(self.closeReconnect)
-
-    def printHost(self):
-        print "%s:%d"%(self.ui.hostName.text(), self.ui.basePortSpin.value())
+        self.ui.actionDisconnect.triggered.connect(self.closeReconnect)
+        self.ui.startStopButton.clicked.connect(self.startStop)
+        self.running = False
 
     def closeReconnect(self):
         self.reconnect = True
         self.close()
+
+    def close(self):
+        if self.client is not None:
+            self.client.close()
+        self.client = None
+        QtWidgets.QMainWindow.close(self)
+
+    def startStop(self):
+        if self.running:
+            print "Stopping Data"
+            self.running = False
+            self.ui.startStopButton.setText("Start Data")
+            self.ui.dataSource.setEnabled(True)
+            self.ui.dataSourcesStackedWidget.setEnabled(True)
+            return
+
+        sourceID = self.ui.dataSource.currentIndex()
+        if sourceID == 0:
+            config = {
+                "Nchan": self.ui.triangleNchan.value(),
+                "SampleRate": self.ui.triangleSampleRate.value(),
+                "Max": self.ui.triangleMaximum.value(),
+                "Min": self.ui.triangleMinimum.value(),
+            }
+            okay = self.client.call("SourceControl.ConfigureTriangleSource", config)
+            if not okay:
+                print "Could not ConfigureTriangleSource"
+                return
+            okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
+            if not okay:
+                print "Could not Start(Triangle)"
+                return
+            print "Starting Triangle"
+
+        elif sourceID == 1:
+            print "Starting Sim Pulses"
+            return
+        else:
+            return
+
+        self.running = True
+        self.ui.startStopButton.setText("Stop Data")
+        self.ui.dataSource.setEnabled(False)
+        self.ui.dataSourcesStackedWidget.setEnabled(False)
+        print self.client.call("SourceControl.Multiply", {"A":13, "B":4})
 
 
 class HostPortDialog(QtWidgets.QInputDialog):
@@ -65,9 +113,14 @@ def main():
         if host is None or port is None:
             print "Could not start Dastard-commander without a valid host:port selection."
             return
+        try:
+            client = rpc_client.JSONClient((host, port))
+        except socket.error:
+            print "Could not connect to Dastard at %s:%d"%(host, port)
+            continue
         print "Dastard is at %s:%d"%(host,port)
 
-        myapp = MainWindow()
+        myapp = MainWindow(client)
         myapp.show()
 
         retval = app.exec_()
