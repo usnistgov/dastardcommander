@@ -33,6 +33,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.disconnectButton.clicked.connect(self.closeReconnect)
         self.ui.actionDisconnect.triggered.connect(self.closeReconnect)
         self.ui.startStopButton.clicked.connect(self.startStop)
+        self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.running = False
 
     def closeReconnect(self):

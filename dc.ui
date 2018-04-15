@@ -260,21 +260,6 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_7">
-             <property name="font">
-              <font>
-               <family>Helvetica</family>
-               <pointsize>14</pointsize>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Configure Simulated Pulses</string>
-             </property>
-            </widget>
-           </item>
            <item row="3" column="0">
             <widget class="QLabel" name="label_10">
              <property name="text">
@@ -348,6 +333,21 @@
              </property>
              <property name="value">
               <number>10000</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="label_7">
+             <property name="font">
+              <font>
+               <family>Helvetica</family>
+               <pointsize>14</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Configure Simulated Pulses</string>
              </property>
             </widget>
            </item>
