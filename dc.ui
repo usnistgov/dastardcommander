@@ -62,10 +62,10 @@
       <item>
        <widget class="QComboBox" name="dataSource">
         <property name="currentText" stdset="0">
-         <string>Simulated pulse source</string>
+         <string>Lancero (PCIe) cards</string>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <item>
          <property name="text">
@@ -102,7 +102,7 @@
       <item>
        <widget class="QStackedWidget" name="dataSourcesStackedWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="trianglePage">
          <widget class="QFrame" name="gridFrame">
@@ -354,6 +354,127 @@
           </layout>
          </widget>
         </widget>
+        <widget class="QWidget" name="lanceroPage">
+         <widget class="QWidget" name="gridLayoutWidget_4">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>20</y>
+            <width>561</width>
+            <height>301</height>
+           </rect>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="1">
+            <layout class="QGridLayout" name="gridLayout_4">
+             <item row="2" column="1">
+              <widget class="QPushButton" name="noFibersButton">
+               <property name="text">
+                <string>None</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" colspan="2">
+              <widget class="QLabel" name="label_15">
+               <property name="text">
+                <string>Fiber Select</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="2">
+              <widget class="QCheckBox" name="parallelStreaming">
+               <property name="text">
+                <string>Parallel Streaming</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QPushButton" name="allFibersButton">
+               <property name="text">
+                <string>All</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <layout class="QGridLayout" name="lanceroFiberLayout"/>
+             </item>
+            </layout>
+           </item>
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QLabel" name="label_13">
+               <property name="text">
+                <string>Choose devices:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="lanceroChooserLayout">
+               <item>
+                <widget class="QLabel" name="noLanceroLabel">
+                 <property name="text">
+                  <string>No devices found at /dev/lancero_*</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_14">
+               <property name="text">
+                <string>TDM Clock Speed:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QRadioButton" name="lanceroClock50Button">
+                 <property name="toolTip">
+                  <string>Choose for 50 MHz TDM master clock speed</string>
+                 </property>
+                 <property name="text">
+                  <string>50 MHz</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="lanceroClock125Button">
+                 <property name="toolTip">
+                  <string>Choose for 125 MHz TDM master clock speed</string>
+                 </property>
+                 <property name="text">
+                  <string>125 MHz</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <zorder>allFibersButton</zorder>
+         <zorder>noFibersButton</zorder>
+         <zorder>parallelStreaming</zorder>
+         <zorder>gridLayoutWidget_4</zorder>
+        </widget>
        </widget>
       </item>
       <item>
@@ -461,7 +582,7 @@
      <rect>
       <x>50</x>
       <y>480</y>
-      <width>121</width>
+      <width>151</width>
       <height>32</height>
      </rect>
     </property>

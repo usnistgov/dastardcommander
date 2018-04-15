@@ -16,6 +16,8 @@ import rpc_client
 #     from dc_ui import Ui_MainWindow
 # except ImportError:
 #     Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
+#
+# TODO: don't process ui files at run-time, but compile them.
 
 Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
 Ui_Dialog, _ = PyQt5.uic.loadUiType("host_port.ui")
@@ -36,17 +38,43 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.running = False
 
+    def updateLanceroCardChoices(self):
+        """Build the check boxes to specify which Lancero cards to use."""
+
+        lo = self.ui.lanceroChooserLayout
+        # Empty the layout
+        while True:
+            item = lo.takeAt(0)
+            if item is None:
+                break
+            if item is not self.ui.noLanceroLabel:
+                del item
+
+        cards = [] # TODO: Query the server for the cards it found.
+        self.lanceroCheckBoxes = {}
+        if len(cards) == 0:
+            lo.addWidget(self.ui.noLanceroLabel)
+        for c in cards:
+            cb = QtWidgets.QCheckBox("lancero %d"%c)
+            self.lanceroCheckBoxes[c] = cb
+            lo.addWidget(cb)
+
+
+
     def closeReconnect(self):
+        """Close the main window, but don't quit. Instead, ask for a new Dastard connection."""
         self.reconnect = True
         self.close()
 
     def close(self):
+        """Close the main window and also the client connection to a Dastard process."""
         if self.client is not None:
             self.client.close()
         self.client = None
         QtWidgets.QMainWindow.close(self)
 
     def startStop(self):
+        """Slot to handle pressing the Start/Stop data button."""
         if self.running:
             okay = self.client.call("SourceControl.Stop", "")
             if not okay:
@@ -129,7 +157,8 @@ def main():
 
     while True:
         # Ask user what host:port to connect to.
-        # TODO: accept a command-line argument to bypass this dialog the first time.
+        # TODO: accept a command-line argument to specify host:port. If given,
+        # then we'll bypass this dialog the first time through the loop.
         d = HostPortDialog(host=host, port=port)
         host, port = d.run()
         if host is None or port is None:
