@@ -37,6 +37,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.running = False
+        self.lanceroCheckBoxes = {}
+        self.updateLanceroCardChoices()
+        self.buildLanceroFiberBoxes(8)
 
     def updateLanceroCardChoices(self):
         """Build the check boxes to specify which Lancero cards to use."""
@@ -60,6 +63,49 @@ class MainWindow(QtWidgets.QMainWindow):
             lo.addWidget(cb)
 
 
+    def buildLanceroFiberBoxes(self, nfibers):
+        """Build the check boxes to specify which fibers to use."""
+        lo = self.ui.lanceroFiberLayout
+        self.fiberBoxes = {}
+        for i in range(nfibers):
+            box = QtWidgets.QCheckBox("%d"%(i+nfibers))
+            lo.addWidget(box, i, 1)
+            self.fiberBoxes[i+nfibers] = box
+
+            box = QtWidgets.QCheckBox("%d"%i)
+            lo.addWidget(box, i, 0)
+            self.fiberBoxes[i] = box
+
+
+        def setAll(value):
+            for box in self.fiberBoxes.values():
+                box.setChecked(value)
+        checkAll = lambda : setAll(True)
+        clearAll = lambda : setAll(False)
+        self.ui.allFibersButton.clicked.connect(checkAll)
+        self.ui.noFibersButton.clicked.connect(clearAll)
+        self.toggleParallelStreaming(self.ui.parallelStreaming.isChecked())
+        self.ui.parallelStreaming.toggled.connect(self.toggleParallelStreaming)
+
+    def toggleParallelStreaming(self, ps):
+        """Make the parallel streaming connection between boxes."""
+
+        nfibers = len(self.fiberBoxes)
+        if ps:
+            for i in range(nfibers//2):
+                box1 = self.fiberBoxes[i]
+                box2 = self.fiberBoxes[i+nfibers//2]
+                either = box1.isChecked() or box2.isChecked()
+                box1.setChecked(either)
+                box2.setChecked(either)
+                box1.toggled.connect(box2.setChecked)
+                box2.toggled.connect(box1.setChecked)
+        else:
+            for i in range(nfibers//2):
+                box1 = self.fiberBoxes[i]
+                box2 = self.fiberBoxes[i+nfibers//2]
+                box1.toggled.disconnect()
+                box2.toggled.disconnect()
 
     def closeReconnect(self):
         """Close the main window, but don't quit. Instead, ask for a new Dastard connection."""
