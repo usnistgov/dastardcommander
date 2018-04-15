@@ -47,6 +47,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def startStop(self):
         if self.running:
+            okay = self.client.call("SourceControl.Stop", "")
+            if not okay:
+                print "Could not Stop data"
+                return
             print "Stopping Data"
             self.running = False
             self.ui.startStopButton.setText("Start Data")
@@ -68,13 +72,28 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
             okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
             if not okay:
-                print "Could not Start(Triangle)"
+                print "Could not Start Triangle "
                 return
             print "Starting Triangle"
 
         elif sourceID == 1:
+            config = {
+                "Nchan": self.ui.simPulseNchan.value(),
+                "SampleRate": self.ui.simPulseSampleRate.value(),
+                "Amplitude": self.ui.simPulseAmplitude.value(),
+                "Pedestal": self.ui.simPulseBaseline.value(),
+                "Nsamp": self.ui.simPulseSamplesPerPulse.value(),
+            }
+            okay = self.client.call("SourceControl.ConfigureSimPulseSource", config)
+            if not okay:
+                print "Could not ConfigureSimPulseSource"
+                return
+            okay = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
+            if not okay:
+                print "Could not Start SimPulse"
+                return
             print "Starting Sim Pulses"
-            return
+
         else:
             return
 

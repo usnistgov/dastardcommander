@@ -62,10 +62,10 @@
       <item>
        <widget class="QComboBox" name="dataSource">
         <property name="currentText" stdset="0">
-         <string>Triangle wave source</string>
+         <string>Simulated pulse source</string>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <item>
          <property name="text">
@@ -102,7 +102,7 @@
       <item>
        <widget class="QStackedWidget" name="dataSourcesStackedWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="trianglePage">
          <widget class="QFrame" name="gridFrame">
@@ -110,51 +110,33 @@
            <rect>
             <x>40</x>
             <y>40</y>
-            <width>301</width>
-            <height>152</height>
+            <width>262</width>
+            <height>176</height>
            </rect>
           </property>
           <property name="frameShape">
            <enum>QFrame::Panel</enum>
           </property>
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="3" column="1">
-            <widget class="QSpinBox" name="triangleMaximum">
-             <property name="maximum">
-              <number>65535</number>
+          <layout class="QFormLayout" name="formLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="font">
+              <font>
+               <family>Helvetica</family>
+               <pointsize>14</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
              </property>
-             <property name="value">
-              <number>20000</number>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDoubleSpinBox" name="triangleSampleRate">
-             <property name="minimum">
-              <double>10.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>1000000.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>10000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QSpinBox" name="triangleMinimum">
-             <property name="maximum">
-              <number>65535</number>
-             </property>
-             <property name="value">
-              <number>10000</number>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>Triangle minimum</string>
+              <string>Configure Triangles</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Number of Channels</string>
              </property>
             </widget>
            </item>
@@ -178,10 +160,16 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Number of Channels</string>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="triangleSampleRate">
+             <property name="minimum">
+              <double>10.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>10000.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -192,8 +180,88 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_6">
+           <item row="3" column="1">
+            <widget class="QSpinBox" name="triangleMaximum">
+             <property name="maximum">
+              <number>65535</number>
+             </property>
+             <property name="value">
+              <number>20000</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Triangle minimum</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="triangleMinimum">
+             <property name="maximum">
+              <number>65535</number>
+             </property>
+             <property name="value">
+              <number>10000</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="simPage">
+         <widget class="QFrame" name="gridFrame_2">
+          <property name="geometry">
+           <rect>
+            <x>40</x>
+            <y>30</y>
+            <width>316</width>
+            <height>176</height>
+           </rect>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Panel</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="3" column="1">
+            <widget class="QDoubleSpinBox" name="simPulseAmplitude">
+             <property name="toolTip">
+              <string>Peak value of pulses, relative to baseline</string>
+             </property>
+             <property name="minimum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>65535.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>20000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QDoubleSpinBox" name="simPulseBaseline">
+             <property name="decimals">
+              <number>0</number>
+             </property>
+             <property name="maximum">
+              <double>65535.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>1000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>Number of Channels</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_7">
              <property name="font">
               <font>
                <family>Helvetica</family>
@@ -203,14 +271,89 @@
               </font>
              </property>
              <property name="text">
-              <string>Configure Triangles</string>
+              <string>Configure Simulated Pulses</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Pulse amplitude</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="simPulseSampleRate">
+             <property name="toolTip">
+              <string/>
+             </property>
+             <property name="minimum">
+              <double>10.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>10000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="simPulseNchan">
+             <property name="toolTip">
+              <string>How many data streams to simulate</string>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>256</number>
+             </property>
+             <property name="value">
+              <number>8</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Baseline level</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Samples per second</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Samples per pulse</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QSpinBox" name="simPulseSamplesPerPulse">
+             <property name="toolTip">
+              <string>How many samples to simulate before next pulse is generated</string>
+             </property>
+             <property name="minimum">
+              <number>100</number>
+             </property>
+             <property name="maximum">
+              <number>999999</number>
+             </property>
+             <property name="value">
+              <number>10000</number>
              </property>
             </widget>
            </item>
           </layout>
          </widget>
         </widget>
-        <widget class="QWidget" name="simPage"/>
        </widget>
       </item>
       <item>
