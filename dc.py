@@ -40,14 +40,49 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
+        self.activeChannelsBoxes = {}
+        self.buildActiveChannels(128, 16, 4, 2)
+
+    def buildActiveChannels(self, nchan, nrow, ncol, chanpersensor=1):
+        if nchan != nrow * ncol * chanpersensor or chanpersensor < 1:
+            print "buildActiveChanels(%d, %d, %d, %d) failed"%(nchan, nrow, ncol, chanpersensor)
+            return
+
+        layout = self.ui.activeChannelFrame.layout()
+        while True:
+            box = layout.takeAt(0)
+            if box is None:
+                break
+            del box
+
+        self.activeChannelsBoxes = {}
+        for row in range(nrow):
+            for col in range(ncol):
+                for ichan in range(chanpersensor):
+                    actualcol = col*chanpersensor + ichan
+                    i = col*(nrow*chanpersensor) + row*chanpersensor + ichan
+                    box = QtWidgets.QCheckBox("%d"%i)
+                    self.activeChannelsBoxes[i] = box
+                    layout.addWidget(box, row, actualcol)
+
+        # All/None buttons
+        def setAll(value):
+            for box in self.activeChannelsBoxes.values():
+                box.setChecked(value)
+        checkAll = lambda : setAll(True)
+        clearAll = lambda : setAll(False)
+        self.ui.allChannelsButton.clicked.connect(checkAll)
+        self.ui.noChannelsButton.clicked.connect(clearAll)
+
+
 
     def updateLanceroCardChoices(self):
         """Build the check boxes to specify which Lancero cards to use."""
 
-        lo = self.ui.lanceroChooserLayout
+        layout = self.ui.lanceroChooserLayout
         # Empty the layout
         while True:
-            item = lo.takeAt(0)
+            item = layout.takeAt(0)
             if item is None:
                 break
             if item is not self.ui.noLanceroLabel:
@@ -56,24 +91,24 @@ class MainWindow(QtWidgets.QMainWindow):
         cards = [] # TODO: Query the server for the cards it found.
         self.lanceroCheckBoxes = {}
         if len(cards) == 0:
-            lo.addWidget(self.ui.noLanceroLabel)
+            layout.addWidget(self.ui.noLanceroLabel)
         for c in cards:
             cb = QtWidgets.QCheckBox("lancero %d"%c)
             self.lanceroCheckBoxes[c] = cb
-            lo.addWidget(cb)
+            layout.addWidget(cb)
 
 
     def buildLanceroFiberBoxes(self, nfibers):
         """Build the check boxes to specify which fibers to use."""
-        lo = self.ui.lanceroFiberLayout
+        layout = self.ui.lanceroFiberLayout
         self.fiberBoxes = {}
         for i in range(nfibers):
             box = QtWidgets.QCheckBox("%d"%(i+nfibers))
-            lo.addWidget(box, i, 1)
+            layout.addWidget(box, i, 1)
             self.fiberBoxes[i+nfibers] = box
 
             box = QtWidgets.QCheckBox("%d"%i)
-            lo.addWidget(box, i, 0)
+            layout.addWidget(box, i, 0)
             self.fiberBoxes[i] = box
 
 
