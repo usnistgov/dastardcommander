@@ -48,6 +48,11 @@ class MainWindow(QtWidgets.QMainWindow):
         pretrig = self.ui.pretriggerSamplesSpin
         pct = self.ui.pctPretriggerSpinBox
 
+        def serverChangeRecordSize():
+            samp = samples.value()
+            presamp = pretrig.value()
+            print "Here we tell the server records are %d (%d pretrigger)"%(samp, presamp)
+
         def changePre(ps):
             pct.setValue(ps*100.0/samples.value())
         pretrig.valueChanged.connect(changePre)
@@ -55,12 +60,14 @@ class MainWindow(QtWidgets.QMainWindow):
         def changePct(p):
             pretrig.valueChanged.disconnect()
             pretrig.setValue(int(0.5+samples.value()*p/100.0))
+            serverChangeRecordSize()
             pretrig.valueChanged.connect(changePre)
         pct.valueChanged.connect(changePct)
 
         def changeSamples(s):
             pretrig.valueChanged.disconnect()
             pretrig.setValue(int(0.5+s*pct.value()/100.0))
+            serverChangeRecordSize()
             pretrig.valueChanged.connect(changePre)
         samples.valueChanged.connect(changeSamples)
 
