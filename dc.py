@@ -3,6 +3,7 @@
 import sys
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QObject, pyqtSignal
 # from PyQt5.QtWidgets import (QMainWindow, QDialog, QApplication,
 #                              QLineEdit, QPushButton, QFormLayout, QMessageBox, QWidget)
 
@@ -21,6 +22,66 @@ import rpc_client
 
 Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
 Ui_Dialog, _ = PyQt5.uic.loadUiType("host_port.ui")
+Ui_Trigger, _ = PyQt5.uic.loadUiType("triggerconfig.ui")
+
+
+class TriggerConfig(QtWidgets.QWidget):
+    newRecordLengths = pyqtSignal(int, int)
+
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.ui = Ui_Trigger()
+        self.ui.setupUi(self)
+        self.newRecordLengths.connect(self.updateRecordLengths)
+    def channelChooserChanged(self):
+        pass
+    def checkedCoupleFBErr(self):
+        pass
+    def checkedCoupleErrFB(self):
+        pass
+    def changedAutoTrigConfig(self):
+        pass
+    def changedEdgeTrigConfig(self):
+        pass
+    def changedLevelTrigConfig(self):
+        pass
+    def changedNoiseTrigConfig(self):
+        pass
+    def changedLevelUnits(self):
+        pass
+    def changedRecordLength(self, reclen):
+        samples = self.ui.recordLengthSpinBox
+        pretrig = self.ui.pretrigLengthSpinBox
+        pct = self.ui.pretrigPercentSpinBox
+        old_pt = pretrig.value()
+        new_pt = int(0.5+reclen*pct.value()/100.0)
+        if old_pt != new_pt:
+            pretrig.valueChanged.disconnect()
+            pretrig.setValue(new_pt)
+            pretrig.valueChanged.connect(self.editedPretrigLength)
+        self.newRecordLengths.emit(samples.value(), pretrig.value())
+
+    def editedPretrigLength(self):
+        samples = self.ui.recordLengthSpinBox
+        pretrig = self.ui.pretrigLengthSpinBox
+        pct = self.ui.pretrigPercentSpinBox
+        pct.valueChanged.disconnect()
+        pct.setValue(pretrig.value()*100.0/samples.value())
+        pct.valueChanged.connect(self.editedPretrigPercentage)
+        self.newRecordLengths.emit(samples.value(), pretrig.value())
+
+    def editedPretrigPercentage(self):
+        samples = self.ui.recordLengthSpinBox
+        pretrig = self.ui.pretrigLengthSpinBox
+        pct = self.ui.pretrigPercentSpinBox
+        pretrig.valueChanged.disconnect()
+        pretrig.setValue(int(0.5+samples.value()*pct.value()/100.0))
+        pretrig.valueChanged.connect(self.editedPretrigLength)
+        self.newRecordLengths.emit(samples.value(), pretrig.value())
+
+    def updateRecordLengths(self, samp, presamp):
+        print "Here we tell the server records are %d (%d pretrigger)"%(samp, presamp)
+        self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp":samp, "Npre":presamp})
 
 
 
@@ -40,37 +101,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
-        self.setupRecordSize()
-
-    def setupRecordSize(self):
-        """Connect the samples/presamples/pct-presamples spin boxes to adjust each other"""
-        samples = self.ui.samplesSpin
-        pretrig = self.ui.pretriggerSamplesSpin
-        pct = self.ui.pctPretriggerSpinBox
-
-        def serverChangeRecordSize():
-            samp = samples.value()
-            presamp = pretrig.value()
-            print "Here we tell the server records are %d (%d pretrigger)"%(samp, presamp)
-            self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp":samp, "Npre":presamp})
-
-        def changePre(ps):
-            pct.setValue(ps*100.0/samples.value())
-        pretrig.valueChanged.connect(changePre)
-
-        def changePct(p):
-            pretrig.valueChanged.disconnect()
-            pretrig.setValue(int(0.5+samples.value()*p/100.0))
-            serverChangeRecordSize()
-            pretrig.valueChanged.connect(changePre)
-        pct.valueChanged.connect(changePct)
-
-        def changeSamples(s):
-            pretrig.valueChanged.disconnect()
-            pretrig.setValue(int(0.5+s*pct.value()/100.0))
-            serverChangeRecordSize()
-            pretrig.valueChanged.connect(changePre)
-        samples.valueChanged.connect(changeSamples)
+        self.tconfig = TriggerConfig(self.ui.tabTriggering)
+        self.tconfig.client = self.client
 
     def updateLanceroCardChoices(self):
         """Build the check boxes to specify which Lancero cards to use."""
@@ -162,7 +194,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.startStopButton.setText("Start Data")
             self.ui.dataSource.setEnabled(True)
             self.ui.dataSourcesStackedWidget.setEnabled(True)
-            self.ui.triggeringTab.setEnabled(False)
+            self.ui.tabTriggering.setEnabled(False)
             return
 
         sourceID = self.ui.dataSource.currentIndex()
@@ -208,7 +240,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.startStopButton.setText("Stop Data")
         self.ui.dataSource.setEnabled(False)
         self.ui.dataSourcesStackedWidget.setEnabled(False)
-        self.ui.triggeringTab.setEnabled(True)
+        self.ui.tabTriggering.setEnabled(True)
         print self.client.call("SourceControl.Multiply", {"A":13, "B":4})
 
 
