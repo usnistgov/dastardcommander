@@ -40,6 +40,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
+        self.setupRecordSize()
+
+    def setupRecordSize(self):
+        """Connect the samples/presamples/pct-presamples spin boxes to adjust each other"""
+        samples = self.ui.samplesSpin
+        pretrig = self.ui.pretriggerSamplesSpin
+        pct = self.ui.pctPretriggerSpinBox
+
+        def changePre(ps):
+            pct.setValue(ps*100.0/samples.value())
+        pretrig.valueChanged.connect(changePre)
+
+        def changePct(p):
+            pretrig.valueChanged.disconnect()
+            pretrig.setValue(int(0.5+samples.value()*p/100.0))
+            pretrig.valueChanged.connect(changePre)
+        pct.valueChanged.connect(changePct)
+
+        def changeSamples(s):
+            pretrig.valueChanged.disconnect()
+            pretrig.setValue(int(0.5+s*pct.value()/100.0))
+            pretrig.valueChanged.connect(changePre)
+        samples.valueChanged.connect(changeSamples)
 
     def updateLanceroCardChoices(self):
         """Build the check boxes to specify which Lancero cards to use."""
