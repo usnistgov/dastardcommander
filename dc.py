@@ -40,41 +40,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
-        self.activeChannelsBoxes = {}
-        self.buildActiveChannels(128, 16, 4, 2)
-
-    def buildActiveChannels(self, nchan, nrow, ncol, chanpersensor=1):
-        if nchan != nrow * ncol * chanpersensor or chanpersensor < 1:
-            print "buildActiveChanels(%d, %d, %d, %d) failed"%(nchan, nrow, ncol, chanpersensor)
-            return
-
-        layout = self.ui.activeChannelFrame.layout()
-        while True:
-            box = layout.takeAt(0)
-            if box is None:
-                break
-            del box
-
-        self.activeChannelsBoxes = {}
-        for row in range(nrow):
-            for col in range(ncol):
-                for ichan in range(chanpersensor):
-                    actualcol = col*chanpersensor + ichan
-                    i = col*(nrow*chanpersensor) + row*chanpersensor + ichan
-                    box = QtWidgets.QCheckBox("%d"%i)
-                    self.activeChannelsBoxes[i] = box
-                    layout.addWidget(box, row, actualcol)
-
-        # All/None buttons
-        def setAll(value):
-            for box in self.activeChannelsBoxes.values():
-                box.setChecked(value)
-        checkAll = lambda : setAll(True)
-        clearAll = lambda : setAll(False)
-        self.ui.allChannelsButton.clicked.connect(checkAll)
-        self.ui.noChannelsButton.clicked.connect(clearAll)
-
-
 
     def updateLanceroCardChoices(self):
         """Build the check boxes to specify which Lancero cards to use."""
