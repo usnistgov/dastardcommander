@@ -30,7 +30,7 @@
      <enum>QTabWidget::North</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="usesScrollButtons">
      <bool>false</bool>
@@ -49,10 +49,10 @@
       <item>
        <widget class="QComboBox" name="dataSource">
         <property name="currentText" stdset="0">
-         <string>Lancero (PCIe) cards</string>
+         <string>Simulated pulse source</string>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>1</number>
         </property>
         <item>
          <property name="text">
@@ -89,7 +89,7 @@
       <item>
        <widget class="QStackedWidget" name="dataSourcesStackedWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="trianglePage">
          <widget class="QFrame" name="gridFrame">
@@ -531,7 +531,10 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="tab_2">
+    <widget class="QWidget" name="triggeringTab">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <attribute name="title">
       <string>Triggering</string>
      </attribute>
@@ -575,6 +578,9 @@
          </property>
          <property name="maximum">
           <number>262144</number>
+         </property>
+         <property name="value">
+          <number>512</number>
          </property>
         </widget>
        </item>
@@ -648,7 +654,7 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>50</x>

@@ -52,6 +52,7 @@ class MainWindow(QtWidgets.QMainWindow):
             samp = samples.value()
             presamp = pretrig.value()
             print "Here we tell the server records are %d (%d pretrigger)"%(samp, presamp)
+            self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp":samp, "Npre":presamp})
 
         def changePre(ps):
             pct.setValue(ps*100.0/samples.value())
@@ -161,6 +162,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.startStopButton.setText("Start Data")
             self.ui.dataSource.setEnabled(True)
             self.ui.dataSourcesStackedWidget.setEnabled(True)
+            self.ui.triggeringTab.setEnabled(False)
             return
 
         sourceID = self.ui.dataSource.currentIndex()
@@ -206,6 +208,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.startStopButton.setText("Stop Data")
         self.ui.dataSource.setEnabled(False)
         self.ui.dataSourcesStackedWidget.setEnabled(False)
+        self.ui.triggeringTab.setEnabled(True)
         print self.client.call("SourceControl.Multiply", {"A":13, "B":4})
 
 
