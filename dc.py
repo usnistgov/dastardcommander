@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
+# Non-Qt imports
+import socket
+import subprocess
 import sys
+
+# Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
 # from PyQt5.QtWidgets import (QMainWindow, QDialog, QApplication,
 #                              QLineEdit, QPushButton, QFormLayout, QMessageBox, QWidget)
 
-import socket
+# User code imports
 import rpc_client
 
 # Here is how you try to import compiled UI files and fall back to processing them
@@ -26,6 +31,10 @@ Ui_Trigger, _ = PyQt5.uic.loadUiType("triggerconfig.ui")
 
 
 class TriggerConfig(QtWidgets.QWidget):
+    """Provide the UI inside the Triggering tab.
+
+    Most of the UI is copied from MATTER, but the Python implementation in this
+    class is new."""
     newRecordLengths = pyqtSignal(int, int)
 
     def __init__(self, parent=None):
@@ -103,6 +112,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.buildLanceroFiberBoxes(8)
         self.tconfig = TriggerConfig(self.ui.tabTriggering)
         self.tconfig.client = self.client
+        self.microscopes = []
+        self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
+        self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
+
+    def launchMicroscope(self):
+        """Launch one instance of microscope.
+
+        TODO: don't hard-wire in the location of the binary!"""
+        self.microscopes.append(
+            subprocess.Popen("/Users/fowlerj/Software/microscope/microscope"))
+
+    def killAllMicroscopes(self):
+        """Terminate all instances of microscope launched by this program."""
+        while True:
+            try:
+                m = self.microscopes.pop()
+                m.terminate()
+            except IndexError:
+                return
 
     def updateLanceroCardChoices(self):
         """Build the check boxes to specify which Lancero cards to use."""
@@ -125,7 +153,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.lanceroCheckBoxes[c] = cb
             layout.addWidget(cb)
 
-
     def buildLanceroFiberBoxes(self, nfibers):
         """Build the check boxes to specify which fibers to use."""
         layout = self.ui.lanceroFiberLayout
@@ -139,7 +166,6 @@ class MainWindow(QtWidgets.QMainWindow):
             layout.addWidget(box, i, 0)
             self.fiberBoxes[i] = box
 
-
         def setAll(value):
             for box in self.fiberBoxes.values():
                 box.setChecked(value)
@@ -150,23 +176,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toggleParallelStreaming(self.ui.parallelStreaming.isChecked())
         self.ui.parallelStreaming.toggled.connect(self.toggleParallelStreaming)
 
-    def toggleParallelStreaming(self, ps):
+    def toggleParallelStreaming(self, parallelStream):
         """Make the parallel streaming connection between boxes."""
-
         nfibers = len(self.fiberBoxes)
-        if ps:
-            for i in range(nfibers//2):
+        npairs = nfibers//2
+        if parallelStream:
+            for i in range(npairs):
                 box1 = self.fiberBoxes[i]
-                box2 = self.fiberBoxes[i+nfibers//2]
+                box2 = self.fiberBoxes[i+npairs]
                 either = box1.isChecked() or box2.isChecked()
                 box1.setChecked(either)
                 box2.setChecked(either)
                 box1.toggled.connect(box2.setChecked)
                 box2.toggled.connect(box1.setChecked)
         else:
-            for i in range(nfibers//2):
+            for i in range(npairs):
                 box1 = self.fiberBoxes[i]
-                box2 = self.fiberBoxes[i+nfibers//2]
+                box2 = self.fiberBoxes[i+npairs]
                 box1.toggled.disconnect()
                 box2.toggled.disconnect()
 

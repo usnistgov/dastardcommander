@@ -1,3 +1,8 @@
 *~
 *.pyc
 *_ui.py
+
+dastard-commander.config
+dastard-commander.creator
+dastard-commander.files
+dastard-commander.includes

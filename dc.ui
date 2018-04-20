@@ -48,7 +48,7 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QComboBox" name="dataSource">
-        <property name="currentText" stdset="0">
+        <property name="currentText">
          <string>Simulated pulse source</string>
         </property>
         <property name="currentIndex">
@@ -547,7 +547,7 @@
      </attribute>
     </widget>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>50</x>
@@ -558,12 +558,19 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="launchMicroscopeButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string>New Microscope</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="killAllMicroscopesButton">
+       <property name="text">
+        <string>Close microscopes</string>
        </property>
       </widget>
      </item>
