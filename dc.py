@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Non-Qt imports
+import json
 import socket
 import subprocess
 import sys
@@ -14,6 +15,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 
 # User code imports
 import rpc_client
+import status_monitor
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -93,7 +95,6 @@ class TriggerConfig(QtWidgets.QWidget):
         self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp":samp, "Npre":presamp})
 
 
-
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, parent=None):
         self.client = rpc_client
@@ -115,6 +116,39 @@ class MainWindow(QtWidgets.QMainWindow):
         self.microscopes = []
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
+
+        # The ZMQ update monitor
+        self.nmsg = 0
+        self.zmqthread = QtCore.QThread()
+        self.zmqlistener = status_monitor.ZMQListener()
+        self.zmqlistener.moveToThread(self.zmqthread)
+        self.zmqthread.started.connect(self.zmqlistener.loop)
+        self.zmqlistener.message.connect(self.update_received)
+
+        QtCore.QTimer.singleShot(0, self.zmqthread.start)
+
+    def update_received(self, message):
+        try:
+            d = json.loads(message)
+            nchan = d["Nchannels"]
+            print("Message %5d: JSON: %s with Nchannels=%d"%(self.nmsg, d, nchan))
+            self._setGuiRunning(d["Running"])
+            source = d["SourceName"]
+            if source == "Triangles":
+                self.ui.dataSource.setCurrentIndex(0)
+                self.ui.triangleNchan.setValue(nchan)
+            elif source == "SimPulses":
+                self.ui.dataSource.setCurrentIndex(1)
+                self.ui.simPulseNchan.setValue(nchan)
+        except:
+            print("Message %5d: %s"% (self.nmsg, message))
+        self.nmsg += 1
+
+    # The following will cleanly close the zmqlistener.
+    # def closeEvent(self, event):
+    #     self.zmqlistener.running = False
+    #     self.zmqthread.quit()
+    #     self.zmqthread.wait()
 
     def launchMicroscope(self):
         """Launch one instance of microscope.
@@ -211,20 +245,39 @@ class MainWindow(QtWidgets.QMainWindow):
     def startStop(self):
         """Slot to handle pressing the Start/Stop data button."""
         if self.running:
-            okay = self.client.call("SourceControl.Stop", "")
-            if not okay:
-                print "Could not Stop data"
-                return
-            print "Stopping Data"
-            self.running = False
-            self.ui.startStopButton.setText("Start Data")
-            self.ui.dataSource.setEnabled(True)
-            self.ui.dataSourcesStackedWidget.setEnabled(True)
-            self.ui.tabTriggering.setEnabled(False)
-            return
+            self._stop()
+            self._setGuiRunning(False)
+        else:
+            self._start()
+            self._setGuiRunning(True)
 
+    def _stop(self):
+        okay = self.client.call("SourceControl.Stop", "")
+        if not okay:
+            print "Could not Stop data"
+            return
+        print "Stopping Data"
+
+    def _setGuiRunning(self, running):
+        self.running = running
+        label = "Start Data"
+        if running:
+            label = "Stop Data"
+        self.ui.startStopButton.setText(label)
+        self.ui.dataSource.setEnabled(not running)
+        self.ui.dataSourcesStackedWidget.setEnabled(not running)
+        self.ui.tabTriggering.setEnabled(running)
+
+    def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
         if sourceID == 0:
+            self._startTriangle()
+        elif sourceID == 1:
+            self._startSimPulse()
+        else:
+            return
+
+    def _startTriangle(self):
             config = {
                 "Nchan": self.ui.triangleNchan.value(),
                 "SampleRate": self.ui.triangleSampleRate.value(),
@@ -241,33 +294,24 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
             print "Starting Triangle"
 
-        elif sourceID == 1:
-            config = {
-                "Nchan": self.ui.simPulseNchan.value(),
-                "SampleRate": self.ui.simPulseSampleRate.value(),
-                "Amplitude": self.ui.simPulseAmplitude.value(),
-                "Pedestal": self.ui.simPulseBaseline.value(),
-                "Nsamp": self.ui.simPulseSamplesPerPulse.value(),
-            }
-            okay = self.client.call("SourceControl.ConfigureSimPulseSource", config)
-            if not okay:
-                print "Could not ConfigureSimPulseSource"
-                return
-            okay = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
-            if not okay:
-                print "Could not Start SimPulse"
-                return
-            print "Starting Sim Pulses"
-
-        else:
+    def _startSimPulse(self):
+        config = {
+            "Nchan": self.ui.simPulseNchan.value(),
+            "SampleRate": self.ui.simPulseSampleRate.value(),
+            "Amplitude": self.ui.simPulseAmplitude.value(),
+            "Pedestal": self.ui.simPulseBaseline.value(),
+            "Nsamp": self.ui.simPulseSamplesPerPulse.value(),
+        }
+        okay = self.client.call("SourceControl.ConfigureSimPulseSource", config)
+        if not okay:
+            print "Could not ConfigureSimPulseSource"
             return
+        okay = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
+        if not okay:
+            print "Could not Start SimPulse"
+            return
+        print "Starting Sim Pulses"
 
-        self.running = True
-        self.ui.startStopButton.setText("Stop Data")
-        self.ui.dataSource.setEnabled(False)
-        self.ui.dataSourcesStackedWidget.setEnabled(False)
-        self.ui.tabTriggering.setEnabled(True)
-        print self.client.call("SourceControl.Multiply", {"A":13, "B":4})
 
 
 class HostPortDialog(QtWidgets.QInputDialog):
