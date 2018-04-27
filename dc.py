@@ -141,7 +141,7 @@ class MainWindow(QtWidgets.QMainWindow):
             nchan = d["Nchannels"]
             print("Message %5d: JSON: %s with Nchannels=%d"%(self.nmsg, d, nchan))
             self._setGuiRunning(d["Running"])
-            self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamples"])
+            self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
             source = d["SourceName"]
             if source == "Triangles":
                 self.ui.dataSource.setCurrentIndex(0)
@@ -149,8 +149,8 @@ class MainWindow(QtWidgets.QMainWindow):
             elif source == "SimPulses":
                 self.ui.dataSource.setCurrentIndex(1)
                 self.ui.simPulseNchan.setValue(nchan)
-        except:
-            print("Message %5d: %s"% (self.nmsg, message))
+        except Exception as e:
+            print("Error processing status message: %s"%e)
         self.nmsg += 1
 
     # The following will cleanly close the zmqlistener.
