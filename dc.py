@@ -60,6 +60,14 @@ class TriggerConfig(QtWidgets.QWidget):
         pass
     def changedLevelUnits(self):
         pass
+    def updateRecordLengthsFromServer(self, nsamp, npre):
+        samples = self.ui.recordLengthSpinBox
+        pretrig = self.ui.pretrigLengthSpinBox
+        pct = self.ui.pretrigPercentSpinBox
+        samples.setValue(nsamp)
+        pretrig.setValue(npre)
+        pct.setValue(1.0*npre/nsamp)
+        # TODO: I think this causes updateRecordLengths to be called! Fix it.
     def changedRecordLength(self, reclen):
         samples = self.ui.recordLengthSpinBox
         pretrig = self.ui.pretrigLengthSpinBox
@@ -133,6 +141,7 @@ class MainWindow(QtWidgets.QMainWindow):
             nchan = d["Nchannels"]
             print("Message %5d: JSON: %s with Nchannels=%d"%(self.nmsg, d, nchan))
             self._setGuiRunning(d["Running"])
+            self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamples"])
             source = d["SourceName"]
             if source == "Triangles":
                 self.ui.dataSource.setCurrentIndex(0)
