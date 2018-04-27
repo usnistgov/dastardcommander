@@ -28,7 +28,7 @@ import status_monitor
 # TODO: don't process ui files at run-time, but compile them.
 
 Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
-Ui_Dialog, _ = PyQt5.uic.loadUiType("host_port.ui")
+Ui_HostPortDialog, _ = PyQt5.uic.loadUiType("host_port.ui")
 Ui_Trigger, _ = PyQt5.uic.loadUiType("triggerconfig.ui")
 
 
@@ -323,10 +323,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 
-class HostPortDialog(QtWidgets.QInputDialog):
+class HostPortDialog(QtWidgets.QDialog):
     def __init__(self, host, port, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_Dialog()
+        QtWidgets.QDialog.__init__(self, parent)
+        self.ui = Ui_HostPortDialog()
         self.ui.setupUi(self)
         self.ui.hostName.setText(host)
         self.ui.basePortSpin.setValue(port)
