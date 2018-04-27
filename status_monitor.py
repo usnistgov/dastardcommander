@@ -1,3 +1,4 @@
+import time
 import zmq
 from PyQt5 import QtCore
 
@@ -17,15 +18,23 @@ class ZMQListener(QtCore.QObject):
         print "Collecting updates from dastard"
         self.socket.connect ("tcp://localhost:5501")
 
-        # Subscribe to zipcode, default is NYC, 10001
-        topic = "STATUS"
-        self.socket.setsockopt(zmq.SUBSCRIBE, topic)
+        self.topics = ("STATUS",)
+        for topic in self.topics:
+            self.socket.setsockopt(zmq.SUBSCRIBE, topic)
 
         self.running = True
+        self.messages_seen = {t:0 for t in self.topics}
 
     def loop(self):
         while self.running:
             [topic, contents] = self.socket.recv_multipart()
+            if topic in self.topics:
+                self.messages_seen[topic] += 1
             if topic == "STATUS":
                 self.message.emit(contents)
         print("ZMQListener quit cleanly")
+
+    # def waitFirstMessages(self, topics):
+    #     for t in topics:
+    #         while self.messages_seen[t] <= 0:
+    #             time.sleep(0.05)
