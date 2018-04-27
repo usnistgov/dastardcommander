@@ -60,14 +60,15 @@ class TriggerConfig(QtWidgets.QWidget):
         pass
     def changedLevelUnits(self):
         pass
+
     def updateRecordLengthsFromServer(self, nsamp, npre):
         samples = self.ui.recordLengthSpinBox
+        if samples.value() != nsamp:
+            samples.setValue(nsamp)
         pretrig = self.ui.pretrigLengthSpinBox
-        pct = self.ui.pretrigPercentSpinBox
-        samples.setValue(nsamp)
-        pretrig.setValue(npre)
-        pct.setValue(1.0*npre/nsamp)
-        # TODO: I think this causes updateRecordLengths to be called! Fix it.
+        if pretrig.value() != npre:
+            pretrig.setValue(npre)
+
     def changedRecordLength(self, reclen):
         samples = self.ui.recordLengthSpinBox
         pretrig = self.ui.pretrigLengthSpinBox
@@ -132,8 +133,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zmqlistener.moveToThread(self.zmqthread)
         self.zmqthread.started.connect(self.zmqlistener.loop)
         self.zmqlistener.message.connect(self.update_received)
-
         QtCore.QTimer.singleShot(0, self.zmqthread.start)
+
 
     def update_received(self, message):
         try:
@@ -154,6 +155,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.nmsg += 1
 
     # The following will cleanly close the zmqlistener.
+    # Problem: it won't return until that listener receives another status packet.
     # def closeEvent(self, event):
     #     self.zmqlistener.running = False
     #     self.zmqthread.quit()
