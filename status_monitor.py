@@ -22,16 +22,26 @@ class ZMQListener(QtCore.QObject):
         for topic in self.topics:
             self.socket.setsockopt(zmq.SUBSCRIBE, topic)
 
-        self.running = True
         self.messages_seen = {t:0 for t in self.topics}
+        self.quit_once = False
 
     def loop(self):
+        if self.quit_once:
+            raise ValueError("Cannot run a ZMQListener.loop more than once!")
+        self.running = True
+        poller = zmq.Poller()
+        poller.register(self.socket, zmq.POLLIN)
         while self.running:
+            evts = poller.poll(300) # wait 300 ms then timeout
+            if len(evts) == 0:
+                continue
             [topic, contents] = self.socket.recv_multipart()
             if topic in self.topics:
                 self.messages_seen[topic] += 1
             if topic in ("STATUS", "TRIGGER"):
                 self.message.emit(topic, contents)
+        self.socket.close()
+        self.quit_once = True
         print("ZMQListener quit cleanly")
 
     # def waitFirstMessages(self, topics):

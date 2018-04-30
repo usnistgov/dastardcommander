@@ -161,15 +161,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.nmsg += 1
 
     # The following will cleanly close the zmqlistener.
-    # Problem: it won't return until that listener receives another status packet.
-    # def closeEvent(self, event):
-    #     self.zmqlistener.running = False
-    #     self.zmqthread.quit()
-    #     self.zmqthread.wait()
+    def closeEvent(self, event):
+        self.zmqlistener.running = False
+        self.zmqthread.quit()
+        self.zmqthread.wait()
 
     def launchMicroscope(self):
         """Launch one instance of microscope.
-
         TODO: don't hard-wire in the location of the binary!"""
         self.microscopes.append(
             subprocess.Popen("/Users/fowlerj/Software/microscope/microscope"))
