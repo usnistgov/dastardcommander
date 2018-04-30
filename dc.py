@@ -5,6 +5,7 @@ import json
 import socket
 import subprocess
 import sys
+import time
 
 # Qt5 imports
 import PyQt5.uic
@@ -126,15 +127,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
 
-        # The ZMQ update monitor
+        # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
         self.zmqthread = QtCore.QThread()
         self.zmqlistener = status_monitor.ZMQListener()
-        self.zmqlistener.moveToThread(self.zmqthread)
-        self.zmqthread.started.connect(self.zmqlistener.loop)
         self.zmqlistener.message.connect(self.update_received)
-        QtCore.QTimer.singleShot(0, self.zmqthread.start)
 
+        # We don't want to make this request until the zmqthread is running.
+        # So set it up as a slot to receive the thread's started message.
+        def request_status():
+            self.client.call("SourceControl.SendAllStatus", "dummy")
+
+        self.zmqlistener.moveToThread(self.zmqthread)
+        self.zmqthread.started.connect(request_status)
+        self.zmqthread.started.connect(self.zmqlistener.loop)
+        QtCore.QTimer.singleShot(0, self.zmqthread.start)
 
 
     def update_received(self, topic, message):
@@ -158,6 +165,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.simPulseNchan.setValue(nchan)
         elif topic == "TRIGGER":
             print("TRIGGER %5d: JSON: %s"%(self.nmsg, d))
+        else:
+            print("Topic %s: JSON: %s"%(topic, d))
         self.nmsg += 1
 
     # The following will cleanly close the zmqlistener.
