@@ -10,13 +10,14 @@ class TriggerConfig(QtWidgets.QWidget):
 
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
-    newRecordLengths = pyqtSignal(int, int)
 
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_Trigger()
         self.ui.setupUi(self)
-        self.newRecordLengths.connect(self.updateRecordLengths)
+        self.ui.recordLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
+        self.ui.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
+        self.ui.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
     def channelChooserChanged(self):
         pass
     def checkedCoupleFBErr(self):
@@ -52,26 +53,25 @@ class TriggerConfig(QtWidgets.QWidget):
             pretrig.valueChanged.disconnect()
             pretrig.setValue(new_pt)
             pretrig.valueChanged.connect(self.editedPretrigLength)
-        self.newRecordLengths.emit(samples.value(), pretrig.value())
 
     def editedPretrigLength(self):
         samples = self.ui.recordLengthSpinBox
         pretrig = self.ui.pretrigLengthSpinBox
         pct = self.ui.pretrigPercentSpinBox
-        pct.valueChanged.disconnect()
+        pct.blockSignals(True)
         pct.setValue(pretrig.value()*100.0/samples.value())
-        pct.valueChanged.connect(self.editedPretrigPercentage)
-        self.newRecordLengths.emit(samples.value(), pretrig.value())
+        pct.blockSignals(False)
 
     def editedPretrigPercentage(self):
         samples = self.ui.recordLengthSpinBox
         pretrig = self.ui.pretrigLengthSpinBox
         pct = self.ui.pretrigPercentSpinBox
-        pretrig.valueChanged.disconnect()
+        pretrig.blockSignals(True)
         pretrig.setValue(int(0.5+samples.value()*pct.value()/100.0))
-        pretrig.valueChanged.connect(self.editedPretrigLength)
-        self.newRecordLengths.emit(samples.value(), pretrig.value())
+        pretrig.blockSignals(False)
 
-    def updateRecordLengths(self, samp, presamp):
+    def sendRecordLengthsToServer(self):
+        samp = self.ui.recordLengthSpinBox.value()
+        presamp = self.ui.pretrigLengthSpinBox.value()
         print "Here we tell the server records are %d (%d pretrigger)"%(samp, presamp)
         self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp":samp, "Npre":presamp})

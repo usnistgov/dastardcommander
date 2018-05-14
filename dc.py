@@ -52,6 +52,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig = trigger_config.TriggerConfig(self.ui.tabTriggering)
         self.tconfig.client = self.client
         self.microscopes = []
+        self.last_messages = {}
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
 
@@ -59,7 +60,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.nmsg = 0
         self.zmqthread = QtCore.QThread()
         self.zmqlistener = status_monitor.ZMQListener()
-        self.zmqlistener.message.connect(self.update_received)
+        self.zmqlistener.message.connect(self.updateReceived)
 
         # We don't want to make this request until the zmqthread is running.
         # So set it up as a slot to receive the thread's started message.
@@ -72,30 +73,31 @@ class MainWindow(QtWidgets.QMainWindow):
         QtCore.QTimer.singleShot(0, self.zmqthread.start)
 
 
-    def update_received(self, topic, message):
+    def updateReceived(self, topic, message):
         try:
             d = json.loads(message)
         except Exception as e:
             print("Error processing status message: %s"%e)
             return
 
-        if topic == "STATUS":
-            print("STATUS %5d: JSON: %s"%(self.nmsg, d))
-            self._setGuiRunning(d["Running"])
-            self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
-            source = d["SourceName"]
-            nchan = d["Nchannels"]
-            if source == "Triangles":
-                self.ui.dataSource.setCurrentIndex(0)
-                self.ui.triangleNchan.setValue(nchan)
-            elif source == "SimPulses":
-                self.ui.dataSource.setCurrentIndex(1)
-                self.ui.simPulseNchan.setValue(nchan)
-        elif topic == "TRIGGER":
-            print("TRIGGER %5d: JSON: %s"%(self.nmsg, d))
-        else:
-            print("Topic %s: JSON: %s"%(topic, d))
+        if not self.last_messages.get(topic, "") == message:
+            if topic == "STATUS":
+                self._setGuiRunning(d["Running"])
+                self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
+                source = d["SourceName"]
+                nchan = d["Nchannels"]
+                if source == "Triangles":
+                    self.ui.dataSource.setCurrentIndex(0)
+                    self.ui.triangleNchan.setValue(nchan)
+                elif source == "SimPulses":
+                    self.ui.dataSource.setCurrentIndex(1)
+                    self.ui.simPulseNchan.setValue(nchan)
+            elif topic == "TRIGGER":
+                pass
+
+        print("%s %5d: %s"%(topic, self.nmsg, d))
         self.nmsg += 1
+        self.last_messages[topic] = message
 
     # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):

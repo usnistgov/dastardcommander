@@ -4,5 +4,6 @@
 
 dastard-commander.config
 dastard-commander.creator
+dastard-commander.creator.*
 dastard-commander.files
 dastard-commander.includes
