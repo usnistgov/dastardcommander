@@ -92,8 +92,21 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif source == "SimPulses":
                     self.ui.dataSource.setCurrentIndex(1)
                     self.ui.simPulseNchan.setValue(nchan)
-            elif topic == "TRIGGER":
-                pass
+            # elif topic == "TRIGGER":
+            #     pass
+            elif topic == "TRIANGLE":
+                self.ui.triangleNchan.setValue(d["Nchan"])
+                self.ui.triangleSampleRate.setValue(d["SampleRate"])
+                self.ui.triangleMinimum.setValue(d["Min"])
+                self.ui.triangleMaximum.setValue(d["Max"])
+            elif topic == "SIMPULSE":
+                self.ui.simPulseNchan.setValue(d["Nchan"])
+                self.ui.simPulseSampleRate.setValue(d["SampleRate"])
+                self.ui.simPulseBaseline.setValue(d["Pedestal"])
+                self.ui.simPulseAmplitude.setValue(d["Amplitude"])
+                self.ui.simPulseSamplesPerPulse.setValue(d["Nsamp"])
+            else:
+                print("%s is not a topic we handle yet."%topic)
 
         print("%s %5d: %s"%(topic, self.nmsg, d))
         self.nmsg += 1
@@ -292,8 +305,8 @@ def main():
 
     while True:
         # Ask user what host:port to connect to.
-        # TODO: accept a command-line argument to specify host:port. If given,
-        # then we'll bypass this dialog the first time through the loop.
+        # TODO: accept a command-line argument to specify host:port.
+        # If given, we'll bypass this dialog the first time through the loop.
         d = HostPortDialog(host=host, port=port)
         host, port = d.run()
         if host is None or port is None:

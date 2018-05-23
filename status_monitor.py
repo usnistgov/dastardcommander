@@ -18,7 +18,7 @@ class ZMQListener(QtCore.QObject):
         print "Collecting updates from dastard"
         self.socket.connect ("tcp://localhost:5501")
 
-        self.topics = ("STATUS", "TRIGGER")
+        self.topics = ("STATUS", "TRIGGER", "TRIANGLE", "SIMPULSE")
         for topic in self.topics:
             self.socket.setsockopt(zmq.SUBSCRIBE, topic)
 
