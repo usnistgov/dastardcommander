@@ -55,6 +55,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.last_messages = {}
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
+        self.ui.centralwidget.setEnabled(False)
 
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
@@ -111,6 +112,17 @@ class MainWindow(QtWidgets.QMainWindow):
         print("%s %5d: %s"%(topic, self.nmsg, d))
         self.nmsg += 1
         self.last_messages[topic] = message
+
+        # Enable the window once the following message types have been received
+        require = ("TRIANGLE", "SIMPULSE")
+        all = True
+        for k in require:
+            if not k in self.last_messages:
+                all = False
+                break
+        if all:
+            self.ui.centralwidget.setEnabled(True)
+
 
     # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):
