@@ -53,6 +53,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig.client = self.client
         self.microscopes = []
         self.last_messages = {}
+        self.channel_names = []
+        self.channel_prefixes = set()
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
         self.ui.centralwidget.setEnabled(False)
@@ -73,12 +75,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zmqthread.started.connect(self.zmqlistener.loop)
         QtCore.QTimer.singleShot(0, self.zmqthread.start)
 
-
     def updateReceived(self, topic, message):
         try:
             d = json.loads(message)
         except Exception as e:
-            print("Error processing status message: %s"%e)
+            print("Error processing status message: %s" % e)
             return
 
         if not self.last_messages.get(topic, "") == message:
@@ -100,16 +101,26 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.triangleSampleRate.setValue(d["SampleRate"])
                 self.ui.triangleMinimum.setValue(d["Min"])
                 self.ui.triangleMaximum.setValue(d["Max"])
+
             elif topic == "SIMPULSE":
                 self.ui.simPulseNchan.setValue(d["Nchan"])
                 self.ui.simPulseSampleRate.setValue(d["SampleRate"])
                 self.ui.simPulseBaseline.setValue(d["Pedestal"])
                 self.ui.simPulseAmplitude.setValue(d["Amplitude"])
                 self.ui.simPulseSamplesPerPulse.setValue(d["Nsamp"])
-            else:
-                print("%s is not a topic we handle yet."%topic)
 
-        print("%s %5d: %s"%(topic, self.nmsg, d))
+            elif topic == "CHANNELNAMES":
+                self.channel_names = []
+                self.channel_prefixes.clear()
+                for name in d:
+                    self.channel_names.append(name)
+                    prefix = name.rstrip("1234567890")
+                    self.channel_prefixes.add(prefix)
+
+            else:
+                print("%s is not a topic we handle yet." % topic)
+
+        print("%s %5d: %s" % (topic, self.nmsg, d))
         self.nmsg += 1
         self.last_messages[topic] = message
 
@@ -117,12 +128,11 @@ class MainWindow(QtWidgets.QMainWindow):
         require = ("TRIANGLE", "SIMPULSE")
         all = True
         for k in require:
-            if not k in self.last_messages:
+            if k not in self.last_messages:
                 all = False
                 break
         if all:
             self.ui.centralwidget.setEnabled(True)
-
 
     # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):
@@ -157,12 +167,12 @@ class MainWindow(QtWidgets.QMainWindow):
             if item is not self.ui.noLanceroLabel:
                 del item
 
-        cards = [] # TODO: Query the server for the cards it found.
+        cards = []  # TODO: Query the server for the cards it found.
         self.lanceroCheckBoxes = {}
         if len(cards) == 0:
             layout.addWidget(self.ui.noLanceroLabel)
         for c in cards:
-            cb = QtWidgets.QCheckBox("lancero %d"%c)
+            cb = QtWidgets.QCheckBox("lancero %d" % c)
             self.lanceroCheckBoxes[c] = cb
             layout.addWidget(cb)
 
@@ -171,19 +181,24 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = self.ui.lanceroFiberLayout
         self.fiberBoxes = {}
         for i in range(nfibers):
-            box = QtWidgets.QCheckBox("%d"%(i+nfibers))
+            box = QtWidgets.QCheckBox("%d" % (i+nfibers))
             layout.addWidget(box, i, 1)
             self.fiberBoxes[i+nfibers] = box
 
-            box = QtWidgets.QCheckBox("%d"%i)
+            box = QtWidgets.QCheckBox("%d" % i)
             layout.addWidget(box, i, 0)
             self.fiberBoxes[i] = box
 
         def setAll(value):
             for box in self.fiberBoxes.values():
                 box.setChecked(value)
-        checkAll = lambda : setAll(True)
-        clearAll = lambda : setAll(False)
+
+        def checkAll():
+            setAll(True)
+
+        def clearAll():
+            setAll(False)
+
         self.ui.allFibersButton.clicked.connect(checkAll)
         self.ui.noFibersButton.clicked.connect(clearAll)
         self.toggleParallelStreaming(self.ui.parallelStreaming.isChecked())
@@ -292,7 +307,6 @@ class MainWindow(QtWidgets.QMainWindow):
         print "Starting Sim Pulses"
 
 
-
 class HostPortDialog(QtWidgets.QDialog):
     def __init__(self, host, port, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
@@ -313,7 +327,7 @@ class HostPortDialog(QtWidgets.QDialog):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    host,port = "localhost",5500
+    host, port = "localhost", 5500
 
     while True:
         # Ask user what host:port to connect to.
@@ -327,9 +341,9 @@ def main():
         try:
             client = rpc_client.JSONClient((host, port))
         except socket.error:
-            print "Could not connect to Dastard at %s:%d"%(host, port)
+            print "Could not connect to Dastard at %s:%d" % (host, port)
             continue
-        print "Dastard is at %s:%d"%(host,port)
+        print "Dastard is at %s:%d" % (host, port)
 
         myapp = MainWindow(client)
         myapp.show()
@@ -339,4 +353,5 @@ def main():
             sys.exit(retval)
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
