@@ -110,8 +110,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.simPulseSamplesPerPulse.setValue(d["Nsamp"])
 
             elif topic == "LANCERO":
-                print "Lancero message:"
-                print d
+                self.updateLanceroCardChoices(d["AvailableCards"])
+                mask = d["FiberMask"]
+                for k, v in self.fiberBoxes.items():
+                    v.setChecked(mask & (1 << k))
 
             elif topic == "CHANNELNAMES":
                 self.channel_names = []
@@ -159,8 +161,9 @@ class MainWindow(QtWidgets.QMainWindow):
             except IndexError:
                 return
 
-    def updateLanceroCardChoices(self):
-        """Build the check boxes to specify which Lancero cards to use."""
+    def updateLanceroCardChoices(self, cards=[]):
+        """Build the check boxes to specify which Lancero cards to use.
+        cards is a list of integers: which cards are available on the sever"""
 
         layout = self.ui.lanceroChooserLayout
         # Empty the layout
@@ -171,12 +174,15 @@ class MainWindow(QtWidgets.QMainWindow):
             if item is not self.ui.noLanceroLabel:
                 del item
 
-        cards = []  # TODO: Query the server for the cards it found.
         self.lanceroCheckBoxes = {}
         if len(cards) == 0:
+            self.ui.noLanceroLabel.show()
             layout.addWidget(self.ui.noLanceroLabel)
+        else:
+            self.ui.noLanceroLabel.hide()
         for c in cards:
             cb = QtWidgets.QCheckBox("lancero %d" % c)
+            cb.setChecked(True)
             self.lanceroCheckBoxes[c] = cb
             layout.addWidget(cb)
 
@@ -314,19 +320,25 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _startLancero(self):
         mask = 0
-        for k,v in self.fiberBoxes.items():
+        for k, v in self.fiberBoxes.items():
             if v.isChecked():
-                mask |= (1<<k)
+                mask |= (1 << k)
         print("Fiber mask: 0x%4.4x" % mask)
         clock = 125
         if self.ui.lanceroClock50Button.isChecked():
             clock = 50
+
+        activate = []
+        for k, v in self.lanceroCheckBoxes.items():
+            if v.isChecked():
+                activate.append(k)
+
         config = {
             "FiberMask": mask,
             "ClockMhz": clock,
             "CardDelay": 1,
-            "ActiveCards": [],
-            "AvailableCards": []
+            "ActiveCards": activate,
+            "AvailableCards": []   # This is filled in only by server, not us.
         }
         okay = self.client.call("SourceControl.ConfigureLanceroSource", config)
         if not okay:
