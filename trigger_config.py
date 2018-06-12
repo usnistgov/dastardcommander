@@ -5,6 +5,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 
 Ui_Trigger, _ = PyQt5.uic.loadUiType("triggerconfig.ui")
 
+
 class TriggerConfig(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
 
@@ -18,18 +19,29 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.recordLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
+        self.ui.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
+
     def channelChooserChanged(self):
-        pass
+        print("Channel Chooser menu new value: ", self.ui.channelChooserBox.currentText())
+
+    def channelListTextChanged(self):
+        print("Trying to update the channel information")
+
     def checkedCoupleFBErr(self):
         pass
+
     def checkedCoupleErrFB(self):
         pass
+
     def changedAutoTrigConfig(self):
         pass
+
     def changedEdgeTrigConfig(self):
         pass
+
     def changedLevelTrigConfig(self):
         pass
+
     def changedNoiseTrigConfig(self):
         pass
     def changedLevelUnits(self):
@@ -44,7 +56,6 @@ class TriggerConfig(QtWidgets.QWidget):
             pretrig.setValue(npre)
 
     def changedRecordLength(self, reclen):
-        samples = self.ui.recordLengthSpinBox
         pretrig = self.ui.pretrigLengthSpinBox
         pct = self.ui.pretrigPercentSpinBox
         old_pt = pretrig.value()
