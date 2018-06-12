@@ -109,6 +109,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.simPulseAmplitude.setValue(d["Amplitude"])
                 self.ui.simPulseSamplesPerPulse.setValue(d["Nsamp"])
 
+            elif topic == "LANCERO":
+                print "Lancero message:"
+                print d
+
             elif topic == "CHANNELNAMES":
                 self.channel_names = []
                 self.channel_prefixes.clear()
@@ -268,6 +272,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self._startTriangle()
         elif sourceID == 1:
             self._startSimPulse()
+        elif sourceID == 2:
+            self._startLancero()
         else:
             return
 
@@ -305,6 +311,32 @@ class MainWindow(QtWidgets.QMainWindow):
             print "Could not Start SimPulse"
             return
         print "Starting Sim Pulses"
+
+    def _startLancero(self):
+        mask = 0
+        for k,v in self.fiberBoxes.items():
+            if v.isChecked():
+                mask |= (1<<k)
+        print("Fiber mask: 0x%4.4x" % mask)
+        clock = 125
+        if self.ui.lanceroClock50Button.isChecked():
+            clock = 50
+        config = {
+            "FiberMask": mask,
+            "ClockMhz": clock,
+            "CardDelay": 1,
+            "ActiveCards": [],
+            "AvailableCards": []
+        }
+        okay = self.client.call("SourceControl.ConfigureLanceroSource", config)
+        if not okay:
+            print "Could not ConfigureLanceroSource"
+            return
+        okay = self.client.call("SourceControl.Start", "LANCEROSOURCE")
+        if not okay:
+            print "Could not Start Lancero"
+            return
+        print "Starting Lancero device"
 
 
 class HostPortDialog(QtWidgets.QDialog):
