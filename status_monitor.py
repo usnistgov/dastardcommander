@@ -8,7 +8,7 @@ class ZMQListener(QtCore.QObject):
 
     message = QtCore.pyqtSignal(str, str)
 
-    def __init__(self):
+    def __init__(self, host, port):
 
         QtCore.QObject.__init__(self)
 
@@ -16,8 +16,11 @@ class ZMQListener(QtCore.QObject):
         context = zmq.Context()
         self.socket = context.socket(zmq.SUB)
 
-        print("Collecting updates from dastard")
-        self.socket.connect("tcp://localhost:5501")
+        self.host = host
+        self.baseport = port+1
+        self.address = "tcp://%s:%d" % (self.host, self.baseport)
+        self.socket.connect(self.address)
+        print("Collecting updates from dastard at %s" % self.address)
 
         self.topics = ("STATUS", "TRIGGER", "TRIANGLE", "SIMPULSE", "CHANNELNAMES")
         for topic in self.topics:

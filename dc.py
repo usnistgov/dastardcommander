@@ -34,7 +34,7 @@ Ui_HostPortDialog, _ = PyQt5.uic.loadUiType("host_port.ui")
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, rpc_client, parent=None):
+    def __init__(self, rpc_client, host, port, parent=None):
         self.client = rpc_client
 
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -57,12 +57,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.channel_prefixes = set()
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
-        self.ui.centralwidget.setEnabled(False)
+        self.ui.tabWidget.setEnabled(False)
 
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
         self.zmqthread = QtCore.QThread()
-        self.zmqlistener = status_monitor.ZMQListener()
+        self.zmqlistener = status_monitor.ZMQListener(host, port)
         self.zmqlistener.message.connect(self.updateReceived)
 
         # We don't want to make this request until the zmqthread is running.
@@ -132,7 +132,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 all = False
                 break
         if all:
-            self.ui.centralwidget.setEnabled(True)
+            self.ui.tabWidget.setEnabled(True)
 
     # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):
@@ -345,7 +345,7 @@ def main():
             continue
         print "Dastard is at %s:%d" % (host, port)
 
-        myapp = MainWindow(client)
+        myapp = MainWindow(client, host, port)
         myapp.show()
 
         retval = app.exec_()

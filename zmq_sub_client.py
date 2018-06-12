@@ -12,17 +12,16 @@ python zmq_sub_client.py [portnum]
 import sys
 import zmq
 
-port = "5501"
+host = "localhost:5501"
 if len(sys.argv) > 1:
-    port =  sys.argv[1]
-    int(port)
+    host =  sys.argv[1]
 
 # Socket to talk to server
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
 print "Collecting updates from dastard server..."
-socket.connect ("tcp://localhost:%s" % port)
+socket.connect ("tcp://%s" % host)
 
 # for topicfilter in ("TRIGGER", "STATUS"):
 #     socket.setsockopt(zmq.SUBSCRIBE, topicfilter)
