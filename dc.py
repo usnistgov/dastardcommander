@@ -153,8 +153,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def launchMicroscope(self):
         """Launch one instance of microscope.
         TODO: don't hard-wire in the location of the binary!"""
-        self.microscopes.append(
-            subprocess.Popen("/Users/fowlerj/Software/microscope/microscope"))
+        try:
+            sps = subprocess.Popen("microscope")
+            self.microscopes.append(sps)
+        except OSError:
+            print("Could not launch microscope. Is it in your path?")
 
     def killAllMicroscopes(self):
         """Terminate all instances of microscope launched by this program."""
