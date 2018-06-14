@@ -36,6 +36,8 @@ Ui_HostPortDialog, _ = PyQt5.uic.loadUiType("host_port.ui")
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, host, port, parent=None):
         self.client = rpc_client
+        self.host = host
+        self.port = port
 
         QtWidgets.QMainWindow.__init__(self, parent)
         self.ui = Ui_MainWindow()
@@ -154,10 +156,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """Launch one instance of microscope.
         TODO: don't hard-wire in the location of the binary!"""
         try:
-            sps = subprocess.Popen("microscope")
+            args = ("microscope", "tcp://%s:%d" % (self.host, self.port+2))
+            sps = subprocess.Popen(args)
             self.microscopes.append(sps)
-        except OSError:
+        except OSError as e:
             print("Could not launch microscope. Is it in your path?")
+            print("Error is: ", e)
 
     def killAllMicroscopes(self):
         """Terminate all instances of microscope launched by this program."""
