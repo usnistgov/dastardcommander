@@ -182,20 +182,36 @@ class MainWindow(QtWidgets.QMainWindow):
             item = layout.takeAt(0)
             if item is None:
                 break
-            if item is not self.ui.noLanceroLabel:
-                del item
+            del item
 
         self.lanceroCheckBoxes = {}
+        self.lanceroDelays = {}
         if len(cards) == 0:
             self.ui.noLanceroLabel.show()
-            layout.addWidget(self.ui.noLanceroLabel)
         else:
             self.ui.noLanceroLabel.hide()
-        for c in cards:
+            layout.addWidget(QtWidgets.QLabel("Card number"), 0, 0)
+            layout.addWidget(QtWidgets.QLabel("Card delay"), 0, 1)
+
+        narrow = QtWidgets.QSizePolicy()
+        narrow.setHorizontalStretch(2)
+        wide = QtWidgets.QSizePolicy()
+        wide.setHorizontalStretch(10)
+
+        for i, c in enumerate(cards):
             cb = QtWidgets.QCheckBox("lancero %d" % c)
             cb.setChecked(True)
+            cb.setSizePolicy(wide)
             self.lanceroCheckBoxes[c] = cb
-            layout.addWidget(cb)
+            layout.addWidget(cb, i+1, 0)
+            sb = QtWidgets.QSpinBox()
+            sb.setMinimum(0)
+            sb.setMaximum(40)
+            sb.setValue(1)
+            sb.setSizePolicy(narrow)
+            sb.setToolTip("Card delay for card %d"%c)
+            self.lanceroDelays[c] = sb
+            layout.addWidget(sb, i+1, 1)
 
     def buildLanceroFiberBoxes(self, nfibers):
         """Build the check boxes to specify which fibers to use."""
@@ -340,14 +356,16 @@ class MainWindow(QtWidgets.QMainWindow):
             clock = 50
 
         activate = []
+        delays = []
         for k, v in self.lanceroCheckBoxes.items():
             if v.isChecked():
                 activate.append(k)
+                delays.append(self.lanceroDelays[k].value())
 
         config = {
             "FiberMask": mask,
             "ClockMhz": clock,
-            "CardDelay": 1,
+            "CardDelay": delays,
             "ActiveCards": activate,
             "AvailableCards": []   # This is filled in only by server, not us.
         }

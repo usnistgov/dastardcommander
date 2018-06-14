@@ -341,8 +341,8 @@
              <rect>
               <x>0</x>
               <y>20</y>
-              <width>561</width>
-              <height>301</height>
+              <width>310</width>
+              <height>278</height>
              </rect>
             </property>
             <layout class="QGridLayout" name="gridLayout_3">
@@ -397,21 +397,25 @@
                 </widget>
                </item>
                <item>
-                <layout class="QVBoxLayout" name="lanceroChooserLayout">
-                 <item>
-                  <widget class="QLabel" name="noLanceroLabel">
-                   <property name="text">
-                    <string>No devices found at /dev/lancero_*</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                   <property name="wordWrap">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
+                <widget class="QLabel" name="noLanceroLabel">
+                 <property name="text">
+                  <string>No devices found at /dev/lancero_*</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QFrame" name="lanceroChooserLayout_2">
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
+                 </property>
+                 <layout class="QGridLayout" name="lanceroChooserLayout"/>
+                </widget>
                </item>
                <item>
                 <spacer name="verticalSpacer">
