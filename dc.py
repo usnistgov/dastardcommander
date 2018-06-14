@@ -94,8 +94,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif source == "SimPulses":
                     self.ui.dataSource.setCurrentIndex(1)
                     self.ui.simPulseNchan.setValue(nchan)
+                elif source == "Lancero":
+                    self.ui.dataSource.setCurrentIndex(2)
+
             # elif topic == "TRIGGER":
             #     pass
+
             elif topic == "TRIANGLE":
                 self.ui.triangleNchan.setValue(d["Nchan"])
                 self.ui.triangleSampleRate.setValue(d["SampleRate"])
