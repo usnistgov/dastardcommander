@@ -610,7 +610,14 @@
     <addaction name="actionDisconnect"/>
     <addaction name="actionQuit"/>
    </widget>
+   <widget class="QMenu" name="menuExpert">
+    <property name="title">
+     <string>Expert</string>
+    </property>
+    <addaction name="actionLoad_Projectors_Basis"/>
+   </widget>
    <addaction name="menuConnection"/>
+   <addaction name="menuExpert"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionDisconnect">
@@ -621,6 +628,11 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionLoad_Projectors_Basis">
+   <property name="text">
+    <string>Load Projectors/Basis</string>
    </property>
   </action>
  </widget>
