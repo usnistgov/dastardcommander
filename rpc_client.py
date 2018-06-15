@@ -14,7 +14,7 @@ class JSONClient(object):
                     params=[params],
                     method=name)
 
-    def call(self, name, params):
+    def call(self, name, params, verbose=True):
         request = self._message(name, params)
         id = request.get('id')
         msg = self._codec.dumps(request)
@@ -30,8 +30,9 @@ class JSONClient(object):
                               response.get('error')))
 
         if response.get('error') is not None:
-            print "Yikes! Request is: ", request
-            print "Reponse is: ", response
+            if verbose:
+                print "Yikes! Request is: ", request
+                print "Reponse is: ", response
             raise Exception(response.get('error'))
 
         return response.get('result')

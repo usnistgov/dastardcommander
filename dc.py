@@ -6,18 +6,20 @@ import socket
 import subprocess
 import sys
 import time
+import os
+from collections import OrderedDict
 
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal
-# from PyQt5.QtWidgets import (QMainWindow, QDialog, QApplication,
-#                              QLineEdit, QPushButton, QFormLayout, QMessageBox, QWidget)
+from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
 import rpc_client
 import status_monitor
 import trigger_config
+import projectors
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -47,6 +49,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionDisconnect.triggered.connect(self.closeReconnect)
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
+        self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
         self.running = False
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
@@ -378,6 +381,31 @@ class MainWindow(QtWidgets.QMainWindow):
             print "Could not Start Lancero"
             return
         print "Starting Lancero device"
+
+    def loadProjectorsBasis(self):
+        options = QFileDialog.Options()
+        if not hasattr(self,"lastdir"):
+            dir = os.path.expanduser("~")
+        else:
+            dir = self.lastdir
+        fileName, _ = QFileDialog.getOpenFileName(self,"Find Projectors Basis file", dir,"Model Files (*_model.h5);;All Files (*)", options=options)
+        if fileName:
+            self.lastdir = os.path.dirname(fileName)
+            print("opening: {}".format(fileName))
+            configs = projectors.getConfigs(fileName)
+            print("Sending model for {} chans".format(len(configs)))
+            success_chans = []
+            failures = OrderedDict()
+            for channum, config in configs.items():
+                try:
+                    self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False)
+                    success_chans.append(channum)
+                except Exception as ex:
+                    failures[channum] = ex.args[0]
+
+            print("success on chans: {}".format(success_chans))
+            print("failures:")
+            print( json.dumps(failures, sort_keys=True,indent=4) )
 
 
 class HostPortDialog(QtWidgets.QDialog):
