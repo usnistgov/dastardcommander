@@ -1,7 +1,7 @@
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
 Ui_Trigger, _ = PyQt5.uic.loadUiType("triggerconfig.ui")
 
@@ -64,11 +64,11 @@ class TriggerConfig(QtWidgets.QWidget):
         chantext = chantext.replace("\t", "\n").replace(";", "\n").replace(" ", "")
         lines = chantext.split()
         for line in lines:
-            if not ":" in line:
+            if ":" not in line:
                 continue
             prefix, cnums = line.split(":", 1)
             if prefix not in self.channel_prefixes:
-                print("Channel prefix %s not in known prefixes: %s"%(prefix, self.channel_prefixes))
+                print("Channel prefix %s not in known prefixes: %s" % (prefix, self.channel_prefixes))
                 continue
             for cnum in cnums.split(","):
                 name = prefix+cnum
@@ -81,6 +81,8 @@ class TriggerConfig(QtWidgets.QWidget):
 
     def getstate(self, name):
         channels = self.chosenChannels
+        if len(channels) == 0:
+            return None
         for ch in channels:
             if ch not in self.trigger_state:
                 return None
@@ -141,7 +143,17 @@ class TriggerConfig(QtWidgets.QWidget):
         pass
 
     def changedAutoTrigConfig(self):
-        pass
+        auto = self.ui.autoTrigActive.checkState()
+        state = {"Channels": self.chosenChannels}
+        if not auto == Qt.PartiallyChecked:
+            self.ui.autoTrigActive.setTristate(False)
+            state["AutoTrigger"] = auto == Qt.Checked
+        delay = self.ui.autoTimeEdit.text()
+        try:
+            msdelay = int(float(delay)*1e6+0.5)
+            state["AutoDelay"] = msdelay
+        except ValueError:
+            print "Could not set trigger config with auto delay =", delay
 
     def changedEdgeTrigConfig(self):
         pass
