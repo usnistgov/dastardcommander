@@ -104,8 +104,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif source == "Lancero":
                     self.ui.dataSource.setCurrentIndex(2)
 
-            # elif topic == "TRIGGER":
-            #     pass
+            elif topic == "TRIGGER":
+                self.tconfig.handleTriggerMessage(d)
 
             elif topic == "TRIANGLE":
                 self.ui.triangleNchan.setValue(d["Nchan"])
@@ -146,7 +146,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.last_messages[topic] = message
 
         # Enable the window once the following message types have been received
-        require = ("TRIANGLE", "SIMPULSE")
+        require = ("TRIANGLE", "SIMPULSE", "LANCERO")
         all = True
         for k in require:
             if k not in self.last_messages:

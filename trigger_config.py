@@ -20,8 +20,17 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
+        self.trigger_state = {}
+
+    def handleTriggerMessage(self, dicts):
+        """Handle the trigger state message (in list-of-dicts form)"""
+        for d in dicts:
+            for ch in d["ChanNumbers"]:
+                self.trigger_state[ch] = d
+        print "Trigger state:\n", self.trigger_state
 
     def channelChooserChanged(self):
+        """The channel selector menu was activated: update the edit box"""
         cctext = self.ui.channelChooserBox.currentText()
         if cctext.startswith("All"):
             allprefixes = [self.chanbyprefix(p) for p in self.channel_prefixes]
@@ -37,20 +46,27 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.channelsChosenEdit.setPlainText(result)
 
     def chanbyprefix(self, prefix):
+        """Return a string listing all channels for the given prefix"""
         cnum = ",".join([p.lstrip(prefix) for p in self.channel_names if p.startswith(prefix)])
-        return "%s:%s"%(prefix, cnum)
+        return "%s:%s" % (prefix, cnum)
 
     def channelListTextChanged(self):
+        """The channel selector text edit box changed."""
+        self.parseChannelText()
+        self.updateTriggerStatus()
+
+    def parseChannelText(self):
+        """Parse the text in the channel selector text edit box. Set the list
+        self.chosenChannels accordingly."""
         self.chosenChannels = []
         chantext = self.ui.channelsChosenEdit.toPlainText()
         print ("Trying to update the channel information")
-        chantext = chantext.replace("\t","\n").replace(";", "\n").replace(" ", "")
+        chantext = chantext.replace("\t", "\n").replace(";", "\n").replace(" ", "")
         lines = chantext.split()
         for line in lines:
-            try:
-                prefix, cnums = line.split(":")
-            except:
+            if not ":" in line:
                 continue
+            prefix, cnums = line.split(":", 1)
             if prefix not in self.channel_prefixes:
                 print("Channel prefix %s not in known prefixes: %s"%(prefix, self.channel_prefixes))
                 continue
@@ -60,11 +76,63 @@ class TriggerConfig(QtWidgets.QWidget):
                     idx = self.channel_names.index(name)
                     self.chosenChannels.append(idx)
                 except ValueError:
-                    print ("Channel %s not known"%(name))
+                    print ("Channel %s not known" % (name))
         print "The chosen channels are ", self.chosenChannels
 
-    # def parseChannelText(self, text):
-    #     pass
+    def getstate(self, name):
+        channels = self.chosenChannels
+        for ch in channels:
+            if ch not in self.trigger_state:
+                return None
+        x = self.trigger_state[channels[0]].get(name, None)
+        if x is None:
+            return None
+        for ch in channels[1:]:
+            y = self.trigger_state[ch].get(name, None)
+            if x != y:
+                return None
+        return x
+
+    def updateTriggerStatus(self):
+        """Given the self.chosenChannels, update the various trigger status GUI elements."""
+
+        boxes = (
+            (self.ui.autoTrigActive, "AutoTrigger"),
+            (self.ui.edgeTrigActive, "EdgeTrigger"),
+            (self.ui.levelTrigActive, "LevelTrigger"),
+            (self.ui.noiseTrigActive, "NoiseTrigger"),
+        )
+        for (checkbox, name) in boxes:
+            state = self.getstate(name)
+            checkbox.setTristate(state is None)
+            if state is not None:
+                checkbox.setChecked(state)
+
+        levelscale = edgescale = 1.0
+        if self.ui.levelVoltsRaw.currentText().startswith("Volts"):
+            levelscale = 1./16384.0
+            edgescale = levelscale * 100  # TODO: replace 100 with samples per second
+        edits = (
+            (self.ui.autoTimeEdit, "AutoDelay", 1e-6),
+            (self.ui.edgeEdit, "EdgeLevel", edgescale),
+            (self.ui.levelEdit, "LevelLevel", levelscale),
+            # (self.ui.noiseEdit, "NoiseLevel", 1.0)
+        )
+        for (edit, name, scale) in edits:
+            state = self.getstate(name)
+            if state is None:
+                edit.setText("")
+                continue
+            edit.setText("%f" % (state*scale))
+
+        r = self.getstate("EdgeRising")
+        f = self.getstate("EdgeFalling")
+        if r and f:
+            self.ui.edgeRiseFallBoth.setCurrentIndex(2)
+        elif f:
+            self.ui.edgeRiseFallBoth.setCurrentIndex(1)
+        else:
+            self.ui.edgeRiseFallBoth.setCurrentIndex(0)
 
     def checkedCoupleFBErr(self):
         pass
@@ -83,8 +151,10 @@ class TriggerConfig(QtWidgets.QWidget):
 
     def changedNoiseTrigConfig(self):
         pass
+
     def changedLevelUnits(self):
-        pass
+        """Changed the edge+level units between RAW and Volts"""
+        self.updateTriggerStatus()
 
     def updateRecordLengthsFromServer(self, nsamp, npre):
         samples = self.ui.recordLengthSpinBox
@@ -123,5 +193,5 @@ class TriggerConfig(QtWidgets.QWidget):
     def sendRecordLengthsToServer(self):
         samp = self.ui.recordLengthSpinBox.value()
         presamp = self.ui.pretrigLengthSpinBox.value()
-        print "Here we tell the server records are %d (%d pretrigger)"%(samp, presamp)
-        self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp":samp, "Npre":presamp})
+        print "Here we tell the server records are %d (%d pretrigger)" % (samp, presamp)
+        self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp})
