@@ -22,10 +22,49 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
 
     def channelChooserChanged(self):
-        print("Channel Chooser menu new value: ", self.ui.channelChooserBox.currentText())
+        cctext = self.ui.channelChooserBox.currentText()
+        if cctext.startswith("All"):
+            allprefixes = [self.chanbyprefix(p) for p in self.channel_prefixes]
+            allprefixes.sort()
+            result = "\n".join(allprefixes)
+        elif cctext.startswith("user"):
+            return
+        else:
+            prefix = cctext.split()[0].lower()
+            if prefix == "FB":
+                prefix = "ch"
+            result = self.chanbyprefix(prefix)
+        self.ui.channelsChosenEdit.setPlainText(result)
+
+    def chanbyprefix(self, prefix):
+        cnum = ",".join([p.lstrip(prefix) for p in self.channel_names if p.startswith(prefix)])
+        return "%s:%s"%(prefix, cnum)
 
     def channelListTextChanged(self):
-        print("Trying to update the channel information")
+        self.chosenChannels = []
+        chantext = self.ui.channelsChosenEdit.toPlainText()
+        print ("Trying to update the channel information")
+        chantext = chantext.replace("\t","\n").replace(";", "\n").replace(" ", "")
+        lines = chantext.split()
+        for line in lines:
+            try:
+                prefix, cnums = line.split(":")
+            except:
+                continue
+            if prefix not in self.channel_prefixes:
+                print("Channel prefix %s not in known prefixes: %s"%(prefix, self.channel_prefixes))
+                continue
+            for cnum in cnums.split(","):
+                name = prefix+cnum
+                try:
+                    idx = self.channel_names.index(name)
+                    self.chosenChannels.append(idx)
+                except ValueError:
+                    print ("Channel %s not known"%(name))
+        print "The chosen channels are ", self.chosenChannels
+
+    # def parseChannelText(self, text):
+    #     pass
 
     def checkedCoupleFBErr(self):
         pass

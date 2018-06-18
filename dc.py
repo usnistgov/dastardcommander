@@ -60,6 +60,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.last_messages = {}
         self.channel_names = []
         self.channel_prefixes = set()
+        self.tconfig.channel_names = self.channel_names
+        self.tconfig.channel_prefixes = self.channel_prefixes
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
         self.ui.tabWidget.setEnabled(False)
@@ -125,7 +127,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     v.setChecked(mask & (1 << k))
 
             elif topic == "CHANNELNAMES":
-                self.channel_names = []
+                try:
+                    while True:
+                        self.channel_names.pop()
+                except IndexError:
+                    pass
                 self.channel_prefixes.clear()
                 for name in d:
                     self.channel_names.append(name)
