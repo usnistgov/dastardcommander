@@ -27,7 +27,6 @@ class TriggerConfig(QtWidgets.QWidget):
         for d in dicts:
             for ch in d["ChanNumbers"]:
                 self.trigger_state[ch] = d
-        print "Trigger state:\n", self.trigger_state
 
     def channelChooserChanged(self):
         """The channel selector menu was activated: update the edit box"""
@@ -107,6 +106,27 @@ class TriggerConfig(QtWidgets.QWidget):
             # This will add a trigger state to the list only if it's not already in the list.
             if ch in self.trigger_state and self.trigger_state[ch] not in allstates:
                 allstates.append(self.trigger_state[ch])
+
+        # Now we need to split states if any of allstates refers to channels both
+        # in AND out of self.chosenChannels. Those dictionaries each become 2 dictionaries.
+        for state in allstates:
+            chans = state["ChanNumbers"]
+            keep = []
+            splitoff = []
+            for c in chans:
+                if c in self.chosenChannels:
+                    keep.append(c)
+                else:
+                    splitoff.append(c)
+            if len(splitoff) > 0:
+                state["ChanNumbers"] = keep
+                for c in keep:
+                    self.trigger_state[c] = state
+                newstate = state.copy()
+                newstate["ChanNumbers"] = splitoff
+                for c in splitoff:
+                    self.trigger_state[c] = newstate
+
         return allstates
 
     def setstate(self, name, newvalue):
@@ -173,10 +193,9 @@ class TriggerConfig(QtWidgets.QWidget):
             msdelay = int(float(delay)*1e6+0.5)
             self.setstate("AutoDelay", msdelay)
         except ValueError:
-            print "Could not set trigger config with auto delay =", delay
+            pass
 
         for state in self.alltriggerstates():
-            print "Calling SourceControl.ConfigureTriggers with", state
             self.client.call("SourceControl.ConfigureTriggers", state)
 
     def changedEdgeTrigConfig(self):
