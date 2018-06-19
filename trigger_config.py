@@ -53,7 +53,7 @@ class TriggerConfig(QtWidgets.QWidget):
     def channelListTextChanged(self):
         """The channel selector text edit box changed."""
         self.parseChannelText()
-        self.updateTriggerStatus()
+        self.updateTriggerGUIElements()
 
     def parseChannelText(self):
         """Parse the text in the channel selector text edit box. Set the list
@@ -80,6 +80,7 @@ class TriggerConfig(QtWidgets.QWidget):
         print "The chosen channels are ", self.chosenChannels
 
     def getstate(self, name):
+        "Get the self.trigger_state value named name. If mutiple values, return None"
         channels = self.chosenChannels
         if len(channels) == 0:
             return None
@@ -166,7 +167,7 @@ class TriggerConfig(QtWidgets.QWidget):
 
     def changedLevelUnits(self):
         """Changed the edge+level units between RAW and Volts"""
-        self.updateTriggerStatus()
+        self.updateTriggerGUIElements()
 
     def updateRecordLengthsFromServer(self, nsamp, npre):
         samples = self.ui.recordLengthSpinBox
