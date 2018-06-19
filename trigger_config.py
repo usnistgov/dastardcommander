@@ -96,7 +96,26 @@ class TriggerConfig(QtWidgets.QWidget):
                 return None
         return x
 
-    def updateTriggerStatus(self):
+    def alltriggerstates(self):
+        """Return all unique dictionaries that are values in the self.trigger_state dict.
+        There might be 100s of entries in self.trigger_state dict but only one or a few
+        unique values in it."""
+
+        # A set() might seem natural but cannot be used to store unhashable items like dicts.
+        allstates = []
+        for ch in self.chosenChannels:
+            # This will add a trigger state to the list only if it's not already in the list.
+            if ch in self.trigger_state and self.trigger_state[ch] not in allstates:
+                allstates.append(self.trigger_state[ch])
+        return allstates
+
+    def setstate(self, name, newvalue):
+        "Set the self.trigger_state value named name to newvalue"
+        for state in self.alltriggerstates():
+            state[name] = newvalue
+        return newvalue
+
+    def updateTriggerGUIElements(self):
         """Given the self.chosenChannels, update the various trigger status GUI elements."""
 
         boxes = (
@@ -145,16 +164,20 @@ class TriggerConfig(QtWidgets.QWidget):
 
     def changedAutoTrigConfig(self):
         auto = self.ui.autoTrigActive.checkState()
-        state = {"Channels": self.chosenChannels}
         if not auto == Qt.PartiallyChecked:
             self.ui.autoTrigActive.setTristate(False)
-            state["AutoTrigger"] = auto == Qt.Checked
+            self.setstate("AutoTrigger", auto == Qt.Checked)
+
         delay = self.ui.autoTimeEdit.text()
         try:
             msdelay = int(float(delay)*1e6+0.5)
-            state["AutoDelay"] = msdelay
+            self.setstate("AutoDelay", msdelay)
         except ValueError:
             print "Could not set trigger config with auto delay =", delay
+
+        for state in self.alltriggerstates():
+            print "Calling SourceControl.ConfigureTriggers with", state
+            self.client.call("SourceControl.ConfigureTriggers", state)
 
     def changedEdgeTrigConfig(self):
         pass
