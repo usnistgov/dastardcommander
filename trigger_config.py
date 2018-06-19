@@ -21,6 +21,7 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
         self.trigger_state = {}
+        self.chosenChannels = []
 
     def handleTriggerMessage(self, dicts):
         """Handle the trigger state message (in list-of-dicts form)"""
@@ -154,6 +155,13 @@ class TriggerConfig(QtWidgets.QWidget):
         if self.ui.levelVoltsRaw.currentText().startswith("Volts"):
             levelscale = 1./16384.0
             edgescale = levelscale * 100  # TODO: replace 100 with samples per second
+            self.ui.levelUnitsLabel.setText("Volts")
+            self.ui.edgeUnitsLabel.setText("V/ms")
+            self.ui.noiseUnitsLabel.setText("V/ms")
+        else:
+            self.ui.levelUnitsLabel.setText("raw")
+            self.ui.edgeUnitsLabel.setText("raw/samp")
+            self.ui.noiseUnitsLabel.setText("raw/samp")
         edits = (
             (self.ui.autoTimeEdit, "AutoDelay", 1e-6),
             (self.ui.edgeEdit, "EdgeLevel", edgescale),
@@ -194,7 +202,6 @@ class TriggerConfig(QtWidgets.QWidget):
             self.setstate("AutoDelay", msdelay)
         except ValueError:
             pass
-
         for state in self.alltriggerstates():
             self.client.call("SourceControl.ConfigureTriggers", state)
 
@@ -202,7 +209,22 @@ class TriggerConfig(QtWidgets.QWidget):
         pass
 
     def changedLevelTrigConfig(self):
-        pass
+        level = self.ui.levelTrigActive.checkState()
+        if not level == Qt.PartiallyChecked:
+            self.ui.levelTrigActive.setTristate(False)
+            self.setstate("LevelTrigger", level == Qt.Checked)
+
+        levelraw = self.ui.levelEdit.text()
+        levelscale = 1.0
+        if self.ui.levelVoltsRaw.currentText().startswith("Volts"):
+            levelscale = 1./16384.0
+        try:
+            levelraw = int(float(levelraw)/levelscale+0.5)
+            self.setstate("LevelLevel", levelraw)
+        except ValueError:
+            pass
+        for state in self.alltriggerstates():
+            self.client.call("SourceControl.ConfigureTriggers", state)
 
     def changedNoiseTrigConfig(self):
         pass
