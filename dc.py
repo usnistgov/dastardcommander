@@ -170,10 +170,19 @@ class MainWindow(QtWidgets.QMainWindow):
         if run:
             status = "%s source active, %d channels" % (
                 data["SourceName"], data["Nchannels"])
-            cols = data.get("Ncol", 0)
-            if cols > 0:
-                rows = data["Nchannels"] // (2*cols)
-                status += " (%d rows x %d cols)" % (rows, cols)
+            cols = data.get("Ncol", [])
+            rows = data.get("Nrow", [])
+            ndev = min(len(cols), len(rows))
+            if ndev == 1:
+                status += " (%d rows x %d cols)" % (rows[0], cols[0])
+            elif ndev > 1:
+                status += " ("
+                for i in range(ndev):
+                    status += "%d x %d" % (rows[i], cols[i])
+                    if i < ndev-1:
+                        status += ", "
+                status += " rows x cols)"
+
             self.statusMainLabel.setText(status)
         else:
             self.statusMainLabel.setText("Data source stopped")
