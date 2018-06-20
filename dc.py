@@ -307,6 +307,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.dataSource.setEnabled(not running)
         self.ui.dataSourcesStackedWidget.setEnabled(not running)
         self.ui.tabTriggering.setEnabled(running)
+        if running:
+            self.ui.tabWidget.setCurrentWidget(self.ui.tabTriggering)
 
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()

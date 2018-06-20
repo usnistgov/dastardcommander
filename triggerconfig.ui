@@ -655,6 +655,9 @@
    </item>
    <item>
     <widget class="QFrame" name="triggerLoadSaveFrame">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="frameShape">
       <enum>QFrame::Panel</enum>
      </property>
@@ -748,7 +751,7 @@
       <item row="1" column="5">
        <widget class="QPushButton" name="loadTriggerC">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="toolTip">
          <string>Load current trigger state from slot C</string>
@@ -761,7 +764,7 @@
       <item row="2" column="5">
        <widget class="QPushButton" name="loadTriggerD">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="toolTip">
          <string>Load current trigger state from slot D</string>
@@ -787,7 +790,7 @@
       <item row="1" column="1">
        <widget class="QPushButton" name="loadTriggerA">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="toolTip">
          <string>Load current trigger state from slot A</string>
@@ -840,7 +843,7 @@
       <item row="2" column="1">
        <widget class="QPushButton" name="loadTriggerB">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="toolTip">
          <string>Load current trigger state from slot B</string>

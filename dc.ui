@@ -83,7 +83,7 @@
         <item>
          <widget class="QStackedWidget" name="dataSourcesStackedWidget">
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="trianglePage">
            <widget class="QFrame" name="gridFrame">
@@ -534,12 +534,12 @@
         <string>Triggering</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tab_3">
+      <widget class="QWidget" name="tabWriting">
        <attribute name="title">
         <string>Writing</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tab_4">
+      <widget class="QWidget" name="tabServer">
        <attribute name="title">
         <string>Server Ctrl</string>
        </attribute>
