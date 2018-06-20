@@ -40,7 +40,7 @@ class TriggerConfig(QtWidgets.QWidget):
             return
         else:
             prefix = cctext.split()[0].lower()
-            if prefix == "FB":
+            if prefix == "fb":
                 prefix = "ch"
             result = self.chanbyprefix(prefix)
         self.ui.channelsChosenEdit.setPlainText(result)
@@ -206,7 +206,33 @@ class TriggerConfig(QtWidgets.QWidget):
             self.client.call("SourceControl.ConfigureTriggers", state)
 
     def changedEdgeTrigConfig(self):
-        pass
+        edge = self.ui.edgeTrigActive.checkState()
+        if not edge == Qt.PartiallyChecked:
+            self.ui.edgeTrigActive.setTristate(False)
+            self.setstate("EdgeTrigger", edge == Qt.Checked)
+        rfb = self.ui.edgeRiseFallBoth.currentText()
+        if rfb.startswith("Rising"):
+            self.setstate("EdgeRising", True)
+            self.setstate("EdgeFalling", False)
+        elif rfb.startswith("Falling"):
+            self.setstate("EdgeRising", False)
+            self.setstate("EdgeFalling", True)
+        elif rfb.startswith("Either"):
+            self.setstate("EdgeRising", True)
+            self.setstate("EdgeFalling", True)
+
+        edgeraw = self.ui.edgeEdit.text()
+        edgescale = 1.0
+        if self.ui.levelVoltsRaw.currentText().startswith("Volts"):
+            edgescale = 1./16384.0
+            # TODO: convert samples to ms
+        try:
+            edgeraw = int(float(edgeraw)/edgescale+0.5)
+            self.setstate("EdgeLevel", edgeraw)
+        except ValueError:
+            pass
+        for state in self.alltriggerstates():
+            self.client.call("SourceControl.ConfigureTriggers", state)
 
     def changedLevelTrigConfig(self):
         level = self.ui.levelTrigActive.checkState()
