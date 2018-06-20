@@ -213,6 +213,16 @@ class TriggerConfig(QtWidgets.QWidget):
         if not level == Qt.PartiallyChecked:
             self.ui.levelTrigActive.setTristate(False)
             self.setstate("LevelTrigger", level == Qt.Checked)
+        rfb = self.ui.levelRiseFallBoth.currentText()
+        if rfb.startswith("Rising"):
+            self.setstate("LevelRising", True)
+            self.setstate("LevelFalling", False)
+        elif rfb.startswith("Falling"):
+            self.setstate("LevelRising", False)
+            self.setstate("LevelFalling", True)
+        elif rfb.startswith("Either"):
+            self.setstate("LevelRising", True)
+            self.setstate("LevelFalling", True)
 
         levelraw = self.ui.levelEdit.text()
         levelscale = 1.0

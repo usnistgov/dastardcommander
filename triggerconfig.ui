@@ -287,37 +287,6 @@
       <property name="verticalSpacing">
        <number>6</number>
       </property>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="autoTimeEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="baseSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Time between auto triggers (ms)</string>
-        </property>
-        <property name="text">
-         <string>1000</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
        <widget class="QCheckBox" name="levelTrigActive">
         <property name="toolTip">
@@ -325,192 +294,6 @@
         </property>
         <property name="text">
          <string>Active</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="noiseTrigLabel">
-        <property name="text">
-         <string>Noise trigger
-(Edge veto)</string>
-        </property>
-        <property name="margin">
-         <number>2</number>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1" colspan="2">
-       <widget class="QCheckBox" name="noiseTrigActive">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Turn on noise (pulse-free) trigger for selected channels</string>
-        </property>
-        <property name="text">
-         <string>Active</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="autoTrigLabel">
-        <property name="text">
-         <string>Auto trigger</string>
-        </property>
-        <property name="margin">
-         <number>2</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QComboBox" name="levelVoltsRaw">
-        <property name="toolTip">
-         <string>Units for the level trigger value</string>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>Volts</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Raw</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QCheckBox" name="edgeTrigActive">
-        <property name="toolTip">
-         <string>Turn on edge trigger for selected channels</string>
-        </property>
-        <property name="text">
-         <string>Active</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="autoUnitsLabel">
-        <property name="text">
-         <string>ms</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" rowspan="2">
-       <widget class="QLabel" name="edgeTrigLabel">
-        <property name="text">
-         <string>Edge trigger</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-        <property name="margin">
-         <number>2</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2" rowspan="2">
-       <widget class="QComboBox" name="edgeRiseFallBoth">
-        <property name="toolTip">
-         <string>Trigger these channels on rising edges, falling edges, or both</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Rising edge</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Falling edge</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Either</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="4" column="3" rowspan="2">
-       <widget class="QLineEdit" name="edgeEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="baseSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Slope threshhold, in Volts/ms.</string>
-        </property>
-        <property name="text">
-         <string>1</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="3">
-       <widget class="QLineEdit" name="noiseEdit">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="baseSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Pulses large than this threshold are NOT recorded in noise trigger mode.</string>
-        </property>
-        <property name="text">
-         <string>0.4</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="4" rowspan="2">
-       <widget class="QLabel" name="edgeUnitsLabel">
-        <property name="text">
-         <string>V/ms</string>
         </property>
        </widget>
       </item>
@@ -545,7 +328,17 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="autoTrigLabel">
+        <property name="text">
+         <string>Auto trigger</string>
+        </property>
+        <property name="margin">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="4">
        <widget class="QLabel" name="noiseUnitsLabel">
         <property name="text">
          <string>V/ms</string>
@@ -568,6 +361,50 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="autoUnitsLabel">
+        <property name="text">
+         <string>ms</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="edgeTrigActive">
+        <property name="toolTip">
+         <string>Turn on edge trigger for selected channels</string>
+        </property>
+        <property name="text">
+         <string>Active</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2" rowspan="2">
+       <widget class="QComboBox" name="edgeRiseFallBoth">
+        <property name="toolTip">
+         <string>Trigger these channels on rising edges, falling edges, or both</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Rising edge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Falling edge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Either</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string/>
+         </property>
+        </item>
+       </widget>
+      </item>
       <item row="1" column="0" rowspan="2">
        <widget class="QLabel" name="levelTrigLabel">
         <property name="text">
@@ -578,7 +415,81 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1" colspan="2">
+      <item row="4" column="0" rowspan="2">
+       <widget class="QLabel" name="edgeTrigLabel">
+        <property name="text">
+         <string>Edge trigger</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="margin">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3" rowspan="2">
+       <widget class="QLineEdit" name="edgeEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Slope threshhold, in Volts/ms.</string>
+        </property>
+        <property name="text">
+         <string>1</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="4" rowspan="2">
+       <widget class="QLabel" name="edgeUnitsLabel">
+        <property name="text">
+         <string>V/ms</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLabel" name="levelUnitsLabel">
+        <property name="text">
+         <string>Volts</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QCheckBox" name="noiseTrigActive">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Turn on noise (pulse-free) trigger for selected channels</string>
+        </property>
+        <property name="text">
+         <string>Active</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
        <widget class="QCheckBox" name="autoTrigActive">
         <property name="toolTip">
          <string>Turn on auto-trigger for selected channels</string>
@@ -588,11 +499,119 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="levelUnitsLabel">
-        <property name="text">
-         <string>Volts</string>
+      <item row="8" column="3">
+       <widget class="QLineEdit" name="noiseEdit">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Pulses large than this threshold are NOT recorded in noise trigger mode.</string>
+        </property>
+        <property name="text">
+         <string>0.4</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QComboBox" name="levelRiseFallBoth">
+        <item>
+         <property name="text">
+          <string>Rising edge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Falling edge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Either</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="autoTimeEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Time between auto triggers (ms)</string>
+        </property>
+        <property name="text">
+         <string>1000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="noiseTrigLabel">
+        <property name="text">
+         <string>Noise trigger
+(Edge veto)</string>
+        </property>
+        <property name="margin">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QComboBox" name="levelVoltsRaw">
+        <property name="toolTip">
+         <string>Units for the level trigger value</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Volts</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Raw</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -1132,6 +1151,22 @@
     <hint type="destinationlabel">
      <x>299</x>
      <y>283</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>levelRiseFallBoth</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>triggerConfigTab</receiver>
+   <slot>changedLevelTrigConfig()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>337</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>308</x>
+     <y>301</y>
     </hint>
    </hints>
   </connection>
