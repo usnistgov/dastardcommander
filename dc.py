@@ -65,6 +65,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
         self.ui.tabWidget.setEnabled(False)
+        self.buildStatusBar()
 
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
@@ -91,6 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if not self.last_messages.get(topic, "") == message:
             if topic == "STATUS":
+                self.updateStatusBar(d)
                 self._setGuiRunning(d["Running"])
                 self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 source = d["SourceName"]
@@ -154,6 +156,27 @@ class MainWindow(QtWidgets.QMainWindow):
                 break
         if all:
             self.ui.tabWidget.setEnabled(True)
+
+    def buildStatusBar(self):
+        self.statusMainLabel = QtWidgets.QLabel("Server not running. ")
+        self.statusFreshLabel = QtWidgets.QLabel("")
+        sb = self.statusBar()
+        sb.addWidget(self.statusMainLabel)
+        sb.addWidget(self.statusFreshLabel)
+
+    def updateStatusBar(self, data):
+        print "setStatusBar(): ", data
+        run = data["Running"]
+        if run:
+            status = "%s source active, %d channels" % (
+                data["SourceName"], data["Nchannels"])
+            cols = data.get("Ncol", 0)
+            if cols > 0:
+                rows = data["Nchannels"] // (2*cols)
+                status += " (%d rows x %d cols)" % (rows, cols)
+            self.statusMainLabel.setText(status)
+        else:
+            self.statusMainLabel.setText("Data source stopped")
 
     # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):
