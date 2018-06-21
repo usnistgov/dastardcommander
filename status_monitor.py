@@ -22,7 +22,8 @@ class ZMQListener(QtCore.QObject):
         self.socket.connect(self.address)
         print("Collecting updates from dastard at %s" % self.address)
 
-        self.topics = ("STATUS", "TRIGGER", "TRIANGLE", "SIMPULSE", "LANCERO", "CHANNELNAMES")
+        self.topics = ("STATUS", "ALIVE", "TRIGGER", "TRIANGLE",
+                       "SIMPULSE", "LANCERO", "CHANNELNAMES")
         for topic in self.topics:
             self.socket.setsockopt(zmq.SUBSCRIBE, topic)
 

@@ -106,6 +106,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 elif source == "Lancero":
                     self.ui.dataSource.setCurrentIndex(2)
 
+            elif topic == "ALIVE":
+                self.heartbeat(d)
+
             elif topic == "TRIGGER":
                 self.tconfig.handleTriggerMessage(d)
 
@@ -187,6 +190,29 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.statusMainLabel.setText("Data source stopped")
 
+    def heartbeat(self, hb):
+        mb = hb["DataMB"]
+        t = float(hb["Time"])
+
+        def color(c):
+            self.statusFreshLabel.setStyleSheet("QLabel { color : %s; }" % c)
+
+        if mb <= 0:
+            # No data is okay...unless server says it's running!
+            if self.running:
+                self.statusFreshLabel.setText("no fresh data")
+                color("red")
+            else:
+                self.statusFreshLabel.setText("")
+
+        elif t <= 0:
+            self.statusFreshLabel.setText("%7.3f MB in 0 s??" % mb)
+            color("red")
+        else:
+            rate = mb / t
+            self.statusFreshLabel.setText("%7.3f MB/s" % rate)
+            color("green")
+
     # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):
         self.zmqlistener.running = False
@@ -250,7 +276,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sb.setMaximum(40)
             sb.setValue(1)
             sb.setSizePolicy(narrow)
-            sb.setToolTip("Card delay for card %d"%c)
+            sb.setToolTip("Card delay for card %d" % c)
             self.lanceroDelays[c] = sb
             layout.addWidget(sb, i+1, 1)
 
