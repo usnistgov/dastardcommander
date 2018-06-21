@@ -83,6 +83,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zmqthread.started.connect(self.zmqlistener.loop)
         QtCore.QTimer.singleShot(0, self.zmqthread.start)
 
+        # A timer to monitor for the heartbeat. If this ever times out, it's because
+        # too long has elapsed without receiving a heartbeat from Dstard.  Then we
+        # have to close the main window.
+        self.hbTimer = QtCore.QTimer()
+        self.hbTimer.timeout.connect(self.closeReconnect)
+        self.hbTimeout = 5000  # that is, 5000 ms
+        self.hbTimer.start(self.hbTimeout)
+
     def updateReceived(self, topic, message):
         try:
             d = json.loads(message)
@@ -90,7 +98,10 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Error processing status message: %s" % e)
             return
 
-        if not self.last_messages.get(topic, "") == message:
+        if topic == "ALIVE":
+            self.heartbeat(d)
+
+        elif not self.last_messages.get(topic, "") == message:
             if topic == "STATUS":
                 self.updateStatusBar(d)
                 self._setGuiRunning(d["Running"])
@@ -105,9 +116,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ui.simPulseNchan.setValue(nchan)
                 elif source == "Lancero":
                     self.ui.dataSource.setCurrentIndex(2)
-
-            elif topic == "ALIVE":
-                self.heartbeat(d)
 
             elif topic == "TRIGGER":
                 self.tconfig.handleTriggerMessage(d)
@@ -191,17 +199,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusMainLabel.setText("Data source stopped")
 
     def heartbeat(self, hb):
+        # Keep window open another 5 seconds
+        self.hbTimer.start(self.hbTimeout)
+
         mb = hb["DataMB"]
         t = float(hb["Time"])
 
-        def color(c):
-            self.statusFreshLabel.setStyleSheet("QLabel { color : %s; }" % c)
+        def color(c, bg=None):
+            ss = "QLabel { color : %s; }" % c
+            if bg is not None:
+                ss = "QLabel { color : %s; background-color : %s }" % (c, bg)
+            self.statusFreshLabel.setStyleSheet(ss)
 
         if mb <= 0:
             # No data is okay...unless server says it's running!
             if self.running:
                 self.statusFreshLabel.setText("no fresh data")
-                color("red")
+                color("white", bg="red")
             else:
                 self.statusFreshLabel.setText("")
 
