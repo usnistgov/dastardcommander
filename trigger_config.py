@@ -41,7 +41,7 @@ class TriggerConfig(QtWidgets.QWidget):
         else:
             prefix = cctext.split()[0].lower()
             if prefix == "fb":
-                prefix = "ch"
+                prefix = "chan"
             result = self.chanbyprefix(prefix)
         self.ui.channelsChosenEdit.setPlainText(result)
 
