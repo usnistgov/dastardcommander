@@ -124,6 +124,9 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "TRIGGER":
                 self.tconfig.handleTriggerMessage(d)
 
+            elif topic == "WRITING":
+                self.writing.handleWritingMessage(d)
+
             elif topic == "TRIANGLE":
                 self.ui.triangleNchan.setValue(d["Nchan"])
                 self.ui.triangleSampleRate.setValue(d["SampleRate"])
