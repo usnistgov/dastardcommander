@@ -51,8 +51,8 @@ class WritingControl(QtWidgets.QWidget):
         startPath = self.ui.baseDirectoryEdit.text()
         if len(startPath) == 0:
             startPath = "/"
-        result = QtWidgets.QFileDialog.getExistingDirectory(None, "Choose base path",
-            startPath)
+        result = QtWidgets.QFileDialog.getExistingDirectory(
+            None, "Choose base path", startPath)
         print "Result was: ", result
         if len(result) > 0:
             self.updatePath(result)
@@ -71,12 +71,13 @@ class WritingControl(QtWidgets.QWidget):
         try:
             self.client.call("SourceControl.WriteControl", request)
         except Exception as e:
-            print "Could not %s writing: "%request["Request"], e
+            print "Could not %s writing: " % request["Request"], e
 
     def stoppedWriting(self):
         self.writing = False
         self.ui.writingStartButton.setText("Start Writing")
-        self.ui.fileNameExampleEdit.setText("")
+        self.ui.previousNameExampleEdit.setText(self.ui.fileNameExampleEdit.text())
+        self.ui.fileNameExampleEdit.setText("-")
         self.ui.writingCommentsButton.setEnabled(False)
         self.ui.writingPauseButton.setEnabled(False)
 
