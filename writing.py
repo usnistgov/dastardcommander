@@ -43,7 +43,8 @@ class WritingControl(QtWidgets.QWidget):
         self.ui.writingPauseButton.setChecked(message["Paused"])
 
     def updatePath(self, path):
-        self.ui.baseDirectoryEdit.setText(path)
+        if len(path) > 0:
+            self.ui.baseDirectoryEdit.setText(path)
 
     def pathSelect(self):
         """The GUI to select a path"""
@@ -91,7 +92,6 @@ class WritingControl(QtWidgets.QWidget):
         if not paused:
             request = "Unpause"
         self.client.call("SourceControl.WriteControl", {"Request": request})
-        print "Calling WriteControl with request:", request
 
     def comment(self):
         parent = None
@@ -100,4 +100,4 @@ class WritingControl(QtWidgets.QWidget):
         default = "Operator, settings, purpose..."
         comment, okay = QtWidgets.QInputDialog.getMultiLineText(parent, title, label, default)
         if okay:
-            print "Comment to send: ", comment
+            self.client.call("SourceControl.WriteComment", comment)
