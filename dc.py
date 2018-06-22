@@ -57,7 +57,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.buildLanceroFiberBoxes(8)
         self.tconfig = trigger_config.TriggerConfig(self.ui.tabTriggering)
         self.tconfig.client = self.client
-        self.writing = writing.WritingControl(self.ui.tabWriting, host=host)
+        self.writing = writing.WritingControl(self.ui.tabWriting, host)
+        self.writing.client = self.client
 
         self.microscopes = []
         self.last_messages = {}
