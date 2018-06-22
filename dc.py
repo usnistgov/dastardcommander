@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QFileDialog
 import rpc_client
 import status_monitor
 import trigger_config
+import writing
 import projectors
 
 # Here is how you try to import compiled UI files and fall back to processing them
@@ -56,6 +57,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.buildLanceroFiberBoxes(8)
         self.tconfig = trigger_config.TriggerConfig(self.ui.tabTriggering)
         self.tconfig.client = self.client
+        self.writing = writing.WritingControl(self.ui.tabWriting)
+
         self.microscopes = []
         self.last_messages = {}
         self.channel_names = []
