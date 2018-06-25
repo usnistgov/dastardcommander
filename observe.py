@@ -26,6 +26,9 @@ class ObserveTab(QtWidgets.QWidget):
 
         self.label = QtWidgets.QLabel("????",parent=self)
         self.layout.addWidget(self.label)
+        self.cols = 1
+        self.rows = 1
+        self.initTable()
 
     def handleTriggerRateMessage(self, d):
         if self.cols != self.table.columnCount() or self.rows != self.table.rowCount():
@@ -34,7 +37,7 @@ class ObserveTab(QtWidgets.QWidget):
         for i,c in enumerate(d["CountsSeen"]):
             row = i
             col = 0
-            item = QtWidgets.QTableWidgetItem(str(c))
+            item = self.table.item(row,col)
             item.setText(str(c))
             self.table.setItem(row,col, item)
             print("row {}, col {}, item {}".format(row,col,item))
@@ -59,3 +62,5 @@ class ObserveTab(QtWidgets.QWidget):
             for c in range(self.cols):
                 item = QtWidgets.QTableWidgetItem("0")
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                self.table.setItem(r,c,item)
+        self.table.setColumnWidth()
