@@ -21,6 +21,7 @@ import status_monitor
 import trigger_config
 import writing
 import projectors
+import observe
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -59,6 +60,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig.client = self.client
         self.writing = writing.WritingControl(self.ui.tabWriting, host)
         self.writing.client = self.client
+        self.observeTab = observe.ObserveTab(self.ui.tabObserve)
 
         self.microscopes = []
         self.last_messages = {}
@@ -108,6 +110,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif not self.last_messages.get(topic, "") == message:
             if topic == "STATUS":
                 self.updateStatusBar(d)
+                self.observeTab.handleStatusUpdate(d)
                 self._setGuiRunning(d["Running"])
                 self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 source = d["SourceName"]
@@ -157,6 +160,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
+
+            elif topic == "TRIGGERRATE":
+                self.observeTab.handleTriggerRateMessage(d)
 
             else:
                 print("%s is not a topic we handle yet." % topic)
