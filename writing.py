@@ -43,15 +43,16 @@ class WritingControl(QtWidgets.QWidget):
         self.ui.writingPauseButton.setChecked(message["Paused"])
 
     def updatePath(self, path):
-        self.ui.baseDirectoryEdit.setText(path)
+        if len(path) > 0:
+            self.ui.baseDirectoryEdit.setText(path)
 
     def pathSelect(self):
         """The GUI to select a path"""
         startPath = self.ui.baseDirectoryEdit.text()
         if len(startPath) == 0:
             startPath = "/"
-        result = QtWidgets.QFileDialog.getExistingDirectory(None, "Choose base path",
-            startPath)
+        result = QtWidgets.QFileDialog.getExistingDirectory(
+            None, "Choose base path", startPath)
         print "Result was: ", result
         if len(result) > 0:
             self.updatePath(result)
@@ -70,12 +71,13 @@ class WritingControl(QtWidgets.QWidget):
         try:
             self.client.call("SourceControl.WriteControl", request)
         except Exception as e:
-            print "Could not %s writing: "%request["Request"], e
+            print "Could not %s writing: " % request["Request"], e
 
     def stoppedWriting(self):
         self.writing = False
         self.ui.writingStartButton.setText("Start Writing")
-        self.ui.fileNameExampleEdit.setText("")
+        self.ui.previousNameExampleEdit.setText(self.ui.fileNameExampleEdit.text())
+        self.ui.fileNameExampleEdit.setText("-")
         self.ui.writingCommentsButton.setEnabled(False)
         self.ui.writingPauseButton.setEnabled(False)
 
@@ -91,7 +93,6 @@ class WritingControl(QtWidgets.QWidget):
         if not paused:
             request = "Unpause"
         self.client.call("SourceControl.WriteControl", {"Request": request})
-        print "Calling WriteControl with request:", request
 
     def comment(self):
         parent = None
@@ -100,4 +101,4 @@ class WritingControl(QtWidgets.QWidget):
         default = "Operator, settings, purpose..."
         comment, okay = QtWidgets.QInputDialog.getMultiLineText(parent, title, label, default)
         if okay:
-            print "Comment to send: ", comment
+            self.client.call("SourceControl.WriteComment", comment)
