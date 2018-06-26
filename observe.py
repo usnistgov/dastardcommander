@@ -63,4 +63,3 @@ class ObserveTab(QtWidgets.QWidget):
                 item = QtWidgets.QTableWidgetItem("0")
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 self.table.setItem(r,c,item)
-        self.table.setColumnWidth()
