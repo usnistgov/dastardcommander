@@ -11,7 +11,7 @@ Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
 
 class Observe(QtWidgets.QWidget):
     def __init__(self, parent=None):
-        QtWidgets.QMainWindow.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_Observe()
         self.ui.setupUi(self)
         self.ui.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
@@ -37,7 +37,6 @@ class Observe(QtWidgets.QWidget):
             arrayCps = countRates.sum()
             self.setArrayCps(arrayCps, integrationComplete)
             print("Observe! Trigger*****\n\n\n", arrayCps)
-
         else:
             print("got trigger rate message before status")
 
