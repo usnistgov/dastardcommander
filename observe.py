@@ -102,10 +102,13 @@ class Observe(QtWidgets.QWidget):
         if d["SourceName"] == "Lancero":
             self.auxPerChan = 1
         cols = d.get("Ncol", [])
-        rows = d.get("Nrow", [1])
+        rows = d.get("Nrow", [])
         nchannels = d["Nchannels"] / (self.auxPerChan+1)
         cols = max(1, sum(cols))
-        rows = max(rows)
+        if len(rows) == 0:
+            rows = [1]
+        else:
+            rows = max(rows)
         print "Rows, cols, nchan: ", rows, cols, nchannels
         # If numbers don't add up, trust the column count
         if rows*cols != nchannels:
