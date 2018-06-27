@@ -74,7 +74,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -721,6 +721,11 @@
          </item>
         </layout>
        </widget>
+      </widget>
+      <widget class="QWidget" name="tabObserve">
+       <attribute name="title">
+        <string>Observe</string>
+       </attribute>
       </widget>
      </widget>
     </item>

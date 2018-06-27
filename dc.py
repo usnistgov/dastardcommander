@@ -21,6 +21,7 @@ import status_monitor
 import trigger_config
 import writing
 import projectors
+import observe
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -59,12 +60,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig.client = self.client
         self.writing = writing.WritingControl(self.ui.tabWriting, host)
         self.writing.client = self.client
+        self.observeTab = observe.Observe(self.ui.tabObserve)
 
         self.microscopes = []
         self.last_messages = {}
         self.channel_names = []
         self.channel_prefixes = set()
         self.tconfig.channel_names = self.channel_names
+        self.observeTab.channel_names = self.channel_names
         self.tconfig.channel_prefixes = self.channel_prefixes
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
@@ -108,6 +111,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif not self.last_messages.get(topic, "") == message:
             if topic == "STATUS":
                 self.updateStatusBar(d)
+                self.observeTab.handleStatusUpdate(d)
                 self._setGuiRunning(d["Running"])
                 self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 source = d["SourceName"]
@@ -147,16 +151,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     v.setChecked(mask & (1 << k))
 
             elif topic == "CHANNELNAMES":
-                try:
-                    while True:
-                        self.channel_names.pop()
-                except IndexError:
-                    pass
+                self.channel_names[:] = []   # Careful: don't replace the variable
                 self.channel_prefixes.clear()
                 for name in d:
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
+                print "New channames: ", self.channel_names
+
+            elif topic == "TRIGGERRATE":
+                self.observeTab.handleTriggerRateMessage(d)
 
             else:
                 print("%s is not a topic we handle yet." % topic)
@@ -183,7 +187,6 @@ class MainWindow(QtWidgets.QMainWindow):
         sb.addWidget(self.statusFreshLabel)
 
     def updateStatusBar(self, data):
-        print "setStatusBar(): ", data
         run = data["Running"]
         if run:
             status = "%s source active, %d channels" % (
