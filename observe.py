@@ -62,9 +62,9 @@ class Observe(QtWidgets.QWidget):
         channel_names = self.channel_names
         if channel_names is None or len(channel_names) < cols*rows:
             channel_names = []
-            for row in range(rows):
-                for col in range(cols):
-                    channel_names.append("r{}c{}".format(row, col))
+            for col in range(cols):
+                for row in range(rows):
+                    channel_names.append("r{}c{}chan{}".format(row, col,len(channel_names)))
         assert(len(channel_names) == cols*rows)
         return channel_names
 
