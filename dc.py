@@ -51,6 +51,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
+        self.ui.pushButton_sendExperimental.clicked.connect(self.sendExperimental)
         self.running = False
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
@@ -493,6 +494,32 @@ class MainWindow(QtWidgets.QMainWindow):
             print("success on chans: {}".format(success_chans))
             print("failures:")
             print( json.dumps(failures, sort_keys=True,indent=4) )
+
+    def sendExperimental(self):
+        config = {
+            "ChanNums" : range(len(self.channel_names)),
+            "TriggerState" : {
+                "EdgeMulti" : self.ui.checkBox_EdgeMulti.isChecked(),
+                "EdgeMultiMakeShortRecords" : self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
+                "EdgeMultiMakeContaminatedRecords" : self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
+                "EdgeMultiVerifyNMonotone" : self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),
+                "EdgeLevel" : self.ui.spinBox_EdgeLevel.value()
+            }
+        }
+        print("experimental trigger config")
+        print(config)
+        self.client.call("SourceControl.ConfigureTriggers", config)
+        for i in range(len(self.channel_names)):
+            if i % 2 == 0:
+                continue # only odd channels get mix
+            config = {
+                "ProcessorIndex" : i,
+                "MixFraction" : self.ui.doubleSpinBox_MixFraction.value()
+            }
+            print("experimental mix config")
+            print config
+            self.client.call("SourceControl.ConfigureMixFraction", config)
+
 
 
 class HostPortDialog(QtWidgets.QDialog):

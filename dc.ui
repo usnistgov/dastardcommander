@@ -74,7 +74,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -626,6 +626,13 @@
            </property>
           </widget>
          </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_19">
+           <property name="text">
+            <string>Not compatible with other triggers.</string>
+           </property>
+          </widget>
+         </item>
          <item row="2" column="0">
           <widget class="QCheckBox" name="checkBox_EdgeMulti">
            <property name="text">
@@ -683,13 +690,6 @@
            </item>
           </layout>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_19">
-           <property name="text">
-            <string>Not compatible with other triggers.</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="horizontalLayoutWidget">
@@ -720,6 +720,19 @@
           </widget>
          </item>
         </layout>
+       </widget>
+       <widget class="QPushButton" name="pushButton_sendExperimental">
+        <property name="geometry">
+         <rect>
+          <x>40</x>
+          <y>381</y>
+          <width>161</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Send Experimental</string>
+        </property>
        </widget>
       </widget>
      </widget>
