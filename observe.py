@@ -11,6 +11,10 @@ Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
 
 
 class Observe(QtWidgets.QWidget):
+    """The tricky bit about this widget is that it cannot be properly set up until
+    dc has processed both a CHANNELNAMES message and a STATUS message (to get the
+    number of rows and columns)."""
+
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_Observe()
@@ -19,28 +23,36 @@ class Observe(QtWidgets.QWidget):
         self.ui.pushButton_autoScale.clicked.connect(self.handleAutoScaleClicked)
         self.crm = None
         self.countsSeens = []
-        self.seenStatus = False
+        self.cols = 0
+        self.rows = 0
         self.lastTotalRate = 0
-        self.channel_names = None
+        self.channel_names = []
+        self.auxPerChan = 0
 
     def handleTriggerRateMessage(self, d):
-        if self.seenStatus:
-            countsSeen = np.array(d["CountsSeen"])
-            integrationTime = self.ui.spinBox_integrationTime.value()
-            self.countsSeens.append(countsSeen)
-            n = min(len(self.countsSeens), integrationTime)
-            self.countsSeens = self.countsSeens[-n:]
-            countRates = np.zeros(len(countsSeen))
-            for cs in self.countsSeens:
-                countRates += cs
-            countRates /= len(self.countsSeens)
-            colorScale = self.getColorScale(countRates)
-            self.crm.setCountRates(countRates, colorScale)
-            integrationComplete = len(self.countsSeens) == integrationTime
-            arrayCps = countRates.sum()
-            self.setArrayCps(arrayCps, integrationComplete)
-        else:
+        if self.cols == 0 or self.rows == 0:
             print("got trigger rate message before status")
+            return
+        if len(self.channel_names) == 0:
+            print("got trigger rate message before channel names")
+            return
+        if self.crm is None:
+            self.buildCRM()
+
+        countsSeen = np.array(d["CountsSeen"])
+        integrationTime = self.ui.spinBox_integrationTime.value()
+        self.countsSeens.append(countsSeen)
+        n = min(len(self.countsSeens), integrationTime)
+        self.countsSeens = self.countsSeens[-n:]
+        countRates = np.zeros(len(countsSeen))
+        for cs in self.countsSeens:
+            countRates += cs
+        countRates /= len(self.countsSeens)
+        colorScale = self.getColorScale(countRates)
+        self.crm.setCountRates(countRates, colorScale)
+        integrationComplete = len(self.countsSeens) == integrationTime
+        arrayCps = countRates.sum()
+        self.setArrayCps(arrayCps, integrationComplete)
 
     def getColorScale(self, countRates):
         if self.ui.pushButton_autoScale.isChecked():
@@ -58,36 +70,43 @@ class Observe(QtWidgets.QWidget):
         self.ui.label_arrayCps.setText(s)
         self.ui.label_arrayCps.setEnabled(integrationComplete)
 
-    def getChannelNames(self, cols, rows):
+    def getChannelNames(self):
         channel_names = self.channel_names
+        rows = self.rows
+        cols = self.cols
+        print "Need channel_names. Have: ", channel_names
         if channel_names is None or len(channel_names) < cols*rows:
             channel_names = []
             for col in range(cols):
                 for row in range(rows):
-                    channel_names.append("r{}c{}chan{}".format(row, col,len(channel_names)))
-        assert(len(channel_names) == cols*rows)
+                    channel_names.append("XXr{}c{}chan{}".format(row, col, len(channel_names)))
+        assert(len(channel_names) == cols*rows*(1+self.auxPerChan))
         return channel_names
 
-    def setColsRows(self, cols, rows):
+    def buildCRM(self):
         if self.crm is not None:
             self.crm.parent = None
             self.crm.deleteLater()
-        self.crm = CountRateMap(self, cols, rows, self.getChannelNames(cols, rows))
+        self.crm = CountRateMap(self, self.cols, self.rows, self.getChannelNames())
         self.ui.verticalLayout_countRateMap.addWidget(self.crm)
 
     def handleStatusUpdate(self, d):
+        # A hack for now to not count error channels.
+        if d["SourceName"] == "Lancero":
+            self.auxPerChan = 1
         cols = d.get("Ncol", [])
         rows = d.get("Nrow", [1])
-        nchannels = d["Nchannels"]
+        nchannels = d["Nchannels"] / (self.auxPerChan+1)
         cols = max(1, sum(cols))
         rows = max(rows)
+        print "Rows, cols, nchan: ", rows, cols, nchannels
         # If numbers don't add up, trust the column count
         if rows*cols != nchannels:
             rows = nchannels // cols
             if nchannels % cols > 0:
                 rows += 1
-        self.seenStatus = True
-        self.setColsRows(cols, rows)
+        self.cols = cols
+        self.rows = rows
 
     def resetIntegration(self):
         self.countsSeens = []
@@ -126,6 +145,8 @@ class CountRateMap(QtWidgets.QWidget):
 
     def deleteButtons(self):
         for button in self.buttons:
+            if button is None:
+                continue
             button.setParent(None)
             button.deleteLater()
         self.buttons = []
@@ -138,21 +159,26 @@ class CountRateMap(QtWidgets.QWidget):
 
     def initButtons(self, scale=25):
         self.deleteButtons()
-        print("init rows{} cols{}".format(self.rows, self.cols))
         print(self.channel_names)
-        for row in range(self.rows):
-            for col in range(self.cols):
-                i = row + col*self.rows
-                print(i, self.channel_names[i])
-                self.addButton(scale*row, scale*col, scale, scale,
-                               self.channel_names[i])
+        row = col = 0
+        for i, name in enumerate(self.channel_names):
+            if not name.startswith("chan"):
+                self.buttons.append(None)
+                continue
+            self.addButton(scale*row, scale*col, scale, scale, name)
+            row += 1
+            if row >= self.rows:
+                row = 0
+                col += 1
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
         assert(len(countRates) == len(self.buttons))
-        cmap = cm.get_cmap('YlOrRd')
+        cmap = cm.get_cmap('plasma')
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
+            if button is None:
+                continue
             if cr < 10:
                 buttonText = "{:.2f}".format(cr)
             elif cr < 100:
