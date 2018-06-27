@@ -151,16 +151,13 @@ class MainWindow(QtWidgets.QMainWindow):
                     v.setChecked(mask & (1 << k))
 
             elif topic == "CHANNELNAMES":
-                try:
-                    while True:
-                        self.channel_names.pop()
-                except IndexError:
-                    pass
+                self.channel_names[:] = []   # Careful: don't replace the variable
                 self.channel_prefixes.clear()
                 for name in d:
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
+                print "New channames: ", self.channel_names
 
             elif topic == "TRIGGERRATE":
                 self.observeTab.handleTriggerRateMessage(d)
@@ -190,7 +187,6 @@ class MainWindow(QtWidgets.QMainWindow):
         sb.addWidget(self.statusFreshLabel)
 
     def updateStatusBar(self, data):
-        print "setStatusBar(): ", data
         run = data["Running"]
         if run:
             status = "%s source active, %d channels" % (

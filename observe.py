@@ -25,9 +25,9 @@ class Observe(QtWidgets.QWidget):
         self.countsSeens = []
         self.cols = 0
         self.rows = 0
-        self.lastTotalRate = 0
         self.channel_names = []
         self.auxPerChan = 0
+        self.lastTotalRate = 0
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
@@ -84,13 +84,20 @@ class Observe(QtWidgets.QWidget):
         return channel_names
 
     def buildCRM(self):
-        if self.crm is not None:
-            self.crm.parent = None
-            self.crm.deleteLater()
+        self.deleteCRM()
         self.crm = CountRateMap(self, self.cols, self.rows, self.getChannelNames())
         self.ui.verticalLayout_countRateMap.addWidget(self.crm)
 
+    def deleteCRM(self):
+        if self.crm is not None:
+            self.crm.parent = None
+            self.crm.deleteLater()
+            self.crm = None
+
     def handleStatusUpdate(self, d):
+        if not d["Running"]:
+            return self.handleStop()
+
         # A hack for now to not count error channels.
         if d["SourceName"] == "Lancero":
             self.auxPerChan = 1
@@ -105,8 +112,15 @@ class Observe(QtWidgets.QWidget):
             rows = nchannels // cols
             if nchannels % cols > 0:
                 rows += 1
-        self.cols = cols
-        self.rows = rows
+        if rows != self.rows or cols != self.cols:
+            self.cols = cols
+            self.rows = rows
+            self.deleteCRM()
+
+    def handleStop(self):
+        self.cols = 0
+        self.rows = 0
+        self.deleteCRM()
 
     def resetIntegration(self):
         self.countsSeens = []
