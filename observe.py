@@ -15,6 +15,7 @@ class Observe(QtWidgets.QWidget):
         self.ui = Ui_Observe()
         self.ui.setupUi(self)
         self.ui.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
+        self.ui.pushButton_autoScale.clicked.connect(self.handleAutoScaleClicked)
         self.crm = None
         self.countsSeens = []
         self.seenStatus = False
@@ -59,10 +60,7 @@ class Observe(QtWidgets.QWidget):
         self.ui.label_arrayCps.setEnabled(integrationComplete)
 
 
-    def setColsRows(self, cols, rows):
-        if self.crm is not None:
-            self.crm.parent = None
-            self.crm.deleteLater()
+    def getChannelNames(self, cols, rows):
         channel_names = self.channel_names
         if channel_names is None or len(channel_names)<cols*rows:
             channel_names = []
@@ -70,7 +68,13 @@ class Observe(QtWidgets.QWidget):
                 for col in range(cols):
                     channel_names.append("r{}c{}".format(row,col))
         assert(len(channel_names)==cols*rows)
-        self.crm = CountRateMap(self,cols,rows,channel_names)
+        return channel_names
+
+    def setColsRows(self, cols, rows):
+        if self.crm is not None:
+            self.crm.parent = None
+            self.crm.deleteLater()
+        self.crm = CountRateMap(self,cols,rows,self.getChannelNames(cols,rows))
         self.ui.verticalLayout_countRateMap.addWidget(self.crm)
 
 
@@ -85,13 +89,15 @@ class Observe(QtWidgets.QWidget):
         if rows*cols != nchannels:
             cols = int(ceil(nchannels/float(rows)))
         self.seenStatus = True
-        print("STATUS*****\n\n\n",cols,rows)
         self.setColsRows(cols,rows)
 
     def resetIntegration(self):
         self.countsSeens = []
         self.crm.setCountRates(np.zeros(len(self.crm.buttons)),1)
         self.setArrayCps(0,False)
+
+    def handleAutoScaleClicked(self):
+        self.ui.doubleSpinBox_colorScale.setEnabled(not self.ui.pushButton_autoScale.isChecked())
 
 class CountRateMap(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.

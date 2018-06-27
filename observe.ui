@@ -87,7 +87,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_colorScale"/>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_colorScale">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_autoScale">
@@ -98,7 +102,7 @@
          <bool>true</bool>
         </property>
         <property name="checked">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
        </widget>
       </item>
