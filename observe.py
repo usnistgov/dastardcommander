@@ -77,14 +77,15 @@ class Observe(QtWidgets.QWidget):
 
     def handleStatusUpdate(self, d):
         cols = d.get("Ncol", [])
-        rows = d.get("Nrow", [])
+        rows = d.get("Nrow", [1])
         nchannels = d["Nchannels"]
-        if cols == []:
-            cols = 1
-        if rows == []:
-            rows = nchannels
+        cols = max(1, sum(cols))
+        rows = max(rows)
+        # If numbers don't add up, trust the column count
         if rows*cols != nchannels:
-            cols = int(ceil(nchannels/float(rows)))
+            rows = nchannels // cols
+            if nchannels % cols > 0:
+                rows += 1
         self.seenStatus = True
         self.setColsRows(cols, rows)
 
