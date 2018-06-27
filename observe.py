@@ -9,7 +9,7 @@ from matplotlib import cm
 
 Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
 
-class Observe(QtWidgets.QMainWindow):
+class Observe(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.ui = Ui_Observe()
@@ -18,7 +18,6 @@ class Observe(QtWidgets.QMainWindow):
         self.crm = None
         self.countsSeens = []
         self.seenStatus = False
-        self.show()
         print("Observe.size()", self.size())
 
     def handleTriggerRateMessage(self, d):
