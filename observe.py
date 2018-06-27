@@ -5,61 +5,153 @@ from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
 import numpy as np
 import json
+from matplotlib import cm
 
-class ObserveTab(QtWidgets.QWidget):
-    """Provide the UI inside the Triggering tab.
-
-    Most of the UI is copied from MATTER, but the Python implementation in this
-    class is new."""
-
+Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
+class Observe(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        self.table = QtWidgets.QTableWidget()
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self.table)
-        self.setLayout(self.layout)
-        self.layout.addWidget(self.table)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        self.table.setSizePolicy(sizePolicy)
-
-        self.label = QtWidgets.QLabel("????",parent=self)
-        self.layout.addWidget(self.label)
-        self.cols = 1
-        self.rows = 1
-        self.initTable()
+        QtWidgets.QMainWindow.__init__(self, parent)
+        self.ui = Ui_Observe()
+        self.ui.setupUi(self)
+        self.ui.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
+        self.crm = None
+        self.countsSeens = []
+        self.seenStatus = False
 
     def handleTriggerRateMessage(self, d):
-        if self.cols != self.table.columnCount() or self.rows != self.table.rowCount():
-            self.initTable()
+        if self.seenStatus:
+            countsSeen = np.array(d["CountsSeen"])
+            integrationTime = self.ui.spinBox_integrationTime.value()
+            self.countsSeens.append(countsSeen)
+            n = min(len(self.countsSeens),integrationTime)
+            self.countsSeens = self.countsSeens[-n:]
+            countRates = np.zeros(len(countsSeen))
+            for cs in self.countsSeens:
+                countRates += cs
+            countRates /= len(self.countsSeens)
+            colorScale = self.ui.doubleSpinBox_colorScale.value()
+            self.crm.setCountRates(countRates, colorScale)
+            integrationComplete = len(self.countsSeens)==integrationTime
+            arrayCps = countRates.sum()
+            self.setArrayCps(arrayCps, integrationComplete)
+            print("Trigger*****\n\n\n", arrayCps)
 
-        for i,c in enumerate(d["CountsSeen"]):
-            row = i
-            col = 0
-            item = self.table.item(row,col)
-            item.setText(str(c))
-            self.table.setItem(row,col, item)
-            print("row {}, col {}, item {}".format(row,col,item))
+        else:
+            print("got trigger rate message before status")
 
-        self.label.setText("{} cps".format(np.sum(d["CountsSeen"])))
+    def setArrayCps(self, arrayCps, integrationComplete):
+        s = "{} cps/array".format(arrayCps)
+        self.ui.label_arrayCps.setText(s)
+        self.ui.label_arrayCps.setEnabled(integrationComplete)
+
+
+    def setColsRows(self, cols, rows):
+        if self.crm is not None:
+            self.crm.parent = None
+            self.crm.deleteLater()
+        self.crm = CountRateMap(self,cols,rows)
+
 
     def handleStatusUpdate(self, d):
         cols = d.get("Ncol", [])
         rows = d.get("Nrow", [])
-        self.nchannels = d["Nchannels"]
+        nchannels = d["Nchannels"]
         if cols == []:
-            self.cols = 1
-            self.rows = self.nchannels
-        else:
+            cols = 1
+        if rows == []:
+            rows = nchannels
+        if rows*cols != nchannels:
+            cols = int(ceil(nchannels/float(rows)))
+        self.seenStatus = True
+        print("STATUS*****\n\n\n",cols,rows)
+        self.setColsRows(cols,rows)
+
+    def resetIntegration(self):
+        self.countsSeens = []
+        self.crm.setCountRates(np.zeros(len(self.crm.buttons)),1)
+        self.setArrayCps(0,False)
+
+class CountRateMap(QtWidgets.QWidget):
+    """Provide the UI inside the Triggering tab.
+
+    Most of the UI is copied from MATTER, but the Python implementation in this
+    class is new."""
+    buttonFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+
+    def __init__(self, parent, cols, rows):
+        QtWidgets.QWidget.__init__(self, parent)
+        self.buttons = []
+        self.setFixedSize(300,300)
+        self.cols = cols
+        self.rows = rows
+        self.initButtons()
+
+
+    def addButton(self,x,y,xwidth,ywidth,tooltip):
+        print("addButton({},{},{},{},{}) nbuttons = {}".format(x,y,xwidth,ywidth,tooltip,len(self.buttons)))
+        button = QtWidgets.QPushButton(self)
+        button.move(x,y)
+        button.setFixedSize(xwidth,ywidth)
+        button.setFont(self.buttonFont)
+        button.setFlat(False)
+        button.setToolTip(tooltip)
+        self.buttons.append(button)
+
+    def deleteButtons(self):
+        for button in self.buttons:
+            button.setParent(None)
+            button.deleteLater()
+        self.buttons=[]
+
+    def setColsRows(self,cols,rows):
+        if cols != self.cols or rows != self.rows:
             self.cols = cols
             self.rows = rows
+            self.initButtons()
 
-    def initTable(self):
-        self.table.setColumnCount(self.cols)
-        self.table.setRowCount(self.rows)
-        for r in range(self.rows):
-            for c in range(self.cols):
-                item = QtWidgets.QTableWidgetItem("0")
-                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                self.table.setItem(r,c,item)
+    def initButtons(self, scale=25):
+        self.deleteButtons()
+        for row in range(self.rows):
+            for col in range(self.cols):
+                print("init {} {}".format(row,col))
+                self.addButton(scale*row,scale*col,scale,scale,"r{}c{}".format(row,col))
+
+    def setCountRates(self, countRates, colorScale):
+        colorScale = float(colorScale)
+        assert(len(countRates)==len(self.buttons))
+        cmap = cm.get_cmap('YlOrRd')
+        for i,cr in enumerate(countRates):
+            button = self.buttons[i]
+            if cr < 10:
+                buttonText = "{:.2f}".format(cr)
+            elif cr < 100:
+                buttonText = "{:.1f}".format(cr)
+            else:
+                buttonText = "{:.0f}".format(cr)
+            button.setText(buttonText)
+
+            color = cmap(cr/colorScale,bytes=True)
+            colorString = "rgb({},{},{})".format(color[0],color[1],color[2])
+            colorString = 'QPushButton {background-color: %s;}'%colorString
+            button.setStyleSheet(colorString)
+            print(colorString, buttonText)
+
+            # button.setStyleSheet(colorString)
+
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    obs = Observe()
+    obs.setColsRows(4,4)
+    obs.setColsRows(10,10)
+    obs.setColsRows(8,32)
+    # obs.crm.initButtons()
+    # print obs.crm.buttons
+    obs.crm.setCountRates(np.arange(obs.crm.cols*obs.crm.rows),obs.crm.cols*obs.crm.rows)
+    # obs.crm.show()
+    obs.show()
+    print obs.crm.size()
+    print obs.crm.sizePolicy()
+    sys.exit(app.exec_())

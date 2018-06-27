@@ -60,7 +60,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig.client = self.client
         self.writing = writing.WritingControl(self.ui.tabWriting, host)
         self.writing.client = self.client
-        self.observeTab = observe.ObserveTab(self.ui.tabObserve)
+        self.observeTab = observe.Observe(self.ui.tabObserve)
 
         self.microscopes = []
         self.last_messages = {}
