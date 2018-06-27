@@ -18,7 +18,8 @@ class Observe(QtWidgets.QWidget):
         self.crm = None
         self.countsSeens = []
         self.seenStatus = False
-        print("Observe.size()", self.size())
+        self.lastTotalRate = 0
+        self.channel_names = None
 
     def handleTriggerRateMessage(self, d):
         if self.seenStatus:
@@ -31,14 +32,26 @@ class Observe(QtWidgets.QWidget):
             for cs in self.countsSeens:
                 countRates += cs
             countRates /= len(self.countsSeens)
-            colorScale = self.ui.doubleSpinBox_colorScale.value()
+            colorScale = self.getColorScale(countRates)
             self.crm.setCountRates(countRates, colorScale)
             integrationComplete = len(self.countsSeens)==integrationTime
             arrayCps = countRates.sum()
             self.setArrayCps(arrayCps, integrationComplete)
-            print("Observe! Trigger*****\n\n\n", arrayCps)
         else:
             print("got trigger rate message before status")
+
+    def getColorScale(self, countRates):
+        if self.ui.pushButton_autoScale.isChecked():
+            totalRate = countRates.sum()
+            fracDiff = np.abs(self.lastTotalRate-totalRate)/(self.lastTotalRate+totalRate)
+            self.lastTotalRate=totalRate
+            if fracDiff > 0.2:
+                print ("autoScale!!")
+                maxRate = np.amax(countRates)
+                self.ui.doubleSpinBox_colorScale.setValue(maxRate)
+        return self.ui.doubleSpinBox_colorScale.value()
+
+
 
     def setArrayCps(self, arrayCps, integrationComplete):
         s = "{} cps/array".format(arrayCps)
@@ -50,7 +63,14 @@ class Observe(QtWidgets.QWidget):
         if self.crm is not None:
             self.crm.parent = None
             self.crm.deleteLater()
-        self.crm = CountRateMap(self,cols,rows)
+        channel_names = self.channel_names
+        if channel_names is None or len(channel_names)<cols*rows:
+            channel_names = []
+            for row in range(rows):
+                for col in range(cols):
+                    channel_names.append("r{}c{}".format(row,col))
+        assert(len(channel_names)==cols*rows)
+        self.crm = CountRateMap(self,cols,rows,channel_names)
         self.ui.verticalLayout_countRateMap.addWidget(self.crm)
 
 
@@ -80,22 +100,23 @@ class CountRateMap(QtWidgets.QWidget):
     class is new."""
     buttonFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
 
-    def __init__(self, parent, cols, rows):
+    def __init__(self, parent, cols, rows, channel_names):
         QtWidgets.QWidget.__init__(self, parent)
         self.buttons = []
         self.cols = cols
         self.rows = rows
+        self.channel_names = channel_names
         self.initButtons()
 
 
     def addButton(self,x,y,xwidth,ywidth,tooltip):
-        print("addButton({},{},{},{},{}) nbuttons = {}".format(x,y,xwidth,ywidth,tooltip,len(self.buttons)))
         button = QtWidgets.QPushButton(self)
         button.move(x,y)
         button.setFixedSize(xwidth,ywidth)
         button.setFont(self.buttonFont)
         button.setFlat(False)
         button.setToolTip(tooltip)
+        button.setCheckable(True)
         self.buttons.append(button)
 
     def deleteButtons(self):
@@ -112,10 +133,13 @@ class CountRateMap(QtWidgets.QWidget):
 
     def initButtons(self, scale=25):
         self.deleteButtons()
+        print("init rows{} cols{}".format(self.rows,self.cols))
+        print(self.channel_names)
         for row in range(self.rows):
             for col in range(self.cols):
-                print("init {} {}".format(row,col))
-                self.addButton(scale*row,scale*col,scale,scale,"r{}c{}".format(row,col))
+                i = row + col*self.rows
+                print(i, self.channel_names[i])
+                self.addButton(scale*row,scale*col,scale,scale,self.channel_names[i])
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
@@ -135,10 +159,6 @@ class CountRateMap(QtWidgets.QWidget):
             colorString = "rgb({},{},{})".format(color[0],color[1],color[2])
             colorString = 'QPushButton {background-color: %s;}'%colorString
             button.setStyleSheet(colorString)
-            print(colorString, buttonText)
-
-            # button.setStyleSheet(colorString)
-
 
 
 if __name__ == "__main__":

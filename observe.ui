@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>994</width>
-    <height>637</height>
+    <width>842</width>
+    <height>485</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>580</y>
-     <width>632</width>
+     <y>440</y>
+     <width>745</width>
      <height>38</height>
     </rect>
    </property>
@@ -89,6 +89,19 @@
       <item>
        <widget class="QDoubleSpinBox" name="doubleSpinBox_colorScale"/>
       </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_autoScale">
+        <property name="text">
+         <string>AutoScale</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -98,8 +111,8 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>971</width>
-     <height>561</height>
+     <width>821</width>
+     <height>421</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_countRateMap"/>
