@@ -8,6 +8,7 @@ import json
 from matplotlib import cm
 
 Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
+
 class Observe(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -17,6 +18,8 @@ class Observe(QtWidgets.QMainWindow):
         self.crm = None
         self.countsSeens = []
         self.seenStatus = False
+        self.show()
+        print("Observe.size()", self.size())
 
     def handleTriggerRateMessage(self, d):
         if self.seenStatus:
@@ -34,7 +37,7 @@ class Observe(QtWidgets.QMainWindow):
             integrationComplete = len(self.countsSeens)==integrationTime
             arrayCps = countRates.sum()
             self.setArrayCps(arrayCps, integrationComplete)
-            print("Trigger*****\n\n\n", arrayCps)
+            print("Observe! Trigger*****\n\n\n", arrayCps)
 
         else:
             print("got trigger rate message before status")
@@ -50,6 +53,7 @@ class Observe(QtWidgets.QMainWindow):
             self.crm.parent = None
             self.crm.deleteLater()
         self.crm = CountRateMap(self,cols,rows)
+        self.ui.verticalLayout_countRateMap.addWidget(self.crm)
 
 
     def handleStatusUpdate(self, d):
@@ -81,7 +85,6 @@ class CountRateMap(QtWidgets.QWidget):
     def __init__(self, parent, cols, rows):
         QtWidgets.QWidget.__init__(self, parent)
         self.buttons = []
-        self.setFixedSize(300,300)
         self.cols = cols
         self.rows = rows
         self.initButtons()
@@ -147,11 +150,9 @@ if __name__ == "__main__":
     obs.setColsRows(4,4)
     obs.setColsRows(10,10)
     obs.setColsRows(8,32)
-    # obs.crm.initButtons()
-    # print obs.crm.buttons
     obs.crm.setCountRates(np.arange(obs.crm.cols*obs.crm.rows),obs.crm.cols*obs.crm.rows)
-    # obs.crm.show()
+    # obs.crm.deleteButtons()
+    # obs.crm.initButtons()
+
     obs.show()
-    print obs.crm.size()
-    print obs.crm.sizePolicy()
     sys.exit(app.exec_())
