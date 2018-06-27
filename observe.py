@@ -121,7 +121,7 @@ class CountRateMap(QtWidgets.QWidget):
         button.setFont(self.buttonFont)
         button.setFlat(False)
         button.setToolTip(tooltip)
-        button.setCheckable(True)
+        # button.setCheckable(True)
         self.buttons.append(button)
 
     def deleteButtons(self):
