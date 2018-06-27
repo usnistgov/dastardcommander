@@ -98,6 +98,7 @@ class Observe(QtWidgets.QWidget):
 
     def handleAutoScaleClicked(self):
         self.ui.doubleSpinBox_colorScale.setEnabled(not self.ui.pushButton_autoScale.isChecked())
+        self.lastTotalRate = 0 # make sure auto scale actually happens
 
 class CountRateMap(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
