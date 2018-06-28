@@ -12,7 +12,7 @@ from collections import OrderedDict, defaultdict
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, QSettings
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
@@ -242,9 +242,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusFreshLabel.setText("%7.3f MB/s" % rate)
             color("green")
 
-
-    # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):
+        """Cleanly close the zmqlistener"""
         self.zmqlistener.running = False
         self.zmqthread.quit()
         self.zmqthread.wait()
@@ -362,7 +361,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Close the main window, but don't quit. Instead, ask for a new Dastard connection.
         Display the disconnection reason."""
         print("disconnecting because: {}".format(disconnectReason))
-        self.disconnectReason=disconnectReason
+        self.disconnectReason = disconnectReason
         self.reconnect = True
         self.close()
 
@@ -494,11 +493,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def loadProjectorsBasis(self):
         options = QFileDialog.Options()
-        if not hasattr(self,"lastdir"):
+        if not hasattr(self, "lastdir"):
             dir = os.path.expanduser("~")
         else:
             dir = self.lastdir
-        fileName, _ = QFileDialog.getOpenFileName(self,"Find Projectors Basis file", dir,"Model Files (*_model.h5);;All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(
+            self, "Find Projectors Basis file", dir,
+            "Model Files (*_model.h5);;All Files (*)", options=options)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
             print("opening: {}".format(fileName))
@@ -515,24 +516,23 @@ class MainWindow(QtWidgets.QMainWindow):
 
             print("success on chans: {}".format(success_chans))
             print("failures:")
-            print( json.dumps(failures, sort_keys=True,indent=4) )
+            print(json.dumps(failures, sort_keys=True, indent=4))
 
 
 class HostPortDialog(QtWidgets.QDialog):
-    def __init__(self, host, port, disconnectReason, parent=None):
+    def __init__(self, host, port, disconnectReason, settings, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_HostPortDialog()
         self.ui.setupUi(self)
         self.ui.hostName.setText(host)
         self.ui.basePortSpin.setValue(port)
+        self.settings = settings
+
         if disconnectReason and disconnectReason != "disconnect button":
             # give a clear message about why disconnections happen
             dialog = QtWidgets.QMessageBox()
             dialog.setText("disconnected because: {}".format(disconnectReason))
             dialog.exec_()
-
-
-
 
     def run(self):
         retval = self.exec_()
@@ -541,19 +541,24 @@ class HostPortDialog(QtWidgets.QDialog):
 
         host = self.ui.hostName.text()
         port = self.ui.basePortSpin.value()
+        self.settings.setValue("host", host)
+        self.settings.setValue("port", int(port))
         return (host, port)
 
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)
-    host, port = "localhost", 5500
+    settings = QSettings("NIST Quantum Sensors", "dastard-commander")
 
+    app = QtWidgets.QApplication(sys.argv)
+    host = settings.value("host", "localhost", type=str)
+    port = settings.value("port", 5500, type=int)
     disconnectReason = ""
     while True:
         # Ask user what host:port to connect to.
         # TODO: accept a command-line argument to specify host:port.
         # If given, we'll bypass this dialog the first time through the loop.
-        d = HostPortDialog(host=host, port=port, disconnectReason=disconnectReason)
+        d = HostPortDialog(host=host, port=port, disconnectReason=disconnectReason,
+                           settings=settings)
         host, port = d.run()
         if host is None or port is None:
             print "Could not start Dastard-commander without a valid host:port selection."
