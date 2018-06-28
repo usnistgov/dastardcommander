@@ -112,7 +112,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if topic == "STATUS":
                 self.updateStatusBar(d)
                 self.observeTab.handleStatusUpdate(d)
-                self._setGuiRunning(d["Running"])
+                self._setGuiRunning(d["Running"], d["SourceName"])
                 self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
@@ -380,7 +380,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         print "Stopping Data"
 
-    def _setGuiRunning(self, running):
+    def _setGuiRunning(self, running, sourceName=""):
         self.running = running
         label = "Start Data"
         if running:
@@ -392,8 +392,15 @@ class MainWindow(QtWidgets.QMainWindow):
         if running:
             self.ui.tabWidget.setCurrentWidget(self.ui.tabTriggering)
 
+        enable = running and (sourceName == "Lancero")
+        self.tconfig.ui.coupleFBToErrCheckBox.setEnabled(enable)
+        self.tconfig.ui.coupleErrToFBCheckBox.setEnabled(enable)
+        self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
+
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
+        # These only make sense for Lancero
         if sourceID == 0:
             self._startTriangle()
         elif sourceID == 1:
@@ -471,6 +478,10 @@ class MainWindow(QtWidgets.QMainWindow):
             print "Could not Start Lancero"
             return
         print "Starting Lancero device"
+        self.tconfig.ui.coupleFBToErrCheckBox.setEnabled(True)
+        self.tconfig.ui.coupleErrToFBCheckBox.setEnabled(True)
+        self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
 
     def loadProjectorsBasis(self):
         options = QFileDialog.Options()

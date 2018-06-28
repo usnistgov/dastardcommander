@@ -185,10 +185,16 @@ class TriggerConfig(QtWidgets.QWidget):
             self.ui.edgeRiseFallBoth.setCurrentIndex(0)
 
     def checkedCoupleFBErr(self):
-        pass
+        on = self.ui.coupleFBToErrCheckBox.isChecked()
+        if on:
+            self.ui.coupleErrToFBCheckBox.setChecked(False)
+        self.client.call("SourceControl.CoupleFBToErr", on)
 
-    def checkedCoupleErrFB(self):
-        pass
+    def checkedCoupleErrFB(self, on):
+        on = self.ui.coupleErrToFBCheckBox.isChecked()
+        if on:
+            self.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.client.call("SourceControl.CoupleErrToFB", on)
 
     def changedAutoTrigConfig(self):
         auto = self.ui.autoTrigActive.checkState()
