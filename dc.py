@@ -46,8 +46,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.reconnect = False
-        self.ui.disconnectButton.clicked.connect(self.closeReconnect)
-        self.ui.actionDisconnect.triggered.connect(self.closeReconnect)
+        self.disconnectReason = ""
+        self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
+        self.ui.actionDisconnect.triggered.connect(lambda: self.closeReconnect("disconnect button"))
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
@@ -91,7 +92,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # too long has elapsed without receiving a heartbeat from Dstard.  Then we
         # have to close the main window.
         self.hbTimer = QtCore.QTimer()
-        self.hbTimer.timeout.connect(self.closeReconnect)
+        self.hbTimer.timeout.connect(lambda: self.closeReconnect("missing heartbeat"))
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
 
@@ -234,6 +235,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusFreshLabel.setText("%7.3f MB/s" % rate)
             color("green")
 
+
     # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):
         self.zmqlistener.running = False
@@ -349,8 +351,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 box1.toggled.disconnect()
                 box2.toggled.disconnect()
 
-    def closeReconnect(self):
-        """Close the main window, but don't quit. Instead, ask for a new Dastard connection."""
+    def closeReconnect(self, disconnectReason):
+        """Close the main window, but don't quit. Instead, ask for a new Dastard connection.
+        Display the disconnection reason."""
+        print("disconnecting because: {}".format(disconnectReason))
+        self.disconnectReason=disconnectReason
         self.reconnect = True
         self.close()
 
@@ -496,12 +501,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 class HostPortDialog(QtWidgets.QDialog):
-    def __init__(self, host, port, parent=None):
+    def __init__(self, host, port, disconnectReason, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_HostPortDialog()
         self.ui.setupUi(self)
         self.ui.hostName.setText(host)
         self.ui.basePortSpin.setValue(port)
+        if disconnectReason and disconnectReason != "disconnect button":
+            # give a clear message about why disconnections happen
+            dialog = QtWidgets.QMessageBox()
+            dialog.setText("disconnected because: {}".format(disconnectReason))
+            dialog.exec_()
+
+
+
 
     def run(self):
         retval = self.exec_()
@@ -517,11 +530,12 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     host, port = "localhost", 5500
 
+    disconnectReason = ""
     while True:
         # Ask user what host:port to connect to.
         # TODO: accept a command-line argument to specify host:port.
         # If given, we'll bypass this dialog the first time through the loop.
-        d = HostPortDialog(host=host, port=port)
+        d = HostPortDialog(host=host, port=port, disconnectReason=disconnectReason)
         host, port = d.run()
         if host is None or port is None:
             print "Could not start Dastard-commander without a valid host:port selection."
@@ -533,11 +547,12 @@ def main():
             continue
         print "Dastard is at %s:%d" % (host, port)
 
-        myapp = MainWindow(client, host, port)
-        myapp.show()
+        dc = MainWindow(client, host, port)
+        dc.show()
 
         retval = app.exec_()
-        if not myapp.reconnect:
+        disconnectReason = dc.disconnectReason
+        if not dc.reconnect:
             sys.exit(retval)
 
 

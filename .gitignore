@@ -1,6 +1,7 @@
 *~
 *.pyc
 *_ui.py
+*.bak
 
 dastard-commander.config
 dastard-commander.creator
