@@ -631,7 +631,8 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>If checked, any trigger in a FB channel will also trigger the corresponding Error chan</string>
+        <string>If checked, any trigger in a FB channel will also trigger
+the corresponding Error chan (Lancero only).</string>
        </property>
        <property name="text">
         <string>Couple Feedback --&gt; Error (for SQUID checking)</string>
@@ -644,7 +645,8 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>If checked, any trigger in an error channel will also trigger the corresponding FB chan</string>
+        <string>If checked, any trigger in an error channel will also 
+trigger the corresponding FB chan (Lancero only).</string>
        </property>
        <property name="text">
         <string>Couple Error --&gt; Feedback (rare)</string>
@@ -903,7 +905,7 @@
   </connection>
   <connection>
    <sender>coupleFBToErrCheckBox</sender>
-   <signal>toggled(bool)</signal>
+   <signal>clicked(bool)</signal>
    <receiver>triggerConfigTab</receiver>
    <slot>checkedCoupleFBErr(bool)</slot>
    <hints>
@@ -919,7 +921,7 @@
   </connection>
   <connection>
    <sender>coupleErrToFBCheckBox</sender>
-   <signal>toggled(bool)</signal>
+   <signal>clicked(bool)</signal>
    <receiver>triggerConfigTab</receiver>
    <slot>checkedCoupleErrFB(bool)</slot>
    <hints>

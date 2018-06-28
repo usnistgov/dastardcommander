@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 import os
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 # Qt5 imports
 import PyQt5.uic
@@ -63,7 +63,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab = observe.Observe(self.ui.tabObserve)
 
         self.microscopes = []
-        self.last_messages = {}
+        self.last_messages = defaultdict(str)
         self.channel_names = []
         self.channel_prefixes = set()
         self.tconfig.channel_names = self.channel_names
@@ -108,11 +108,15 @@ class MainWindow(QtWidgets.QMainWindow):
         if topic == "ALIVE":
             self.heartbeat(d)
 
-        elif not self.last_messages.get(topic, "") == message:
+        elif topic == "TRIGGERRATE":
+            self.observeTab.handleTriggerRateMessage(d)
+
+        # All other messages are ignored if they haven't changed
+        elif not self.last_messages[topic] == message:
             if topic == "STATUS":
                 self.updateStatusBar(d)
                 self.observeTab.handleStatusUpdate(d)
-                self._setGuiRunning(d["Running"])
+                self._setGuiRunning(d["Running"], d["SourceName"])
                 self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
@@ -159,8 +163,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.channel_prefixes.add(prefix)
                 print "New channames: ", self.channel_names
 
-            elif topic == "TRIGGERRATE":
-                self.observeTab.handleTriggerRateMessage(d)
+            elif topic == "TRIGCOUPLING":
+                self.tconfig.handleTrigCoupling(d)
 
             else:
                 print("%s is not a topic we handle yet." % topic)
@@ -380,7 +384,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         print "Stopping Data"
 
-    def _setGuiRunning(self, running):
+    def _setGuiRunning(self, running, sourceName=""):
         self.running = running
         label = "Start Data"
         if running:
@@ -392,8 +396,15 @@ class MainWindow(QtWidgets.QMainWindow):
         if running:
             self.ui.tabWidget.setCurrentWidget(self.ui.tabTriggering)
 
+        enable = running and (sourceName == "Lancero")
+        self.tconfig.ui.coupleFBToErrCheckBox.setEnabled(enable)
+        self.tconfig.ui.coupleErrToFBCheckBox.setEnabled(enable)
+        self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
+
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
+        # These only make sense for Lancero
         if sourceID == 0:
             self._startTriangle()
         elif sourceID == 1:
@@ -471,6 +482,10 @@ class MainWindow(QtWidgets.QMainWindow):
             print "Could not Start Lancero"
             return
         print "Starting Lancero device"
+        self.tconfig.ui.coupleFBToErrCheckBox.setEnabled(True)
+        self.tconfig.ui.coupleErrToFBCheckBox.setEnabled(True)
+        self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
 
     def loadProjectorsBasis(self):
         options = QFileDialog.Options()

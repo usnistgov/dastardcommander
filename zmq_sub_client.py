@@ -27,7 +27,6 @@ socket.connect ("tcp://%s" % host)
 #     socket.setsockopt(zmq.SUBSCRIBE, topicfilter)
 socket.setsockopt(zmq.SUBSCRIBE, "")
 
-# Process 5 updates
 total_value = 0
 while True:
     topic, messagedata = socket.recv_multipart()
