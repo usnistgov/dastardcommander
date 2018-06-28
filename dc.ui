@@ -722,6 +722,11 @@
         </layout>
        </widget>
       </widget>
+      <widget class="QWidget" name="tabObserve">
+       <attribute name="title">
+        <string>Observe</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
    </layout>
