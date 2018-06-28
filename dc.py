@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 import os
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 # Qt5 imports
 import PyQt5.uic
@@ -63,7 +63,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab = observe.Observe(self.ui.tabObserve)
 
         self.microscopes = []
-        self.last_messages = {}
+        self.last_messages = defaultdict(str)
         self.channel_names = []
         self.channel_prefixes = set()
         self.tconfig.channel_names = self.channel_names
@@ -108,7 +108,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if topic == "ALIVE":
             self.heartbeat(d)
 
-        elif not self.last_messages.get(topic, "") == message:
+        elif topic == "TRIGGERRATE":
+            self.observeTab.handleTriggerRateMessage(d)
+
+        # All other messages are ignored if they haven't changed
+        elif not self.last_messages[topic] == message:
             if topic == "STATUS":
                 self.updateStatusBar(d)
                 self.observeTab.handleStatusUpdate(d)
@@ -159,8 +163,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.channel_prefixes.add(prefix)
                 print "New channames: ", self.channel_names
 
-            elif topic == "TRIGGERRATE":
-                self.observeTab.handleTriggerRateMessage(d)
+            elif topic == "TRIGCOUPLING":
+                self.tconfig.handleTrigCoupling(d)
 
             else:
                 print("%s is not a topic we handle yet." % topic)

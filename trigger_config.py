@@ -196,6 +196,17 @@ class TriggerConfig(QtWidgets.QWidget):
             self.ui.coupleFBToErrCheckBox.setChecked(False)
         self.client.call("SourceControl.CoupleErrToFB", on)
 
+    def handleTrigCoupling(self, msg):
+        fberr = errfb = False
+        if msg == 2:
+            fberr = True
+        elif msg == 3:
+            errfb = True
+        elif msg != 1:
+            print "message: TRIGCOUPLING {}, but expect 1, 2 or 3".format(msg)
+        self.ui.coupleFBToErrCheckBox.setChecked(fberr)
+        self.ui.coupleErrToFBCheckBox.setChecked(errfb)
+
     def changedAutoTrigConfig(self):
         auto = self.ui.autoTrigActive.checkState()
         if not auto == Qt.PartiallyChecked:
