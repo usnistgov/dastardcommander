@@ -49,7 +49,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.reconnect = False
         self.disconnectReason = ""
         self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
-        self.ui.actionDisconnect.triggered.connect(lambda: self.closeReconnect("disconnect button"))
+        self.ui.actionDisconnect.triggered.connect(lambda: self.closeReconnect("disconnect menu item"))
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
@@ -373,6 +373,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def close(self):
         """Close the main window and also the client connection to a Dastard process."""
+        self.hbTimer.stop()
         if self.client is not None:
             self.client.close()
         self.client = None
