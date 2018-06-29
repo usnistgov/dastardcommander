@@ -91,6 +91,12 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>999.990000000000009</double>
+        </property>
        </widget>
       </item>
       <item>
