@@ -100,10 +100,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimer.start(self.hbTimeout)
 
     def updateReceived(self, topic, message):
+        ignore_topics = ("CURRENTTIME", )
+        if topic in ignore_topics:
+            return
+
         try:
             d = json.loads(message)
         except Exception as e:
-            print("Error processing status message: %s" % e)
+            print "Error processing status message [topic,msg]: %s, %s" % (
+                topic, message)
+            print "Error is: %s" % e
             return
 
         if topic == "ALIVE":
