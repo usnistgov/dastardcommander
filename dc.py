@@ -528,29 +528,35 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def sendExperimental(self):
         config = {
-            "ChanNums" : range(len(self.channel_names)),
-            "TriggerState" : {
-                "EdgeMulti" : self.ui.checkBox_EdgeMulti.isChecked(),
-                "EdgeMultiMakeShortRecords" : self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
-                "EdgeMultiMakeContaminatedRecords" : self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
-                "EdgeMultiVerifyNMonotone" : self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),
-                "EdgeLevel" : self.ui.spinBox_EdgeLevel.value()
+            "ChanNums": range(len(self.channel_names)),
+            "TriggerState": {
+                "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
+                "EdgeMultiMakeShortRecords": self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
+                "EdgeMultiMakeContaminatedRecords": self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
+                "EdgeMultiVerifyNMonotone": self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),
+                "EdgeLevel": self.ui.spinBox_EdgeLevel.value()
             }
         }
         print("experimental trigger config")
         print(config)
         self.client.call("SourceControl.ConfigureTriggers", config)
-        for i in range(len(self.channel_names)):
-            if i % 2 == 0:
-                continue # only odd channels get mix
-            config = {
-                "ProcessorIndex" : i,
-                "MixFraction" : self.ui.doubleSpinBox_MixFraction.value()
-            }
-            print("experimental mix config")
-            print config
-            self.client.call("SourceControl.ConfigureMixFraction", config)
+        mixFraction = self.ui.doubleSpinBox_MixFraction.value()
+        if mixFraction == 0.0:
+            return
 
+        for i in range(len(self.channel_names)):
+            if i % 2 == 0:  # only odd channels get mix
+                continue
+            config = {
+                "ProcessorIndex": i,
+                "MixFraction": mixFraction
+            }
+            try:
+                self.client.call("SourceControl.ConfigureMixFraction", config)
+                print("experimental mix config")
+                print config
+            except Exception as e:
+                print "Could not set mix: {}".format(e)
 
 
 class HostPortDialog(QtWidgets.QDialog):
