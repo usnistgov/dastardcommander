@@ -8,6 +8,7 @@ class JSONClient(object):
         self._socket = socket.create_connection(addr)
         self._id_iter = itertools.count()
         self._codec = codec
+        self._closed = False
 
     def _message(self, name, params):
         return dict(id=next(self._id_iter),
@@ -15,6 +16,11 @@ class JSONClient(object):
                     method=name)
 
     def call(self, name, params, verbose=True):
+        if self._closed:
+            raise Exception("call after socket closed")
+            # this doesn't seem like it should be possible to reach
+            # but I've seen a few errors that look like we're trying to send
+            # after the socket is closed, and segfault, this will at least be graceful
         request = self._message(name, params)
         id = request.get('id')
         msg = self._codec.dumps(request)
@@ -39,3 +45,4 @@ class JSONClient(object):
 
     def close(self):
         self._socket.close()
+        self._closed = True
