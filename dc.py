@@ -7,12 +7,12 @@ import subprocess
 import sys
 import time
 import os
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, QSettings
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
@@ -21,6 +21,7 @@ import status_monitor
 import trigger_config
 import writing
 import projectors
+import observe
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -46,8 +47,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.reconnect = False
-        self.ui.disconnectButton.clicked.connect(self.closeReconnect)
-        self.ui.actionDisconnect.triggered.connect(self.closeReconnect)
+        self.disconnectReason = ""
+        self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
+        self.ui.actionDisconnect.triggered.connect(lambda: self.closeReconnect("disconnect menu item"))
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
@@ -60,12 +62,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig.client = self.client
         self.writing = writing.WritingControl(self.ui.tabWriting, host)
         self.writing.client = self.client
+        self.observeTab = observe.Observe(self.ui.tabObserve)
 
         self.microscopes = []
-        self.last_messages = {}
+        self.last_messages = defaultdict(str)
         self.channel_names = []
         self.channel_prefixes = set()
         self.tconfig.channel_names = self.channel_names
+        self.observeTab.channel_names = self.channel_names
         self.tconfig.channel_prefixes = self.channel_prefixes
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
@@ -92,24 +96,35 @@ class MainWindow(QtWidgets.QMainWindow):
         # too long has elapsed without receiving a heartbeat from Dstard.  Then we
         # have to close the main window.
         self.hbTimer = QtCore.QTimer()
-        self.hbTimer.timeout.connect(self.closeReconnect)
+        self.hbTimer.timeout.connect(lambda: self.closeReconnect("missing heartbeat"))
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
 
     def updateReceived(self, topic, message):
+        ignore_topics = ("CURRENTTIME", )
+        if topic in ignore_topics:
+            return
+
         try:
             d = json.loads(message)
         except Exception as e:
-            print("Error processing status message: %s" % e)
+            print "Error processing status message [topic,msg]: %s, %s" % (
+                topic, message)
+            print "Error is: %s" % e
             return
 
         if topic == "ALIVE":
             self.heartbeat(d)
 
-        elif not self.last_messages.get(topic, "") == message:
+        elif topic == "TRIGGERRATE":
+            self.observeTab.handleTriggerRateMessage(d)
+
+        # All other messages are ignored if they haven't changed
+        elif not self.last_messages[topic] == message:
             if topic == "STATUS":
                 self.updateStatusBar(d)
-                self._setGuiRunning(d["Running"])
+                self.observeTab.handleStatusUpdate(d)
+                self._setGuiRunning(d["Running"], d["SourceName"])
                 self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
@@ -148,16 +163,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     v.setChecked(mask & (1 << k))
 
             elif topic == "CHANNELNAMES":
-                try:
-                    while True:
-                        self.channel_names.pop()
-                except IndexError:
-                    pass
+                self.channel_names[:] = []   # Careful: don't replace the variable
                 self.channel_prefixes.clear()
                 for name in d:
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
+                print "New channames: ", self.channel_names
+
+            elif topic == "TRIGCOUPLING":
+                self.tconfig.handleTrigCoupling(d)
 
             else:
                 print("%s is not a topic we handle yet." % topic)
@@ -184,7 +199,6 @@ class MainWindow(QtWidgets.QMainWindow):
         sb.addWidget(self.statusFreshLabel)
 
     def updateStatusBar(self, data):
-        print "setStatusBar(): ", data
         run = data["Running"]
         if run:
             status = "%s source active, %d channels" % (
@@ -235,8 +249,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusFreshLabel.setText("%7.3f MB/s" % rate)
             color("green")
 
-    # The following will cleanly close the zmqlistener.
     def closeEvent(self, event):
+        """Cleanly close the zmqlistener"""
         self.zmqlistener.running = False
         self.zmqthread.quit()
         self.zmqthread.wait()
@@ -350,13 +364,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 box1.toggled.disconnect()
                 box2.toggled.disconnect()
 
-    def closeReconnect(self):
-        """Close the main window, but don't quit. Instead, ask for a new Dastard connection."""
+    def closeReconnect(self, disconnectReason):
+        """Close the main window, but don't quit. Instead, ask for a new Dastard connection.
+        Display the disconnection reason."""
+        print("disconnecting because: {}".format(disconnectReason))
+        self.disconnectReason = disconnectReason
         self.reconnect = True
         self.close()
 
     def close(self):
         """Close the main window and also the client connection to a Dastard process."""
+        self.hbTimer.stop()
         if self.client is not None:
             self.client.close()
         self.client = None
@@ -378,7 +396,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         print "Stopping Data"
 
-    def _setGuiRunning(self, running):
+    def _setGuiRunning(self, running, sourceName=""):
         self.running = running
         label = "Start Data"
         if running:
@@ -390,8 +408,15 @@ class MainWindow(QtWidgets.QMainWindow):
         if running:
             self.ui.tabWidget.setCurrentWidget(self.ui.tabTriggering)
 
+        enable = running and (sourceName == "Lancero")
+        self.tconfig.ui.coupleFBToErrCheckBox.setEnabled(enable)
+        self.tconfig.ui.coupleErrToFBCheckBox.setEnabled(enable)
+        self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
+
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
+        # These only make sense for Lancero
         if sourceID == 0:
             self._startTriangle()
         elif sourceID == 1:
@@ -469,14 +494,20 @@ class MainWindow(QtWidgets.QMainWindow):
             print "Could not Start Lancero"
             return
         print "Starting Lancero device"
+        self.tconfig.ui.coupleFBToErrCheckBox.setEnabled(True)
+        self.tconfig.ui.coupleErrToFBCheckBox.setEnabled(True)
+        self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
 
     def loadProjectorsBasis(self):
         options = QFileDialog.Options()
-        if not hasattr(self,"lastdir"):
+        if not hasattr(self, "lastdir"):
             dir = os.path.expanduser("~")
         else:
             dir = self.lastdir
-        fileName, _ = QFileDialog.getOpenFileName(self,"Find Projectors Basis file", dir,"Model Files (*_model.h5);;All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(
+            self, "Find Projectors Basis file", dir,
+            "Model Files (*_model.h5);;All Files (*)", options=options)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
             print("opening: {}".format(fileName))
@@ -493,7 +524,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             print("success on chans: {}".format(success_chans))
             print("failures:")
-            print( json.dumps(failures, sort_keys=True,indent=4) )
+            print(json.dumps(failures, sort_keys=True, indent=4))
 
     def sendExperimental(self):
         config = {
@@ -523,12 +554,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 class HostPortDialog(QtWidgets.QDialog):
-    def __init__(self, host, port, parent=None):
+    def __init__(self, host, port, disconnectReason, settings, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.ui = Ui_HostPortDialog()
         self.ui.setupUi(self)
         self.ui.hostName.setText(host)
         self.ui.basePortSpin.setValue(port)
+        self.settings = settings
+
+        if disconnectReason and disconnectReason != "disconnect button":
+            # give a clear message about why disconnections happen
+            dialog = QtWidgets.QMessageBox()
+            dialog.setText("disconnected because: {}".format(disconnectReason))
+            dialog.exec_()
 
     def run(self):
         retval = self.exec_()
@@ -537,18 +575,24 @@ class HostPortDialog(QtWidgets.QDialog):
 
         host = self.ui.hostName.text()
         port = self.ui.basePortSpin.value()
+        self.settings.setValue("host", host)
+        self.settings.setValue("port", int(port))
         return (host, port)
 
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)
-    host, port = "localhost", 5500
+    settings = QSettings("NIST Quantum Sensors", "dastard-commander")
 
+    app = QtWidgets.QApplication(sys.argv)
+    host = settings.value("host", "localhost", type=str)
+    port = settings.value("port", 5500, type=int)
+    disconnectReason = ""
     while True:
         # Ask user what host:port to connect to.
         # TODO: accept a command-line argument to specify host:port.
         # If given, we'll bypass this dialog the first time through the loop.
-        d = HostPortDialog(host=host, port=port)
+        d = HostPortDialog(host=host, port=port, disconnectReason=disconnectReason,
+                           settings=settings)
         host, port = d.run()
         if host is None or port is None:
             print "Could not start Dastard-commander without a valid host:port selection."
@@ -560,11 +604,12 @@ def main():
             continue
         print "Dastard is at %s:%d" % (host, port)
 
-        myapp = MainWindow(client, host, port)
-        myapp.show()
+        dc = MainWindow(client, host, port)
+        dc.show()
 
         retval = app.exec_()
-        if not myapp.reconnect:
+        disconnectReason = dc.disconnectReason
+        if not dc.reconnect:
             sys.exit(retval)
 
 

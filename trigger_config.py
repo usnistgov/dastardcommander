@@ -185,10 +185,27 @@ class TriggerConfig(QtWidgets.QWidget):
             self.ui.edgeRiseFallBoth.setCurrentIndex(0)
 
     def checkedCoupleFBErr(self):
-        pass
+        on = self.ui.coupleFBToErrCheckBox.isChecked()
+        if on:
+            self.ui.coupleErrToFBCheckBox.setChecked(False)
+        self.client.call("SourceControl.CoupleFBToErr", on)
 
-    def checkedCoupleErrFB(self):
-        pass
+    def checkedCoupleErrFB(self, on):
+        on = self.ui.coupleErrToFBCheckBox.isChecked()
+        if on:
+            self.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.client.call("SourceControl.CoupleErrToFB", on)
+
+    def handleTrigCoupling(self, msg):
+        fberr = errfb = False
+        if msg == 2:
+            fberr = True
+        elif msg == 3:
+            errfb = True
+        elif msg != 1:
+            print "message: TRIGCOUPLING {}, but expect 1, 2 or 3".format(msg)
+        self.ui.coupleFBToErrCheckBox.setChecked(fberr)
+        self.ui.coupleErrToFBCheckBox.setChecked(errfb)
 
     def changedAutoTrigConfig(self):
         auto = self.ui.autoTrigActive.checkState()
