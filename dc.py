@@ -22,6 +22,7 @@ import trigger_config
 import writing
 import projectors
 import observe
+import workflow
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -63,6 +64,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.writing = writing.WritingControl(self.ui.tabWriting, host)
         self.writing.client = self.client
         self.observeTab = observe.Observe(self.ui.tabObserve)
+        self.workflowTab = workflow.Workflow(self, parent=self.ui.tabWorkflow)
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
