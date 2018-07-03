@@ -73,6 +73,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig.channel_names = self.channel_names
         self.observeTab.channel_names = self.channel_names
         self.tconfig.channel_prefixes = self.channel_prefixes
+        self.workflowTab.channel_names = self.channel_names
+        self.workflowTab.channel_prefixes = self.channel_prefixes
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
         self.ui.tabWidget.setEnabled(False)

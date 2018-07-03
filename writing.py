@@ -57,6 +57,19 @@ class WritingControl(QtWidgets.QWidget):
         if len(result) > 0:
             self.updatePath(result)
 
+
+    def start(self):
+        if self.writing:
+            raise Exception("already writing")
+        else:
+            self.startstop()
+
+    def stop(self):
+        if not self.writing:
+            raise Exception("already stopped")
+        else:
+            self.startstop()
+
     def startstop(self):
         if self.writing:
             request = {"Request": "Stop"}
@@ -74,6 +87,7 @@ class WritingControl(QtWidgets.QWidget):
             print "Could not %s writing: " % request["Request"], e
 
     def stoppedWriting(self):
+        print "STOPPED WRITING"
         self.writing = False
         self.ui.writingStartButton.setText("Start Writing")
         self.ui.previousNameExampleEdit.setText(self.ui.fileNameExampleEdit.text())
@@ -82,6 +96,7 @@ class WritingControl(QtWidgets.QWidget):
         self.ui.writingPauseButton.setEnabled(False)
 
     def startedWriting(self, example):
+        print "STARTED WRITING"
         self.writing = True
         self.ui.writingStartButton.setText("Stop Writing")
         self.ui.fileNameExampleEdit.setText(example)
