@@ -623,11 +623,6 @@
         <string>Writing</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabServer">
-       <attribute name="title">
-        <string>Server Ctrl</string>
-       </attribute>
-      </widget>
       <widget class="QWidget" name="tabExperimental">
        <attribute name="title">
         <string>Experimental</string>
