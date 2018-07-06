@@ -173,6 +173,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
                 print "New channames: ", self.channel_names
+                self.tconfig.ui.channelChooserBox.setCurrentIndex(2)
+                self.tconfig.channelChooserChanged()
 
             elif topic == "TRIGCOUPLING":
                 self.tconfig.handleTrigCoupling(d)

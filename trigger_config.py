@@ -20,8 +20,31 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
+        self.ui.auto1psModeButton.pressed.connect(self.go1psMode)
+        self.ui.noiseModeButton.pressed.connect(self.goNoiseMode)
+        self.ui.pulseModeButton.pressed.connect(self.goPulseMode)
         self.trigger_state = {}
         self.chosenChannels = []
+
+    def goPulseMode(self):
+        self.ui.autoTrigActive.setChecked(False)
+        self.ui.edgeTrigActive.setChecked(True)
+        self.ui.levelTrigActive.setChecked(False)
+        self.changedAllTrigConfig()
+
+    def goNoiseMode(self):
+        self.ui.autoTrigActive.setChecked(True)
+        self.ui.autoTimeEdit.setText("0")
+        self.ui.edgeTrigActive.setChecked(False)
+        self.ui.levelTrigActive.setChecked(False)
+        self.changedAllTrigConfig()
+
+    def go1psMode(self):
+        self.ui.autoTrigActive.setChecked(True)
+        self.ui.autoTimeEdit.setText("1000")
+        self.ui.edgeTrigActive.setChecked(False)
+        self.ui.levelTrigActive.setChecked(False)
+        self.changedAllTrigConfig()
 
     def handleTriggerMessage(self, dicts):
         """Handle the trigger state message (in list-of-dicts form)"""
@@ -144,7 +167,6 @@ class TriggerConfig(QtWidgets.QWidget):
             (self.ui.autoTrigActive, "AutoTrigger"),
             (self.ui.edgeTrigActive, "EdgeTrigger"),
             (self.ui.levelTrigActive, "LevelTrigger"),
-            (self.ui.noiseTrigActive, "NoiseTrigger"),
         )
         for (checkbox, name) in boxes:
             state = self.getstate(name)
@@ -158,16 +180,13 @@ class TriggerConfig(QtWidgets.QWidget):
             edgescale = levelscale * 100  # TODO: replace 100 with samples per second
             self.ui.levelUnitsLabel.setText("Volts")
             self.ui.edgeUnitsLabel.setText("V/ms")
-            self.ui.noiseUnitsLabel.setText("V/ms")
         else:
             self.ui.levelUnitsLabel.setText("raw")
             self.ui.edgeUnitsLabel.setText("raw/samp")
-            self.ui.noiseUnitsLabel.setText("raw/samp")
         edits = (
             (self.ui.autoTimeEdit, "AutoDelay", 1e-6),
             (self.ui.edgeEdit, "EdgeLevel", edgescale),
             (self.ui.levelEdit, "LevelLevel", levelscale),
-            # (self.ui.noiseEdit, "NoiseLevel", 1.0)
         )
         for (edit, name, scale) in edits:
             state = self.getstate(name)
@@ -207,6 +226,11 @@ class TriggerConfig(QtWidgets.QWidget):
             print "message: TRIGCOUPLING {}, but expect 1, 2 or 3".format(msg)
         self.ui.coupleFBToErrCheckBox.setChecked(fberr)
         self.ui.coupleErrToFBCheckBox.setChecked(errfb)
+
+    def changedAllTrigConfig(self):
+        self.changedAutoTrigConfig()
+        self.changedEdgeTrigConfig()
+        self.changedLevelTrigConfig()
 
     def changedAutoTrigConfig(self):
         auto = self.ui.autoTrigActive.checkState()
@@ -279,9 +303,6 @@ class TriggerConfig(QtWidgets.QWidget):
             pass
         for state in self.alltriggerstates():
             self.client.call("SourceControl.ConfigureTriggers", state)
-
-    def changedNoiseTrigConfig(self):
-        pass
 
     def changedLevelUnits(self):
         """Changed the edge+level units between RAW and Volts"""
