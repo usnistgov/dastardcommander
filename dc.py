@@ -165,6 +165,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 mask = d["FiberMask"]
                 for k, v in self.fiberBoxes.items():
                     v.setChecked(mask & (1 << k))
+                ns = d["Nsamp"]
+                if ns > 0 and ns <= 16:
+                    self.ui.nsampSpinBox.setValue(ns)
 
             elif topic == "CHANNELNAMES":
                 self.channel_names[:] = []   # Careful: don't replace the variable
@@ -474,6 +477,7 @@ class MainWindow(QtWidgets.QMainWindow):
         clock = 125
         if self.ui.lanceroClock50Button.isChecked():
             clock = 50
+        nsamp = self.ui.nsampSpinBox.value()
 
         activate = []
         delays = []
@@ -486,6 +490,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "FiberMask": mask,
             "ClockMhz": clock,
             "CardDelay": delays,
+            "Nsamp" : nsamp,
             "ActiveCards": activate,
             "AvailableCards": []   # This is filled in only by server, not us.
         }
@@ -493,6 +498,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if not okay:
             print "Could not ConfigureLanceroSource"
             return
+
         okay = self.client.call("SourceControl.Start", "LANCEROSOURCE")
         if not okay:
             print "Could not Start Lancero"
