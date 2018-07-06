@@ -28,6 +28,7 @@ class TriggerConfig(QtWidgets.QWidget):
         for d in dicts:
             for ch in d["ChanNumbers"]:
                 self.trigger_state[ch] = d
+        self.updateTriggerGUIElements()
 
     def channelChooserChanged(self):
         """The channel selector menu was activated: update the edit box"""
