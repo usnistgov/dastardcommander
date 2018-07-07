@@ -1,6 +1,7 @@
 import json
+import itertools
+import socket
 
-import itertools, socket
 
 class JSONClient(object):
 
@@ -17,10 +18,12 @@ class JSONClient(object):
 
     def call(self, name, params, verbose=True):
         if self._closed:
-            raise Exception("call after socket closed")
-            # this doesn't seem like it should be possible to reach
-            # but I've seen a few errors that look like we're trying to send
-            # after the socket is closed, and segfault, this will at least be graceful
+            print "%s(...) ignored because JSON-RPC client is closed." % name
+            return None
+            # This might seem like it should be impossible to reach, but it is possible
+            # because signals like editingFinished can trigger slots when you try
+            # to close a window while editing a QLineEdit (see issue #22).
+            # If you skip this test, you get a segfault; this will be graceful.
         request = self._message(name, params)
         id = request.get('id')
         msg = self._codec.dumps(request)
@@ -31,9 +34,9 @@ class JSONClient(object):
         response = self._codec.loads(response.decode())
 
         if response.get('id') != id:
-            raise Exception("expected id=%s, received id=%s: %s"
-                            %(id, response.get('id'),
-                              response.get('error')))
+            raise Exception("expected id=%s, received id=%s: %s" %
+                            (id, response.get('id'),
+                             response.get('error')))
 
         if response.get('error') is not None:
             if verbose:
@@ -44,5 +47,5 @@ class JSONClient(object):
         return response.get('result')
 
     def close(self):
-        self._socket.close()
         self._closed = True
+        self._socket.close()
