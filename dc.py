@@ -257,10 +257,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def closeEvent(self, event):
-        """Cleanly close the zmqlistener"""
+        """Cleanly close the zmqlistener and block certain signals in the
+        trigger config widget."""
+        self.tconfig._closing()
         self.zmqlistener.running = False
         self.zmqthread.quit()
         self.zmqthread.wait()
+        event.accept()
 
     @pyqtSlot()
     def launchMicroscope(self):
@@ -495,7 +498,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "FiberMask": mask,
             "ClockMhz": clock,
             "CardDelay": delays,
-            "Nsamp" : nsamp,
+            "Nsamp": nsamp,
             "ActiveCards": activate,
             "AvailableCards": []   # This is filled in only by server, not us.
         }

@@ -25,6 +25,18 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.pulseModeButton.pressed.connect(self.goPulseMode)
         self.trigger_state = {}
         self.chosenChannels = []
+        self.editWidgets = [self.ui.recordLengthSpinBox,
+                            self.ui.pretrigLengthSpinBox,
+                            self.ui.pretrigPercentSpinBox,
+                            self.ui.autoTimeEdit,
+                            self.ui.levelEdit,
+                            self.ui.edgeEdit]
+
+    def _closing(self):
+        """The main window calls this to block and editingFinished events from
+        being processed when the main window is closing."""
+        for w in self.editWidgets:
+            w.blockSignals(True)
 
     @pyqtSlot()
     def goPulseMode(self):
