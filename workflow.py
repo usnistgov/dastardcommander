@@ -86,7 +86,7 @@ class Workflow(QtWidgets.QWidget):
         self.dc.writing.start()
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
-        TIME_UNITS_TO_WAIT = 4
+        TIME_UNITS_TO_WAIT = 30
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
         progressBar = QtWidgets.QProgressDialog("taking pulses (not really, just placeholder code)...",None,0,TIME_UNITS_TO_WAIT-1,parent=self)
@@ -125,7 +125,7 @@ class Workflow(QtWidgets.QWidget):
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
         # its more important than in the noise case to count written records
-        TIME_UNITS_TO_WAIT = 4
+        TIME_UNITS_TO_WAIT = 6000
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
         progressBar = QtWidgets.QProgressDialog("taking pulses...",None,0,TIME_UNITS_TO_WAIT-1,parent=self)
