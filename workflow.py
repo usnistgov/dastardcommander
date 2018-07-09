@@ -33,17 +33,19 @@ class Workflow(QtWidgets.QWidget):
         self.ui.pushButton_createProjectors.clicked.connect(self.handleCreateProjectors)
         self.ui.pushButton_loadProjectors.clicked.connect(self.handleLoadProjectors)
         self.ui.pushButton_viewNoisePlot.clicked.connect(self.handleViewNoisePlot)
+        self.ui.pushButton_viewProjectorsPlot.clicked.connect(self.handleViewProjectorsPlot)
         self.dc = dc
         self.channel_names = None # to be overwritten by dc.py
         self.channel_prefixes = None  # to be overwritten by dc.py
+        self.reset()
         self.testingInit()
 
     def testingInit(self):
         """
         pre-populate the output of some steps for faster testing
         """
-        self.noiseFilename = "/tmp/20180706/0007/20180706_run0007_chan*.ljh"
-        self.pulseFilename = "/tmp/20180706/0008/20180706_run0008_chan*.ljh"
+        self.noiseFilename = "/tmp/20180709/0001/20180709_run0001_chan*.ljh"
+        self.pulseFilename = "/tmp/20180709/0000/20180709_run0000_chan*.ljh"
         self.ui.label_noiseFile.setText("current noise file: %s"%self.noiseFilename)
         self.ui.label_pulseFile.setText("current noise file: %s"%self.pulseFilename)
 
@@ -56,6 +58,10 @@ class Workflow(QtWidgets.QWidget):
         self.ui.label_noiseModel.setText("noise model: %s"%self.noiseModelFilename)
         self.noisePlotFilename = None
         self.ui.pushButton_viewNoisePlot.setEnabled(False)
+        self.projectorsFilename = None
+        self.ui.label_projectors.setText("projectors file: %s"%self.projectorsFilename)
+        self.projectorsPlotFilename = None
+        self.ui.pushButton_viewProjectorsPlot.setEnabled(False)
 
 
     def handleTakeNoise(self):
@@ -138,6 +144,7 @@ class Workflow(QtWidgets.QWidget):
         outName = self.noiseFilename[:-9]+"noise.hdf5"
         plotName = self.noiseFilename[:-9]+"noise.pdf"
         print outName
+
         inputFiles = glob.glob(self.noiseFilename)
         cmd = ["julia",NOISE_ANALYSIS_PATH,"-u"] + inputFiles
         # -u instructs noise_analysis to "update" the file by adding new channels, this shouldn't be
@@ -149,39 +156,81 @@ class Workflow(QtWidgets.QWidget):
             print("{} already exists, skipping noise_analysis.jl".format(outName))
         else:
             # check_output throws an error if the process fails
-            output = subprocess.check_output(cmd)
-            print(output)
+            # output = subprocess.check_output(cmd)
+            # print(output)
+            p = subprocess.Popen(cmd)
+            returncode = p.wait()
+            if returncode != 0:
+                raise Exception("return code = {}".format(returncode))
+
+
         self.noiseModelFilename = outName
         self.ui.label_noiseModel.setText("noise model: %s"%self.noiseModelFilename)
 
-        cmdPlot = ["julia",NOISE_PLOT_PATH, plotName]
+        cmdPlot = ["julia",NOISE_PLOT_PATH, outName]
         print(repr(cmdPlot)+"\n")
         if os.path.isfile(plotName):
             print("{} already exists, skipping noise_plots.jl".format(plotName))
         else:
-            cmdOutput = subprocess.check_output(cmdPlot)
-            print(cmdOutput)
+            p = subprocess.Popen(cmdPlot)
+            returncode = p.wait()
+            if returncode != 0:
+                raise Exception("return code = {}".format(returncode))
 
         self.noisePlotFilename = plotName
         self.ui.pushButton_viewNoisePlot.setEnabled(True)
 
-    def handleViewNoisePlot(self):
+    def openPdf(self,path):
+        if not path.endswith(".pdf"):
+            raise Exception("path should end with .pdf, got {}".format(path))
         print sys.platform
         print self.noisePlotFilename
         if sys.platform.startswith('darwin'):
-            cmd = ["open", self.noisePlotFilename]
+            cmd = ["open", path]
         elif sys.platform.startswith('linux'):
-            cmd = ["evince", self.noisePlotFilename]
+            cmd = ["evince", path]
         else:
             raise Exception("pdf view not implement for platform = {}".format(sys.platform))
         print(repr(cmd)+"\n")
         subprocess.Popen(cmd)
 
+    def handleViewNoisePlot(self):
+        self.openPdf(self.noisePlotFilename)
+
     def handleCreateProjectors(self):
         # call pope script
-        # remember filename
-        # button to view plots
-        raise Exception("not implemented")
+        outName = self.pulseFilename[:-9]+"model.h5"
+        plotName = self.pulseFilename[:-9]+"model_modelplots.pdf"
+        print outName
+        pulseFile = glob.glob(self.pulseFilename)[0]
+        cmd = ["julia",BASIS_CREATE_PATH,"--n_basis","5",pulseFile, self.noiseModelFilename]
+        print(repr(cmd)+"\n")
+        if os.path.isfile(outName):
+            print("{} exists, skipping create_basis.jl".format(outName))
+        else:
+            p = subprocess.Popen(cmd)
+            returncode = p.wait()
+            if returncode != 0:
+                raise Exception("return code = {}".format(returncode))
+
+        self.projectorsFilename = outName
+        self.ui.label_projectors.setText("noise model: %s"%self.projectorsFilename)
+
+        cmdPlot = ["julia",BASIS_PLOT_PATH, outName]
+        print(repr(cmdPlot)+"\n")
+        if os.path.isfile(plotName):
+            print("{} already exists, skipping basis_plots.jl".format(plotName))
+        else:
+            p = subprocess.Popen(cmdPlot)
+            returncode = p.wait()
+            if returncode != 0:
+                raise Exception("return code = {}".format(returncode))
+
+        self.projectorsPlotFilename = plotName
+        self.ui.pushButton_viewProjectorsPlot.setEnabled(True)
+
+    def handleViewProjectorsPlot(self):
+        self.openPdf(self.projectorsPlotFilename)
 
     def handleLoadProjectors(self):
         # load projectors
