@@ -40,10 +40,13 @@ class Workflow(QtWidgets.QWidget):
         self.dc = dc
         self.channel_names = None # to be overwritten by dc.py
         self.channel_prefixes = None  # to be overwritten by dc.py
-        self.nsamples = None
-        self.npresamples = None
+        self.nsamples = None # to be set by handleStatusUpdate
+        self.npresamples = None # to be set by handleStatusUpdate
+        self.numberWritten = 0 # to be set by handleNumberWritten
+        self.NumberOfChans = None # to be set by handleNumberWritten
+        self.currentlyWriting = None # to be set by handleWritingMessage
         self.reset()
-        self.testingInit()
+        self.testingInit() # REMOVE
 
     def testingInit(self):
         """
@@ -76,12 +79,11 @@ class Workflow(QtWidgets.QWidget):
         # set triggers to auto for all fb channels
         self.reset()
         print self.channel_names
-        state = {}
-        state["ChanNumbers"]=[chan for (chan,name) in enumerate(self.channel_names) if name.startswith("chan")]
-        state["AutoTrigger"]=True
-        state["AutoDelay"]=0
-        print state
-        self.dc.client.call("SourceControl.ConfigureTriggers", state)
+        if self.currentlyWriting:
+            em = QtWidgets.QErrorMessage(self)
+            em.showMessage("dastard is currently writing, stop it and try again")
+            return
+        self.dc.tconfig.goNoiseMode()
         # start writing files
         self.dc.writing.start()
         # wait for 1000 records/channels
@@ -89,7 +91,7 @@ class Workflow(QtWidgets.QWidget):
         TIME_UNITS_TO_WAIT = 30
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
-        progressBar = QtWidgets.QProgressDialog("taking pulses (not really, just placeholder code)...",None,0,TIME_UNITS_TO_WAIT-1,parent=self)
+        progressBar = QtWidgets.QProgressDialog("taking noise...","Stop Early",0,TIME_UNITS_TO_WAIT-1,parent=self)
         progressBar.setModal(True) # prevent users from clicking elsewhere in gui
         progressBar.show()
         for i in range(TIME_UNITS_TO_WAIT):
@@ -97,8 +99,11 @@ class Workflow(QtWidgets.QWidget):
             # remember filenames
             self.noiseFilename = self.dc.writing.ui.fileNameExampleEdit.text()
             self.ui.label_noiseFile.setText("noise data: %s"%self.noiseFilename)
+            progressBar.setLabelText("noise, {} records".format(self.numberWritten))
             progressBar.setValue(i)
             QtWidgets.QApplication.processEvents() # process gui events
+            if progressBar.wasCanceled():
+                break # should I do anything else here, like invalidate the data?
         progressBar.close()
 
         # # stop writing files
@@ -113,31 +118,33 @@ class Workflow(QtWidgets.QWidget):
         # the best option would be to have Joe implement the "trigger states" buttons
         # and activate the pulses trigger state
         print self.channel_names
-        state = {}
-        state["ChanNumbers"]=[chan for (chan,name) in enumerate(self.channel_names) if name.startswith("chan")]
-        state["EdgeMulti"]=True
-        state["EdgeLevel"]=50
-        state["EdgeMultiVerifyNMonotone"]=10
-        print state
-        self.dc.client.call("SourceControl.ConfigureTriggers", state)
+        if self.currentlyWriting:
+            em = QtWidgets.QErrorMessage(self)
+            em.showMessage("dastard is currently writing, stop it and try again")
+            return
+        self.dc.tconfig.goPulseMode()
         # start writing files
         self.dc.writing.start()
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
         # its more important than in the noise case to count written records
-        TIME_UNITS_TO_WAIT = 6000
+        RECORDS_PER_CHANNEL = 1000
+        RECORDS_TOTAL = RECORDS_PER_CHANNEL*self.NumberOfChans
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
-        progressBar = QtWidgets.QProgressDialog("taking pulses...",None,0,TIME_UNITS_TO_WAIT-1,parent=self)
+        progressBar = QtWidgets.QProgressDialog("taking pulses...","Stop Early",0,RECORDS_TOTAL,parent=self)
         progressBar.setModal(True) # prevent users from clicking elsewhere in gui
         progressBar.show()
-        for i in range(TIME_UNITS_TO_WAIT):
+        while self.numberWritten < RECORDS_TOTAL:
             time.sleep(0.1)
             # remember filenames
             self.pulseFilename = self.dc.writing.ui.fileNameExampleEdit.text()
             self.ui.label_pulseFile.setText("pulse data: %s"%self.pulseFilename)
-            progressBar.setValue(i)
+            progressBar.setLabelText("pulses, {}/{} records".format(self.numberWritten,RECORDS_TOTAL))
+            progressBar.setValue(self.numberWritten)
             QtWidgets.QApplication.processEvents() # process gui events
+            if progressBar.wasCanceled():
+                break # should I do anything else here, like invalidate the data?
         progressBar.close()
 
         # # stop writing files
@@ -275,6 +282,13 @@ class Workflow(QtWidgets.QWidget):
                 self.reset()
             self.nsamples = d["Nsamples"]
             self.npresamples = d["Npresamp"]
+
+    def handleNumberWritten(self,d):
+        self.numberWritten = np.sum(d["NumberWritten"])
+        self.NumberOfChans = len(d["NumberWritten"])
+
+    def handleWritingMessage(self,d):
+        self.currentlyWriting = d["Active"]
 
 
 if __name__ == "__main__":

@@ -149,6 +149,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "WRITING":
                 self.writing.handleWritingMessage(d)
+                self.workflowTab.handleWritingMessage(d)
 
             elif topic == "TRIANGLE":
                 self.ui.triangleNchan.setValue(d["Nchan"])
@@ -188,6 +189,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "NUMBERWRITTEN":
                 self.writing.handleNumberWritten(d)
+                self.workflowTab.handleNumberWritten(d)
             else:
                 print("%s is not a topic we handle yet." % topic)
 
