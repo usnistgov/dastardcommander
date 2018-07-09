@@ -3,8 +3,9 @@ import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
-Ui_Writing, _ = PyQt5.uic.loadUiType("writing.ui")
+import numpy as np
 
+Ui_Writing, _ = PyQt5.uic.loadUiType("writing.ui")
 
 class WritingControl(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
@@ -57,6 +58,9 @@ class WritingControl(QtWidgets.QWidget):
         if len(result) > 0:
             self.updatePath(result)
 
+    def handleNumberWritten(self, d):
+        self.ui.label_numberWritten.setText("Number Written by Channel: {}\nNumber Written Total: {}".format(d["NumberWritten"],
+                                            np.sum(d["NumberWritten"])))
 
     def start(self):
         if self.writing:

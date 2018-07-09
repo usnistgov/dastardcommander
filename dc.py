@@ -186,6 +186,8 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "TRIGCOUPLING":
                 self.tconfig.handleTrigCoupling(d)
 
+            elif topic == "NUMBERWRITTEN":
+                self.writing.handleNumberWritten(d)
             else:
                 print("%s is not a topic we handle yet." % topic)
 
