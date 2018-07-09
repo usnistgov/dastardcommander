@@ -46,11 +46,12 @@ class Workflow(QtWidgets.QWidget):
         self.NumberOfChans = None # to be set by handleNumberWritten
         self.currentlyWriting = None # to be set by handleWritingMessage
         self.reset()
-        self.testingInit() # REMOVE
+        # self.testingInit() # REMOVE
 
     def testingInit(self):
         """
         pre-populate the output of some steps for faster testing
+        to be removed
         """
         self.noiseFilename = "/tmp/20180709/0001/20180709_run0001_chan*.ljh"
         self.pulseFilename = "/tmp/20180709/0000/20180709_run0000_chan*.ljh"
