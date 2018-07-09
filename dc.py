@@ -131,6 +131,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.observeTab.handleStatusUpdate(d)
                 self._setGuiRunning(d["Running"], d["SourceName"])
                 self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
+                self.workflowTab.handleStatusUpdate(d)
+
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
                 if source == "Triangles":

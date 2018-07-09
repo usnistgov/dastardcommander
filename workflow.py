@@ -10,6 +10,8 @@ import subprocess
 import os
 import glob
 import sys
+import projectors
+from collections import OrderedDict
 
 Ui_Workflow, _ = PyQt5.uic.loadUiType("workflow.ui")
 
@@ -18,6 +20,7 @@ NOISE_ANALYSIS_PATH = os.path.join(POPE_PATH,"noise_analysis.jl")
 BASIS_CREATE_PATH = os.path.join(POPE_PATH,"basis_create.jl")
 NOISE_PLOT_PATH = os.path.join(POPE_PATH,"noise_plots.jl")
 BASIS_PLOT_PATH = os.path.join(POPE_PATH,"basis_plots.jl")
+
 class Workflow(QtWidgets.QWidget):
     """The tricky bit about this widget is that it cannot be properly set up until
     dc has processed both a CHANNELNAMES message and a STATUS message (to get the
@@ -37,6 +40,8 @@ class Workflow(QtWidgets.QWidget):
         self.dc = dc
         self.channel_names = None # to be overwritten by dc.py
         self.channel_prefixes = None  # to be overwritten by dc.py
+        self.nsamples = None
+        self.npresamples = None
         self.reset()
         self.testingInit()
 
@@ -110,8 +115,9 @@ class Workflow(QtWidgets.QWidget):
         print self.channel_names
         state = {}
         state["ChanNumbers"]=[chan for (chan,name) in enumerate(self.channel_names) if name.startswith("chan")]
-        state["AutoTrigger"]=True
-        state["AutoDelay"]=0
+        state["EdgeMulti"]=True
+        state["EdgeLevel"]=50
+        state["EdgeMultiVerifyNMonotone"]=10
         print state
         self.dc.client.call("SourceControl.ConfigureTriggers", state)
         # start writing files
@@ -233,8 +239,42 @@ class Workflow(QtWidgets.QWidget):
         self.openPdf(self.projectorsPlotFilename)
 
     def handleLoadProjectors(self):
-        # load projectors
-        raise Exception("not implemented")
+        if self.projectorsFilename is None:
+            em = QtWidgets.QErrorMessage(self)
+            em.showMessage("projectorsFilename is None, have you run the rest of the workflow?")
+            return
+        if not os.path.isfile(self.projectorsFilename):
+            em = QtWidgets.QErrorMessage(self)
+            em.showMessage("{} does not exist".format(self.projectorsFilename))
+            return
+        print("opening: {}".format(self.projectorsFilename))
+        configs = projectors.getConfigs(self.projectorsFilename)
+        print("Sending model for {} chans".format(len(configs)))
+        success_chans = []
+        failures = OrderedDict()
+        for channum, config in configs.items():
+            try:
+                self.dc.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False)
+                success_chans.append(channum)
+            except Exception as ex:
+                failures[channum] = ex.args[0]
+
+        reportstr = "success on chans: {}\n".format(sorted(success_chans))
+        reportstr += "failures:\n"
+        reportstr += json.dumps(failures, sort_keys=True, indent=4)
+        print(reportstr)
+        if len(failures) == 0:
+            self.ui.label_loadedProjectors.setText("loaded?: yes")
+        else:
+            em = QtWidgets.QErrorMessage(self)
+            em.showMessage(reportstr)
+
+    def handleStatusUpdate(self, d):
+        if self.nsamples != d["Nsamples"] or self.npresamples != d["Npresamp"]:
+            if self.nsamples is not None: # don't reset on startup
+                self.reset()
+            self.nsamples = d["Nsamples"]
+            self.npresamples = d["Npresamp"]
 
 
 if __name__ == "__main__":
