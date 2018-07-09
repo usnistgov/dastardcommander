@@ -12,7 +12,7 @@ from collections import OrderedDict, defaultdict
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal, QSettings
+from PyQt5.QtCore import QObject, pyqtSignal, QSettings, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
@@ -104,6 +104,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
 
+    @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
         ignore_topics = ("CURRENTTIME", )
         if topic in ignore_topics:
@@ -177,6 +178,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
                 print "New channames: ", self.channel_names
+                self.tconfig.ui.channelChooserBox.setCurrentIndex(2)
+                self.tconfig.channelChooserChanged()
 
             elif topic == "TRIGCOUPLING":
                 self.tconfig.handleTrigCoupling(d)
@@ -256,12 +259,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.statusFreshLabel.setText("%7.3f MB/s" % rate)
             color("green")
 
+    @pyqtSlot()
     def closeEvent(self, event):
-        """Cleanly close the zmqlistener"""
+        """Cleanly close the zmqlistener and block certain signals in the
+        trigger config widget."""
+        self.tconfig._closing()
         self.zmqlistener.running = False
         self.zmqthread.quit()
         self.zmqthread.wait()
+        event.accept()
 
+    @pyqtSlot()
     def launchMicroscope(self):
         """Launch one instance of microscope.
         TODO: don't hard-wire in the location of the binary!"""
@@ -273,6 +281,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Could not launch microscope. Is it in your path?")
             print("Error is: ", e)
 
+    @pyqtSlot()
     def killAllMicroscopes(self):
         """Terminate all instances of microscope launched by this program."""
         while True:
@@ -351,6 +360,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.toggleParallelStreaming(self.ui.parallelStreaming.isChecked())
         self.ui.parallelStreaming.toggled.connect(self.toggleParallelStreaming)
 
+    @pyqtSlot(bool)
     def toggleParallelStreaming(self, parallelStream):
         """Make the parallel streaming connection between boxes."""
         nfibers = len(self.fiberBoxes)
@@ -371,6 +381,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 box1.toggled.disconnect()
                 box2.toggled.disconnect()
 
+    @pyqtSlot(str)
     def closeReconnect(self, disconnectReason):
         """Close the main window, but don't quit. Instead, ask for a new Dastard connection.
         Display the disconnection reason."""
@@ -387,6 +398,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.client = None
         QtWidgets.QMainWindow.close(self)
 
+    @pyqtSlot()
     def startStop(self):
         """Slot to handle pressing the Start/Stop data button."""
         if self.running:
@@ -490,7 +502,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "FiberMask": mask,
             "ClockMhz": clock,
             "CardDelay": delays,
-            "Nsamp" : nsamp,
+            "Nsamp": nsamp,
             "ActiveCards": activate,
             "AvailableCards": []   # This is filled in only by server, not us.
         }
@@ -509,6 +521,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
         self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
 
+    @pyqtSlot()
     def loadProjectorsBasis(self):
         options = QFileDialog.Options()
         if not hasattr(self, "lastdir"):
@@ -536,6 +549,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("failures:")
             print(json.dumps(failures, sort_keys=True, indent=4))
 
+    @pyqtSlot()
     def sendExperimental(self):
         config = {
             "ChanNums": range(len(self.channel_names)),

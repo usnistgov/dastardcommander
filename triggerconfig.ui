@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>617</width>
-    <height>604</height>
+    <height>511</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,6 +18,9 @@
   </property>
   <property name="windowTitle">
    <string>Form</string>
+  </property>
+  <property name="toolTip">
+   <string>Units for the trigger thresholds</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -290,135 +293,7 @@
       <property name="verticalSpacing">
        <number>6</number>
       </property>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="levelTrigActive">
-        <property name="toolTip">
-         <string>Turn on level trigger for selected channels</string>
-        </property>
-        <property name="text">
-         <string>Active</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3" rowspan="2">
-       <widget class="QLineEdit" name="levelEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="baseSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Raw or voltage level for the level trigger</string>
-        </property>
-        <property name="text">
-         <string>0.5</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="autoTrigLabel">
-        <property name="text">
-         <string>Auto trigger</string>
-        </property>
-        <property name="margin">
-         <number>2</number>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="4">
-       <widget class="QLabel" name="noiseUnitsLabel">
-        <property name="text">
-         <string>raw/samp</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QCheckBox" name="spikeReject">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Whether to use the spike-rejection test in the edge trigger algorithm</string>
-        </property>
-        <property name="text">
-         <string>Spike</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="autoUnitsLabel">
-        <property name="text">
-         <string>ms</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QCheckBox" name="edgeTrigActive">
-        <property name="toolTip">
-         <string>Turn on edge trigger for selected channels</string>
-        </property>
-        <property name="text">
-         <string>Active</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2" rowspan="2">
-       <widget class="QComboBox" name="edgeRiseFallBoth">
-        <property name="toolTip">
-         <string>Trigger these channels on rising edges, falling edges, or both</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Rising edge</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Falling edge</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Either</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0" rowspan="2">
-       <widget class="QLabel" name="levelTrigLabel">
-        <property name="text">
-         <string>Level trigger</string>
-        </property>
-        <property name="margin">
-         <number>2</number>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0" rowspan="2">
+      <item row="5" column="0" rowspan="2">
        <widget class="QLabel" name="edgeTrigLabel">
         <property name="text">
          <string>Edge trigger</string>
@@ -434,7 +309,14 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="3" rowspan="2">
+      <item row="5" column="4" rowspan="2">
+       <widget class="QLabel" name="edgeUnitsLabel">
+        <property name="text">
+         <string>raw/samp</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3" rowspan="2">
        <widget class="QLineEdit" name="edgeEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -465,97 +347,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="4" rowspan="2">
-       <widget class="QLabel" name="edgeUnitsLabel">
-        <property name="text">
-         <string>raw/samp</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="levelUnitsLabel">
-        <property name="text">
-         <string>raw</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QCheckBox" name="noiseTrigActive">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Turn on noise (pulse-free) trigger for selected channels</string>
-        </property>
-        <property name="text">
-         <string>Active</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="autoTrigActive">
-        <property name="toolTip">
-         <string>Turn on auto-trigger for selected channels</string>
-        </property>
-        <property name="text">
-         <string>Active</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="3">
-       <widget class="QLineEdit" name="noiseEdit">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="baseSize">
-         <size>
-          <width>100</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Pulses large than this threshold are NOT recorded in noise trigger mode.</string>
-        </property>
-        <property name="text">
-         <string>0.4</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QComboBox" name="levelRiseFallBoth">
-        <item>
-         <property name="text">
-          <string>Rising edge</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Falling edge</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Either</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="3">
+      <item row="1" column="3">
        <widget class="QLineEdit" name="autoTimeEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -586,21 +378,167 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="noiseTrigLabel">
+      <item row="1" column="0">
+       <widget class="QLabel" name="autoTrigLabel">
         <property name="text">
-         <string>Noise trigger
-(Edge veto)</string>
+         <string>Auto trigger</string>
         </property>
         <property name="margin">
          <number>2</number>
         </property>
        </widget>
       </item>
-      <item row="8" column="2">
+      <item row="6" column="1">
+       <widget class="QCheckBox" name="spikeReject">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Whether to use the spike-rejection test in the edge trigger algorithm</string>
+        </property>
+        <property name="text">
+         <string>Spike</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QComboBox" name="levelRiseFallBoth">
+        <item>
+         <property name="text">
+          <string>Rising edge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Falling edge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Either</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="3" rowspan="2">
+       <widget class="QLineEdit" name="levelEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>100</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Raw or voltage level for the level trigger</string>
+        </property>
+        <property name="text">
+         <string>0.5</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLabel" name="autoUnitsLabel">
+        <property name="text">
+         <string>ms</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="levelTrigActive">
+        <property name="toolTip">
+         <string>Turn on level trigger for selected channels</string>
+        </property>
+        <property name="text">
+         <string>Active</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2" rowspan="2">
+       <widget class="QComboBox" name="edgeRiseFallBoth">
+        <property name="toolTip">
+         <string>Trigger these channels on rising edges, falling edges, or both</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Rising edge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Falling edge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Either</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string/>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="edgeTrigActive">
+        <property name="toolTip">
+         <string>Turn on edge trigger for selected channels</string>
+        </property>
+        <property name="text">
+         <string>Active</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" rowspan="2">
+       <widget class="QLabel" name="levelTrigLabel">
+        <property name="text">
+         <string>Level trigger</string>
+        </property>
+        <property name="margin">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QLabel" name="levelUnitsLabel">
+        <property name="text">
+         <string>raw</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="autoTrigActive">
+        <property name="toolTip">
+         <string>Turn on auto-trigger for selected channels</string>
+        </property>
+        <property name="text">
+         <string>Active</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
        <widget class="QComboBox" name="levelVoltsRaw">
         <property name="toolTip">
-         <string>Units for the level trigger value</string>
+         <string>Change units for trigger thresholds</string>
         </property>
         <property name="currentIndex">
          <number>1</number>
@@ -612,9 +550,40 @@
         </item>
         <item>
          <property name="text">
-          <string>Raw</string>
+          <string>Raw units</string>
          </property>
         </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Trigger Type</string>
+        </property>
+        <property name="margin">
+         <number>-1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Active?</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Trigger threshold</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Direction</string>
+        </property>
        </widget>
       </item>
      </layout>
@@ -661,12 +630,12 @@ trigger the corresponding FB chan (Lancero only).</string>
    <item>
     <widget class="QFrame" name="triggerLoadSaveFrame">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="frameShape">
       <enum>QFrame::Panel</enum>
      </property>
-     <layout class="QGridLayout" name="triggerSaveLayout" columnstretch="0,0,0,0,0,0,0,0">
+     <layout class="QGridLayout" name="gridLayout_2">
       <property name="topMargin">
        <number>6</number>
       </property>
@@ -676,205 +645,47 @@ trigger the corresponding FB chan (Lancero only).</string>
       <property name="bottomMargin">
        <number>6</number>
       </property>
-      <property name="spacing">
-       <number>6</number>
-      </property>
-      <item row="3" column="2" colspan="4">
-       <widget class="QLabel" name="revertLabel">
-        <property name="text">
-         <string>to trigger state before last Load</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="loadTriggerRevert">
-        <property name="toolTip">
-         <string>Undo the last trigger state load</string>
-        </property>
-        <property name="text">
-         <string>Revert</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="4">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>    D:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>    C:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2" colspan="5">
-       <widget class="QLabel" name="triggerSaveLabel">
-        <property name="text">
-         <string>Load and save trigger state</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="6">
-       <widget class="QLineEdit" name="nameTriggerD">
-        <property name="toolTip">
-         <string>Mnemonic label for trigger state D</string>
-        </property>
-        <property name="whatsThis">
-         <string>This label helps you to remember the meaning of saved trigger state D</string>
-        </property>
-        <property name="text">
-         <string>Whatever</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="7">
-       <widget class="QPushButton" name="saveTriggerD">
-        <property name="toolTip">
-         <string>Save current trigger state in slot D</string>
-        </property>
-        <property name="text">
-         <string>Save</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="7">
-       <widget class="QPushButton" name="saveTriggerC">
-        <property name="toolTip">
-         <string>Save current trigger state in slot C</string>
-        </property>
-        <property name="text">
-         <string>Save</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="5">
-       <widget class="QPushButton" name="loadTriggerC">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Load current trigger state from slot C</string>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="5">
-       <widget class="QPushButton" name="loadTriggerD">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Load current trigger state from slot D</string>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
-       <widget class="QLineEdit" name="nameTriggerC">
-        <property name="toolTip">
-         <string>Mnemonic label for trigger state C</string>
-        </property>
-        <property name="whatsThis">
-         <string>This label helps you to remember the meaning of saved trigger state C</string>
-        </property>
-        <property name="text">
-         <string>IV curves</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
-       <widget class="QPushButton" name="loadTriggerA">
+       <widget class="QPushButton" name="pulseModeButton">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="toolTip">
-         <string>Load current trigger state from slot A</string>
+         <string>Switch to pulse data mode
+(keep same edge threshold)</string>
         </property>
         <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="nameTriggerB">
-        <property name="toolTip">
-         <string>Mnemonic label for trigger state B</string>
-        </property>
-        <property name="whatsThis">
-         <string>This label helps you to remember the meaning of saved trigger state B</string>
-        </property>
-        <property name="text">
-         <string>Noise</string>
+         <string>Pulse Mode</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLineEdit" name="nameTriggerA">
+       <widget class="QPushButton" name="auto1psModeButton">
         <property name="toolTip">
-         <string>Mnemonic label for trigger state A</string>
-        </property>
-        <property name="whatsThis">
-         <string>This label helps you to remember the meaning of saved trigger state A</string>
+         <string>Switch to auto data mode (1 trigger/second)</string>
         </property>
         <property name="text">
-         <string>Pulses</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>B:</string>
+         <string>Auto Mode (1/sec)</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
+       <widget class="QPushButton" name="noiseModeButton">
+        <property name="toolTip">
+         <string>Switch to noise data mode</string>
+        </property>
+        <property name="text">
+         <string>Noise Mode</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>A:</string>
+         <string>Quick modes:</string>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="loadTriggerB">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Load current trigger state from slot B</string>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QPushButton" name="saveTriggerA">
-        <property name="toolTip">
-         <string>Save current trigger state in slot A</string>
-        </property>
-        <property name="text">
-         <string>Save</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QPushButton" name="saveTriggerB">
-        <property name="toolTip">
-         <string>Save current trigger state in slot B</string>
-        </property>
-        <property name="text">
-         <string>Save</string>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -897,8 +708,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>channelChooserChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>559</x>
-     <y>218</y>
+     <x>609</x>
+     <y>309</y>
     </hint>
     <hint type="destinationlabel">
      <x>461</x>
@@ -913,8 +724,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>checkedCoupleFBErr(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>44</x>
-     <y>433</y>
+     <x>50</x>
+     <y>515</y>
     </hint>
     <hint type="destinationlabel">
      <x>51</x>
@@ -929,8 +740,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>checkedCoupleErrFB(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>560</x>
-     <y>414</y>
+     <x>610</x>
+     <y>515</y>
     </hint>
     <hint type="destinationlabel">
      <x>401</x>
@@ -945,8 +756,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedAutoTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>121</x>
-     <y>260</y>
+     <x>163</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>138</x>
@@ -961,8 +772,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedAutoTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>417</x>
-     <y>263</y>
+     <x>496</x>
+     <y>382</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -977,8 +788,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>285</y>
+     <x>163</x>
+     <y>408</y>
     </hint>
     <hint type="destinationlabel">
      <x>106</x>
@@ -993,28 +804,12 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>348</x>
-     <y>286</y>
+     <x>496</x>
+     <y>409</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
      <y>236</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>levelVoltsRaw</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>triggerConfigTab</receiver>
-   <slot>changedLevelUnits()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>271</x>
-     <y>285</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>400</y>
     </hint>
    </hints>
   </connection>
@@ -1025,8 +820,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>424</x>
-     <y>326</y>
+     <x>496</x>
+     <y>441</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1041,8 +836,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>234</x>
-     <y>327</y>
+     <x>289</x>
+     <y>445</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1057,8 +852,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>317</y>
+     <x>163</x>
+     <y>432</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1073,40 +868,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>336</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>299</x>
-     <y>283</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>noiseTrigActive</sender>
-   <signal>clicked()</signal>
-   <receiver>triggerConfigTab</receiver>
-   <slot>changedNoiseTrigConfig()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>205</x>
-     <y>359</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>299</x>
-     <y>283</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>noiseEdit</sender>
-   <signal>editingFinished()</signal>
-   <receiver>triggerConfigTab</receiver>
-   <slot>changedNoiseTrigConfig()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>424</x>
-     <y>359</y>
+     <x>163</x>
+     <y>451</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1121,8 +884,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedRecordLength(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>75</x>
-     <y>27</y>
+     <x>86</x>
+     <y>54</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1169,12 +932,28 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>337</y>
+     <x>289</x>
+     <y>412</y>
     </hint>
     <hint type="destinationlabel">
      <x>308</x>
      <y>301</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>levelVoltsRaw</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>triggerConfigTab</receiver>
+   <slot>changedLevelUnits()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>559</x>
+     <y>471</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>447</x>
+     <y>484</y>
     </hint>
    </hints>
   </connection>

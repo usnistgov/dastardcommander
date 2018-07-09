@@ -1,7 +1,7 @@
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal, Qt
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
 
 Ui_Trigger, _ = PyQt5.uic.loadUiType("triggerconfig.ui")
 
@@ -20,8 +20,46 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
+        self.ui.auto1psModeButton.pressed.connect(self.go1psMode)
+        self.ui.noiseModeButton.pressed.connect(self.goNoiseMode)
+        self.ui.pulseModeButton.pressed.connect(self.goPulseMode)
         self.trigger_state = {}
         self.chosenChannels = []
+        self.editWidgets = [self.ui.recordLengthSpinBox,
+                            self.ui.pretrigLengthSpinBox,
+                            self.ui.pretrigPercentSpinBox,
+                            self.ui.autoTimeEdit,
+                            self.ui.levelEdit,
+                            self.ui.edgeEdit]
+
+    def _closing(self):
+        """The main window calls this to block and editingFinished events from
+        being processed when the main window is closing."""
+        for w in self.editWidgets:
+            w.blockSignals(True)
+
+    @pyqtSlot()
+    def goPulseMode(self):
+        self.ui.autoTrigActive.setChecked(False)
+        self.ui.edgeTrigActive.setChecked(True)
+        self.ui.levelTrigActive.setChecked(False)
+        self.changedAllTrigConfig()
+
+    @pyqtSlot()
+    def goNoiseMode(self):
+        self.ui.autoTrigActive.setChecked(True)
+        self.ui.autoTimeEdit.setText("0")
+        self.ui.edgeTrigActive.setChecked(False)
+        self.ui.levelTrigActive.setChecked(False)
+        self.changedAllTrigConfig()
+
+    @pyqtSlot()
+    def go1psMode(self):
+        self.ui.autoTrigActive.setChecked(True)
+        self.ui.autoTimeEdit.setText("1000")
+        self.ui.edgeTrigActive.setChecked(False)
+        self.ui.levelTrigActive.setChecked(False)
+        self.changedAllTrigConfig()
 
     def handleTriggerMessage(self, dicts):
         """Handle the trigger state message (in list-of-dicts form)"""
@@ -30,6 +68,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 self.trigger_state[ch] = d
         self.updateTriggerGUIElements()
 
+    @pyqtSlot()
     def channelChooserChanged(self):
         """The channel selector menu was activated: update the edit box"""
         cctext = self.ui.channelChooserBox.currentText()
@@ -51,6 +90,7 @@ class TriggerConfig(QtWidgets.QWidget):
         cnum = ",".join([p.lstrip(prefix) for p in self.channel_names if p.startswith(prefix)])
         return "%s:%s" % (prefix, cnum)
 
+    @pyqtSlot()
     def channelListTextChanged(self):
         """The channel selector text edit box changed."""
         self.parseChannelText()
@@ -144,7 +184,6 @@ class TriggerConfig(QtWidgets.QWidget):
             (self.ui.autoTrigActive, "AutoTrigger"),
             (self.ui.edgeTrigActive, "EdgeTrigger"),
             (self.ui.levelTrigActive, "LevelTrigger"),
-            (self.ui.noiseTrigActive, "NoiseTrigger"),
         )
         for (checkbox, name) in boxes:
             state = self.getstate(name)
@@ -158,16 +197,13 @@ class TriggerConfig(QtWidgets.QWidget):
             edgescale = levelscale * 100  # TODO: replace 100 with samples per second
             self.ui.levelUnitsLabel.setText("Volts")
             self.ui.edgeUnitsLabel.setText("V/ms")
-            self.ui.noiseUnitsLabel.setText("V/ms")
         else:
             self.ui.levelUnitsLabel.setText("raw")
             self.ui.edgeUnitsLabel.setText("raw/samp")
-            self.ui.noiseUnitsLabel.setText("raw/samp")
         edits = (
             (self.ui.autoTimeEdit, "AutoDelay", 1e-6),
             (self.ui.edgeEdit, "EdgeLevel", edgescale),
             (self.ui.levelEdit, "LevelLevel", levelscale),
-            # (self.ui.noiseEdit, "NoiseLevel", 1.0)
         )
         for (edit, name, scale) in edits:
             state = self.getstate(name)
@@ -185,13 +221,15 @@ class TriggerConfig(QtWidgets.QWidget):
         else:
             self.ui.edgeRiseFallBoth.setCurrentIndex(0)
 
+    @pyqtSlot()
     def checkedCoupleFBErr(self):
         on = self.ui.coupleFBToErrCheckBox.isChecked()
         if on:
             self.ui.coupleErrToFBCheckBox.setChecked(False)
         self.client.call("SourceControl.CoupleFBToErr", on)
 
-    def checkedCoupleErrFB(self, on):
+    @pyqtSlot()
+    def checkedCoupleErrFB(self):
         on = self.ui.coupleErrToFBCheckBox.isChecked()
         if on:
             self.ui.coupleFBToErrCheckBox.setChecked(False)
@@ -208,6 +246,12 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.coupleFBToErrCheckBox.setChecked(fberr)
         self.ui.coupleErrToFBCheckBox.setChecked(errfb)
 
+    def changedAllTrigConfig(self):
+        self.changedAutoTrigConfig()
+        self.changedEdgeTrigConfig()
+        self.changedLevelTrigConfig()
+
+    @pyqtSlot()
     def changedAutoTrigConfig(self):
         auto = self.ui.autoTrigActive.checkState()
         if not auto == Qt.PartiallyChecked:
@@ -223,6 +267,7 @@ class TriggerConfig(QtWidgets.QWidget):
         for state in self.alltriggerstates():
             self.client.call("SourceControl.ConfigureTriggers", state)
 
+    @pyqtSlot()
     def changedEdgeTrigConfig(self):
         edge = self.ui.edgeTrigActive.checkState()
         if not edge == Qt.PartiallyChecked:
@@ -252,6 +297,7 @@ class TriggerConfig(QtWidgets.QWidget):
         for state in self.alltriggerstates():
             self.client.call("SourceControl.ConfigureTriggers", state)
 
+    @pyqtSlot()
     def changedLevelTrigConfig(self):
         level = self.ui.levelTrigActive.checkState()
         if not level == Qt.PartiallyChecked:
@@ -280,13 +326,12 @@ class TriggerConfig(QtWidgets.QWidget):
         for state in self.alltriggerstates():
             self.client.call("SourceControl.ConfigureTriggers", state)
 
-    def changedNoiseTrigConfig(self):
-        pass
-
+    @pyqtSlot()
     def changedLevelUnits(self):
         """Changed the edge+level units between RAW and Volts"""
         self.updateTriggerGUIElements()
 
+    @pyqtSlot(int, int)
     def updateRecordLengthsFromServer(self, nsamp, npre):
         samples = self.ui.recordLengthSpinBox
         if samples.value() != nsamp:
@@ -295,6 +340,7 @@ class TriggerConfig(QtWidgets.QWidget):
         if pretrig.value() != npre:
             pretrig.setValue(npre)
 
+    @pyqtSlot(int)
     def changedRecordLength(self, reclen):
         pretrig = self.ui.pretrigLengthSpinBox
         pct = self.ui.pretrigPercentSpinBox
@@ -305,6 +351,7 @@ class TriggerConfig(QtWidgets.QWidget):
             pretrig.setValue(new_pt)
             pretrig.valueChanged.connect(self.editedPretrigLength)
 
+    @pyqtSlot()
     def editedPretrigLength(self):
         samples = self.ui.recordLengthSpinBox
         pretrig = self.ui.pretrigLengthSpinBox
@@ -313,6 +360,7 @@ class TriggerConfig(QtWidgets.QWidget):
         pct.setValue(pretrig.value()*100.0/samples.value())
         pct.blockSignals(False)
 
+    @pyqtSlot()
     def editedPretrigPercentage(self):
         samples = self.ui.recordLengthSpinBox
         pretrig = self.ui.pretrigLengthSpinBox
@@ -321,6 +369,7 @@ class TriggerConfig(QtWidgets.QWidget):
         pretrig.setValue(int(0.5+samples.value()*pct.value()/100.0))
         pretrig.blockSignals(False)
 
+    @pyqtSlot()
     def sendRecordLengthsToServer(self):
         samp = self.ui.recordLengthSpinBox.value()
         presamp = self.ui.pretrigLengthSpinBox.value()
