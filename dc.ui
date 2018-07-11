@@ -613,6 +613,11 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabWorkflow">
+       <attribute name="title">
+        <string>Workflow</string>
+       </attribute>
+      </widget>
       <widget class="QWidget" name="tabTriggering">
        <attribute name="title">
         <string>Triggering</string>

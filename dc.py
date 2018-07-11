@@ -22,6 +22,7 @@ import trigger_config
 import writing
 import projectors
 import observe
+import workflow
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -63,6 +64,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.writing = writing.WritingControl(self.ui.tabWriting, host)
         self.writing.client = self.client
         self.observeTab = observe.Observe(self.ui.tabObserve)
+        self.workflowTab = workflow.Workflow(self, parent=self.ui.tabWorkflow)
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
@@ -71,6 +73,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tconfig.channel_names = self.channel_names
         self.observeTab.channel_names = self.channel_names
         self.tconfig.channel_prefixes = self.channel_prefixes
+        self.workflowTab.channel_names = self.channel_names
+        self.workflowTab.channel_prefixes = self.channel_prefixes
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
         self.ui.tabWidget.setEnabled(False)
@@ -127,6 +131,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.observeTab.handleStatusUpdate(d)
                 self._setGuiRunning(d["Running"], d["SourceName"])
                 self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
+                self.workflowTab.handleStatusUpdate(d)
+
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
                 if source == "Triangles":
@@ -143,6 +149,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "WRITING":
                 self.writing.handleWritingMessage(d)
+                self.workflowTab.handleWritingMessage(d)
 
             elif topic == "TRIANGLE":
                 self.ui.triangleNchan.setValue(d["Nchan"])
@@ -180,6 +187,9 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "TRIGCOUPLING":
                 self.tconfig.handleTrigCoupling(d)
 
+            elif topic == "NUMBERWRITTEN":
+                self.writing.handleNumberWritten(d)
+                self.workflowTab.handleNumberWritten(d)
             else:
                 print("%s is not a topic we handle yet." % topic)
 
