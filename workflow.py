@@ -84,9 +84,10 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        self.dc.tconfig.goNoiseMode()
+        self.dc.triggerTab.goNoiseMode()
         # start writing files
-        self.dc.writing.start()
+        self.dc.writingTab.start()
+        self.client.call("SourceControl.WriteComment", comment)
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
         TIME_UNITS_TO_WAIT = 30
@@ -99,7 +100,7 @@ class Workflow(QtWidgets.QWidget):
         for i in range(TIME_UNITS_TO_WAIT):
             time.sleep(0.1)
             # remember filenames
-            self.noiseFilename = self.dc.writing.ui.fileNameExampleEdit.text()
+            self.noiseFilename = self.dc.writingTab.ui.fileNameExampleEdit.text()
             self.ui.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
             progressBar.setLabelText("noise, {} records".format(self.numberWritten))
             progressBar.setValue(i)
@@ -109,7 +110,7 @@ class Workflow(QtWidgets.QWidget):
         progressBar.close()
 
         # # stop writing files
-        self.dc.writing.stop()
+        self.dc.writingTab.stop()
 
     def handleTakePulses(self):
         """
@@ -124,9 +125,9 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        self.dc.tconfig.goPulseMode()
+        self.dc.triggerTab.goPulseMode()
         # start writing files
-        self.dc.writing.start()
+        self.dc.writingTab.start()
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
         # its more important than in the noise case to count written records
@@ -141,7 +142,7 @@ class Workflow(QtWidgets.QWidget):
         while self.numberWritten < RECORDS_TOTAL:
             time.sleep(0.1)
             # remember filenames
-            self.pulseFilename = self.dc.writing.ui.fileNameExampleEdit.text()
+            self.pulseFilename = self.dc.writingTab.ui.fileNameExampleEdit.text()
             self.ui.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
             progressBar.setLabelText("pulses, {}/{} records".format(self.numberWritten, RECORDS_TOTAL))
             progressBar.setValue(self.numberWritten)
@@ -151,7 +152,7 @@ class Workflow(QtWidgets.QWidget):
         progressBar.close()
 
         # # stop writing files
-        self.dc.writing.stop()
+        self.dc.writingTab.stop()
 
     def handleCreateNoiseModel(self):
         # create output file name (easier than getting it from script output?)
