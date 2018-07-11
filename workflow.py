@@ -87,7 +87,8 @@ class Workflow(QtWidgets.QWidget):
         self.dc.triggerTab.goNoiseMode()
         # start writing files
         self.dc.writingTab.start()
-        self.client.call("SourceControl.WriteComment", comment)
+        comment = """Noise Data\nWorkflow: Take Noise button pushed"""
+        self.dc.client.call("SourceControl.WriteComment", comment)
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
         TIME_UNITS_TO_WAIT = 30
@@ -128,6 +129,8 @@ class Workflow(QtWidgets.QWidget):
         self.dc.triggerTab.goPulseMode()
         # start writing files
         self.dc.writingTab.start()
+        comment = """Pulse Data for analysis training\nWorkflow: Take Pulses button pushed"""
+        self.dc.client.call("SourceControl.WriteComment", comment)
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
         # its more important than in the noise case to count written records
