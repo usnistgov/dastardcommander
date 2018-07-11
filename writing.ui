@@ -116,6 +116,34 @@
     </layout>
    </item>
    <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QCheckBox" name="checkBox_LJH22">
+       <property name="text">
+        <string>LJH22</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="checkBox_LJH3">
+       <property name="text">
+        <string>LJH3</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="checkBox_OFF">
+       <property name="text">
+        <string>OFF </string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QLabel" name="label_numberWritten">
      <property name="text">
       <string>Records Written: none</string>
