@@ -24,7 +24,7 @@ class JuliaCaller(object):
         is the one you want"""
 
         versiontext = subprocess.check_output(["julia", "-v"]).split()[2]
-        majorminor = versiontext.split(".")[:2].join(".")
+        majorminor = ".".join(versiontext.split(".")[:2])
         path = os.path.expanduser("~/.julia/v%s/Pope/Scripts" % majorminor)
         if not os.path.isdir(path):
             raise ValueError("JuliaCaller could not find ~/.julia/v*/Pope/Scripts")
