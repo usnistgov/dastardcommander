@@ -15,11 +15,49 @@ from collections import OrderedDict
 
 Ui_Workflow, _ = PyQt5.uic.loadUiType("workflow.ui")
 
-POPE_PATH = os.path.expanduser("~/.julia/v0.6/Pope/Scripts")
-NOISE_ANALYSIS_PATH = os.path.join(POPE_PATH, "noise_analysis.jl")
-BASIS_CREATE_PATH = os.path.join(POPE_PATH, "basis_create.jl")
-NOISE_PLOT_PATH = os.path.join(POPE_PATH, "noise_plots.jl")
-BASIS_PLOT_PATH = os.path.join(POPE_PATH, "basis_plots.jl")
+
+class JuliaCaller(object):
+    "A class that can call julia to run POPE scripts"
+
+    def __init__(self, preferred_version="1.0"):
+        """Find which version of julia has POPE installed. Assume that the newest
+        is the one you want"""
+        POPE_PATH = None
+        versions = (preferred_version, "1.0", "0.7", "0.6")
+        for v in versions:
+            path = os.path.expanduser("~/.julia/v%s/Pope/Scripts" % v)
+            if os.path.isdir(path):
+                POPE_PATH = path
+                break
+        if POPE_PATH is None:
+            raise ValueError("JuliaCaller could not find ~/.julia/v*/Pope/Scripts")
+
+        self.POPE_PATH = POPE_PATH
+
+    def jcall(self, scriptname, *args):
+        cmd = ["julia", os.path.join(self.POPE_PATH, scriptname)]
+        cmd.extend(args)
+        print("Running '%s'" % " ".join(cmd))
+        # p = subprocess.Popen(cmd)
+        # returncode = p.wait()
+        # if returncode != 0:
+        #     raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
+
+    def createNoise(self, inputFiles):
+        args = ["-u"] + inputFiles
+        # -u instructs noise_analysis to "update" the file by adding new channels, this shouldn't be
+        # neccesary but it doesn't seem to work without it
+        self.jcall("noise_analysis.jl", *args)
+
+    def plotNoise(self, outName):
+        self.jcall("noise_plots.jl", outName)
+
+    def createBasis(self, pulseFile, noiseModel):
+        args = ["--n_basis", "5", pulseFile, noiseModel]
+        self.jcall("basis_create.jl", *args)
+
+    def plotBasis(self, outName):
+        self.jcall("basis_plots.jl", outName)
 
 
 class Workflow(QtWidgets.QWidget):
@@ -43,10 +81,11 @@ class Workflow(QtWidgets.QWidget):
         self.channel_prefixes = None  # to be overwritten by dc.py
         self.nsamples = None  # to be set by handleStatusUpdate
         self.npresamples = None  # to be set by handleStatusUpdate
-        self.numberWritten = 0 # to be set by handleNumberWritten
+        self.numberWritten = 0  # to be set by handleNumberWritten
         self.NumberOfChans = None  # to be set by handleNumberWritten
         self.currentlyWriting = None  # to be set by handleWritingMessage
         self.reset()
+        self.julia = JuliaCaller()
         # self.testingInit() # REMOVE
 
     def testingInit(self):
@@ -166,35 +205,20 @@ class Workflow(QtWidgets.QWidget):
         print outName
 
         inputFiles = glob.glob(self.noiseFilename)
-        cmd = ["julia", NOISE_ANALYSIS_PATH, "-u"] + inputFiles
-        # -u instructs noise_analysis to "update" the file by adding new channels, this shouldn't be
-        # neccesary but it doesn't seem to work without it
-        print(repr(cmd)+"\n")
         if len(inputFiles) == 0:
             print("found no input files for {}".format(self.noiseFilename))
         elif os.path.isfile(outName):
             print("{} already exists, skipping noise_analysis.jl".format(outName))
         else:
-            # check_output throws an error if the process fails
-            # output = subprocess.check_output(cmd)
-            # print(output)
-            p = subprocess.Popen(cmd)
-            returncode = p.wait()
-            if returncode != 0:
-                raise Exception("return code = {}".format(returncode))
+            self.julia.jcall(inputFiles)
 
         self.noiseModelFilename = outName
         self.ui.label_noiseModel.setText("noise model: %s" % self.noiseModelFilename)
 
-        cmdPlot = ["julia", NOISE_PLOT_PATH, outName]
-        print(repr(cmdPlot)+"\n")
         if os.path.isfile(plotName):
             print("{} already exists, skipping noise_plots.jl".format(plotName))
         else:
-            p = subprocess.Popen(cmdPlot)
-            returncode = p.wait()
-            if returncode != 0:
-                raise Exception("return code = {}".format(returncode))
+            self.julia.jcall(outName)
 
         self.noisePlotFilename = plotName
         self.ui.pushButton_viewNoisePlot.setEnabled(True)
@@ -222,29 +246,18 @@ class Workflow(QtWidgets.QWidget):
         plotName = self.pulseFilename[:-9]+"model_modelplots.pdf"
         print outName
         pulseFile = glob.glob(self.pulseFilename)[0]
-        cmd = ["julia", BASIS_CREATE_PATH, "--n_basis", "5", pulseFile,
-               self.noiseModelFilename]
-        print(repr(cmd)+"\n")
         if os.path.isfile(outName):
             print("{} exists, skipping create_basis.jl".format(outName))
         else:
-            p = subprocess.Popen(cmd)
-            returncode = p.wait()
-            if returncode != 0:
-                raise Exception("return code = {}".format(returncode))
+            self.julia.createBasis(pulseFile, self.noiseModelFilename)
 
         self.projectorsFilename = outName
         self.ui.label_projectors.setText("noise model: %s" % self.projectorsFilename)
 
-        cmdPlot = ["julia", BASIS_PLOT_PATH, outName]
-        print(repr(cmdPlot)+"\n")
         if os.path.isfile(plotName):
             print("{} already exists, skipping basis_plots.jl".format(plotName))
         else:
-            p = subprocess.Popen(cmdPlot)
-            returncode = p.wait()
-            if returncode != 0:
-                raise Exception("return code = {}".format(returncode))
+            self.julia.plotBasis(outName)
 
         self.projectorsPlotFilename = plotName
         self.ui.pushButton_viewProjectorsPlot.setEnabled(True)
