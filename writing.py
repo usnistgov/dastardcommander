@@ -80,8 +80,7 @@ class WritingControl(QtWidgets.QWidget):
         else:
             request = {
                 "Request": "Start",
-                "Rec2Write": 0,  # TODO: let user control this value
-                "FileType": "LJH2.2",
+                "WriteLJH22": True,
                 "Path": self.ui.baseDirectoryEdit.text()
             }
 
