@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+"""
+dastard-commander (dc.py)
+
+A GUI client to operate and monitor the DASTARD server (Data Acquisition
+System for Triggering, Analyzing, and Recording Data).
+
+By Joe Fowler and Galen O'Neil
+NIST Boulder Laboratories
+May 2018 -
+"""
+
+_VERSION = "0.0.2"
+
 # Non-Qt imports
 import json
 import socket
@@ -47,6 +60,7 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle("dastard-commander %s    (connected to %s:%d)" % (_VERSION, host, port))
         self.reconnect = False
         self.disconnectReason = ""
         self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
@@ -59,10 +73,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
-        self.tconfig = trigger_config.TriggerConfig(self.ui.tabTriggering)
-        self.tconfig.client = self.client
-        self.writing = writing.WritingControl(self.ui.tabWriting, host)
-        self.writing.client = self.client
+        self.triggerTab = trigger_config.TriggerConfig(self.ui.tabTriggering)
+        self.triggerTab.client = self.client
+        self.writingTab = writing.WritingControl(self.ui.tabWriting, host)
+        self.writingTab.client = self.client
         self.observeTab = observe.Observe(self.ui.tabObserve)
         self.workflowTab = workflow.Workflow(self, parent=self.ui.tabWorkflow)
 
@@ -70,9 +84,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.last_messages = defaultdict(str)
         self.channel_names = []
         self.channel_prefixes = set()
-        self.tconfig.channel_names = self.channel_names
+        self.triggerTab.channel_names = self.channel_names
         self.observeTab.channel_names = self.channel_names
-        self.tconfig.channel_prefixes = self.channel_prefixes
+        self.triggerTab.channel_prefixes = self.channel_prefixes
         self.workflowTab.channel_names = self.channel_names
         self.workflowTab.channel_prefixes = self.channel_prefixes
         self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
@@ -130,7 +144,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.updateStatusBar(d)
                 self.observeTab.handleStatusUpdate(d)
                 self._setGuiRunning(d["Running"], d["SourceName"])
-                self.tconfig.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
+                self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 self.workflowTab.handleStatusUpdate(d)
 
                 source = d["SourceName"]
@@ -145,10 +159,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ui.dataSource.setCurrentIndex(2)
 
             elif topic == "TRIGGER":
-                self.tconfig.handleTriggerMessage(d)
+                self.triggerTab.handleTriggerMessage(d)
 
             elif topic == "WRITING":
-                self.writing.handleWritingMessage(d)
+                self.writingTab.handleWritingMessage(d)
                 self.workflowTab.handleWritingMessage(d)
 
             elif topic == "TRIANGLE":
@@ -181,14 +195,14 @@ class MainWindow(QtWidgets.QMainWindow):
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
                 print "New channames: ", self.channel_names
-                self.tconfig.ui.channelChooserBox.setCurrentIndex(2)
-                self.tconfig.channelChooserChanged()
+                self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
+                self.triggerTab.channelChooserChanged()
 
             elif topic == "TRIGCOUPLING":
-                self.tconfig.handleTrigCoupling(d)
+                self.triggerTab.handleTrigCoupling(d)
 
             elif topic == "NUMBERWRITTEN":
-                self.writing.handleNumberWritten(d)
+                self.writingTab.handleNumberWritten(d)
                 self.workflowTab.handleNumberWritten(d)
             else:
                 print("%s is not a topic we handle yet." % topic)
@@ -199,12 +213,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Enable the window once the following message types have been received
         require = ("TRIANGLE", "SIMPULSE", "LANCERO")
-        all = True
+        allseen = True
         for k in require:
             if k not in self.last_messages:
-                all = False
+                allseen = False
                 break
-        if all:
+        if allseen:
             self.ui.tabWidget.setEnabled(True)
 
     def buildStatusBar(self):
@@ -269,7 +283,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         """Cleanly close the zmqlistener and block certain signals in the
         trigger config widget."""
-        self.tconfig._closing()
+        self.triggerTab._closing()
         self.zmqlistener.running = False
         self.zmqthread.quit()
         self.zmqthread.wait()
@@ -297,7 +311,7 @@ class MainWindow(QtWidgets.QMainWindow):
             except IndexError:
                 return
 
-    def updateLanceroCardChoices(self, cards=[]):
+    def updateLanceroCardChoices(self, cards=None):
         """Build the check boxes to specify which Lancero cards to use.
         cards is a list of integers: which cards are available on the sever"""
 
@@ -311,6 +325,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.lanceroCheckBoxes = {}
         self.lanceroDelays = {}
+        if cards is None:
+            cards = []
         if len(cards) == 0:
             self.ui.noLanceroLabel.show()
         else:
@@ -434,10 +450,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.tabWidget.setCurrentWidget(self.ui.tabTriggering)
 
         enable = running and (sourceName == "Lancero")
-        self.tconfig.ui.coupleFBToErrCheckBox.setEnabled(enable)
-        self.tconfig.ui.coupleErrToFBCheckBox.setEnabled(enable)
-        self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
-        self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
+        self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(enable)
+        self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(enable)
+        self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
 
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
@@ -522,10 +538,10 @@ class MainWindow(QtWidgets.QMainWindow):
             print "Could not Start Lancero"
             return
         print "Starting Lancero device"
-        self.tconfig.ui.coupleFBToErrCheckBox.setEnabled(True)
-        self.tconfig.ui.coupleErrToFBCheckBox.setEnabled(True)
-        self.tconfig.ui.coupleFBToErrCheckBox.setChecked(False)
-        self.tconfig.ui.coupleErrToFBCheckBox.setChecked(False)
+        self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(True)
+        self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(True)
+        self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
+        self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
 
     @pyqtSlot()
     def loadProjectorsBasis(self):

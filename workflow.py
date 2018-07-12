@@ -16,10 +16,11 @@ from collections import OrderedDict
 Ui_Workflow, _ = PyQt5.uic.loadUiType("workflow.ui")
 
 POPE_PATH = os.path.expanduser("~/.julia/v0.6/Pope/Scripts")
-NOISE_ANALYSIS_PATH = os.path.join(POPE_PATH,"noise_analysis.jl")
-BASIS_CREATE_PATH = os.path.join(POPE_PATH,"basis_create.jl")
-NOISE_PLOT_PATH = os.path.join(POPE_PATH,"noise_plots.jl")
-BASIS_PLOT_PATH = os.path.join(POPE_PATH,"basis_plots.jl")
+NOISE_ANALYSIS_PATH = os.path.join(POPE_PATH, "noise_analysis.jl")
+BASIS_CREATE_PATH = os.path.join(POPE_PATH, "basis_create.jl")
+NOISE_PLOT_PATH = os.path.join(POPE_PATH, "noise_plots.jl")
+BASIS_PLOT_PATH = os.path.join(POPE_PATH, "basis_plots.jl")
+
 
 class Workflow(QtWidgets.QWidget):
     """The tricky bit about this widget is that it cannot be properly set up until
@@ -38,13 +39,13 @@ class Workflow(QtWidgets.QWidget):
         self.ui.pushButton_viewNoisePlot.clicked.connect(self.handleViewNoisePlot)
         self.ui.pushButton_viewProjectorsPlot.clicked.connect(self.handleViewProjectorsPlot)
         self.dc = dc
-        self.channel_names = None # to be overwritten by dc.py
+        self.channel_names = None  # to be overwritten by dc.py
         self.channel_prefixes = None  # to be overwritten by dc.py
-        self.nsamples = None # to be set by handleStatusUpdate
-        self.npresamples = None # to be set by handleStatusUpdate
+        self.nsamples = None  # to be set by handleStatusUpdate
+        self.npresamples = None  # to be set by handleStatusUpdate
         self.numberWritten = 0 # to be set by handleNumberWritten
-        self.NumberOfChans = None # to be set by handleNumberWritten
-        self.currentlyWriting = None # to be set by handleWritingMessage
+        self.NumberOfChans = None  # to be set by handleNumberWritten
+        self.currentlyWriting = None  # to be set by handleWritingMessage
         self.reset()
         # self.testingInit() # REMOVE
 
@@ -55,23 +56,22 @@ class Workflow(QtWidgets.QWidget):
         """
         self.noiseFilename = "/tmp/20180709/0001/20180709_run0001_chan*.ljh"
         self.pulseFilename = "/tmp/20180709/0000/20180709_run0000_chan*.ljh"
-        self.ui.label_noiseFile.setText("current noise file: %s"%self.noiseFilename)
-        self.ui.label_pulseFile.setText("current noise file: %s"%self.pulseFilename)
+        self.ui.label_noiseFile.setText("current noise file: %s" % self.noiseFilename)
+        self.ui.label_pulseFile.setText("current noise file: %s" % self.pulseFilename)
 
     def reset(self):
         self.noiseFilename = None
-        self.ui.label_noiseFile.setText("noise data: %s"%self.noiseFilename)
+        self.ui.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
         self.pulseFilename = None
-        self.ui.label_pulseFile.setText("pulse data: %s"%self.pulseFilename)
+        self.ui.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
         self.noiseModelFilename = None
-        self.ui.label_noiseModel.setText("noise model: %s"%self.noiseModelFilename)
+        self.ui.label_noiseModel.setText("noise model: %s" % self.noiseModelFilename)
         self.noisePlotFilename = None
         self.ui.pushButton_viewNoisePlot.setEnabled(False)
         self.projectorsFilename = None
-        self.ui.label_projectors.setText("projectors file: %s"%self.projectorsFilename)
+        self.ui.label_projectors.setText("projectors file: %s" % self.projectorsFilename)
         self.projectorsPlotFilename = None
         self.ui.pushButton_viewProjectorsPlot.setEnabled(False)
-
 
     def handleTakeNoise(self):
         """
@@ -84,31 +84,34 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        self.dc.tconfig.goNoiseMode()
+        self.dc.triggerTab.goNoiseMode()
         # start writing files
-        self.dc.writing.start()
+        self.dc.writingTab.start()
+        comment = """Noise Data\nWorkflow: Take Noise button pushed"""
+        self.dc.client.call("SourceControl.WriteComment", comment)
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
         TIME_UNITS_TO_WAIT = 30
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
-        progressBar = QtWidgets.QProgressDialog("taking noise...","Stop Early",0,TIME_UNITS_TO_WAIT-1,parent=self)
-        progressBar.setModal(True) # prevent users from clicking elsewhere in gui
+        progressBar = QtWidgets.QProgressDialog("taking noise...", "Stop Early", 0,
+                                                TIME_UNITS_TO_WAIT-1, parent=self)
+        progressBar.setModal(True)  # prevent users from clicking elsewhere in gui
         progressBar.show()
         for i in range(TIME_UNITS_TO_WAIT):
             time.sleep(0.1)
             # remember filenames
-            self.noiseFilename = self.dc.writing.ui.fileNameExampleEdit.text()
-            self.ui.label_noiseFile.setText("noise data: %s"%self.noiseFilename)
+            self.noiseFilename = self.dc.writingTab.ui.fileNameExampleEdit.text()
+            self.ui.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
             progressBar.setLabelText("noise, {} records".format(self.numberWritten))
             progressBar.setValue(i)
-            QtWidgets.QApplication.processEvents() # process gui events
+            QtWidgets.QApplication.processEvents()  # process gui events
             if progressBar.wasCanceled():
-                break # should I do anything else here, like invalidate the data?
+                break  # should I do anything else here, like invalidate the data?
         progressBar.close()
 
         # # stop writing files
-        self.dc.writing.stop()
+        self.dc.writingTab.stop()
 
     def handleTakePulses(self):
         """
@@ -123,9 +126,11 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        self.dc.tconfig.goPulseMode()
+        self.dc.triggerTab.goPulseMode()
         # start writing files
-        self.dc.writing.start()
+        self.dc.writingTab.start()
+        comment = """Pulse Data for analysis training\nWorkflow: Take Pulses button pushed"""
+        self.dc.client.call("SourceControl.WriteComment", comment)
         # wait for 1000 records/channels
         # dont know how to do this yet, so lets just wait for 3 seconds
         # its more important than in the noise case to count written records
@@ -133,23 +138,24 @@ class Workflow(QtWidgets.QWidget):
         RECORDS_TOTAL = RECORDS_PER_CHANNEL*self.NumberOfChans
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
-        progressBar = QtWidgets.QProgressDialog("taking pulses...","Stop Early",0,RECORDS_TOTAL,parent=self)
-        progressBar.setModal(True) # prevent users from clicking elsewhere in gui
+        progressBar = QtWidgets.QProgressDialog("taking pulses...", "Stop Early",
+                                                0, RECORDS_TOTAL, parent=self)
+        progressBar.setModal(True)  # prevent users from clicking elsewhere in gui
         progressBar.show()
         while self.numberWritten < RECORDS_TOTAL:
             time.sleep(0.1)
             # remember filenames
-            self.pulseFilename = self.dc.writing.ui.fileNameExampleEdit.text()
-            self.ui.label_pulseFile.setText("pulse data: %s"%self.pulseFilename)
-            progressBar.setLabelText("pulses, {}/{} records".format(self.numberWritten,RECORDS_TOTAL))
+            self.pulseFilename = self.dc.writingTab.ui.fileNameExampleEdit.text()
+            self.ui.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
+            progressBar.setLabelText("pulses, {}/{} records".format(self.numberWritten, RECORDS_TOTAL))
             progressBar.setValue(self.numberWritten)
-            QtWidgets.QApplication.processEvents() # process gui events
+            QtWidgets.QApplication.processEvents()  # process gui events
             if progressBar.wasCanceled():
-                break # should I do anything else here, like invalidate the data?
+                break  # should I do anything else here, like invalidate the data?
         progressBar.close()
 
         # # stop writing files
-        self.dc.writing.stop()
+        self.dc.writingTab.stop()
 
     def handleCreateNoiseModel(self):
         # create output file name (easier than getting it from script output?)
@@ -160,7 +166,7 @@ class Workflow(QtWidgets.QWidget):
         print outName
 
         inputFiles = glob.glob(self.noiseFilename)
-        cmd = ["julia",NOISE_ANALYSIS_PATH,"-u"] + inputFiles
+        cmd = ["julia", NOISE_ANALYSIS_PATH, "-u"] + inputFiles
         # -u instructs noise_analysis to "update" the file by adding new channels, this shouldn't be
         # neccesary but it doesn't seem to work without it
         print(repr(cmd)+"\n")
@@ -177,11 +183,10 @@ class Workflow(QtWidgets.QWidget):
             if returncode != 0:
                 raise Exception("return code = {}".format(returncode))
 
-
         self.noiseModelFilename = outName
-        self.ui.label_noiseModel.setText("noise model: %s"%self.noiseModelFilename)
+        self.ui.label_noiseModel.setText("noise model: %s" % self.noiseModelFilename)
 
-        cmdPlot = ["julia",NOISE_PLOT_PATH, outName]
+        cmdPlot = ["julia", NOISE_PLOT_PATH, outName]
         print(repr(cmdPlot)+"\n")
         if os.path.isfile(plotName):
             print("{} already exists, skipping noise_plots.jl".format(plotName))
@@ -194,7 +199,7 @@ class Workflow(QtWidgets.QWidget):
         self.noisePlotFilename = plotName
         self.ui.pushButton_viewNoisePlot.setEnabled(True)
 
-    def openPdf(self,path):
+    def openPdf(self, path):
         if not path.endswith(".pdf"):
             raise Exception("path should end with .pdf, got {}".format(path))
         print sys.platform
@@ -217,7 +222,8 @@ class Workflow(QtWidgets.QWidget):
         plotName = self.pulseFilename[:-9]+"model_modelplots.pdf"
         print outName
         pulseFile = glob.glob(self.pulseFilename)[0]
-        cmd = ["julia",BASIS_CREATE_PATH,"--n_basis","5",pulseFile, self.noiseModelFilename]
+        cmd = ["julia", BASIS_CREATE_PATH, "--n_basis", "5", pulseFile,
+               self.noiseModelFilename]
         print(repr(cmd)+"\n")
         if os.path.isfile(outName):
             print("{} exists, skipping create_basis.jl".format(outName))
@@ -228,9 +234,9 @@ class Workflow(QtWidgets.QWidget):
                 raise Exception("return code = {}".format(returncode))
 
         self.projectorsFilename = outName
-        self.ui.label_projectors.setText("noise model: %s"%self.projectorsFilename)
+        self.ui.label_projectors.setText("noise model: %s" % self.projectorsFilename)
 
-        cmdPlot = ["julia",BASIS_PLOT_PATH, outName]
+        cmdPlot = ["julia", BASIS_PLOT_PATH, outName]
         print(repr(cmdPlot)+"\n")
         if os.path.isfile(plotName):
             print("{} already exists, skipping basis_plots.jl".format(plotName))
@@ -279,25 +285,24 @@ class Workflow(QtWidgets.QWidget):
 
     def handleStatusUpdate(self, d):
         if self.nsamples != d["Nsamples"] or self.npresamples != d["Npresamp"]:
-            if self.nsamples is not None: # don't reset on startup
+            if self.nsamples is not None:  # don't reset on startup
                 self.reset()
             self.nsamples = d["Nsamples"]
             self.npresamples = d["Npresamp"]
 
-    def handleNumberWritten(self,d):
+    def handleNumberWritten(self, d):
         self.numberWritten = np.sum(d["NumberWritten"])
         self.NumberOfChans = len(d["NumberWritten"])
 
-    def handleWritingMessage(self,d):
+    def handleWritingMessage(self, d):
         self.currentlyWriting = d["Active"]
 
 
 if __name__ == "__main__":
     import sys
 
-
     app = QtWidgets.QApplication(sys.argv)
-    bar = QtWidgets.QProgressDialog("taking noise...",None,0,30,parent=None)
+    bar = QtWidgets.QProgressDialog("taking noise...", None, 0, 30, parent=None)
     # bar.setWindowModality(PyQt5.WindowModal)
     bar.show()
 
@@ -305,7 +310,7 @@ if __name__ == "__main__":
     while not bar.wasCanceled():
         time.sleep(0.1)
         # remember filesnames
-        i+=1
+        i += 1
         bar.setValue(i)
 
     sys.exit(app.exec_())
