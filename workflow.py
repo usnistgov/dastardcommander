@@ -19,29 +19,28 @@ Ui_Workflow, _ = PyQt5.uic.loadUiType("workflow.ui")
 class JuliaCaller(object):
     "A class that can call julia to run POPE scripts"
 
-    def __init__(self, preferred_version="1.0"):
+    def __init__(self):
         """Find which version of julia has POPE installed. Assume that the newest
         is the one you want"""
-        POPE_PATH = None
-        versions = (preferred_version, "1.0", "0.7", "0.6")
-        for v in versions:
-            path = os.path.expanduser("~/.julia/v%s/Pope/Scripts" % v)
-            if os.path.isdir(path):
-                POPE_PATH = path
-                break
-        if POPE_PATH is None:
-            raise ValueError("JuliaCaller could not find ~/.julia/v*/Pope/Scripts")
 
-        self.POPE_PATH = POPE_PATH
+        versiontext = subprocess.check_output(["julia", "-v"]).split()[2]
+        majorminor = versiontext.split(".")[:2].join(".")
+        path = os.path.expanduser("~/.julia/v%s/Pope/Scripts" % majorminor)
+        if not os.path.isdir(path):
+            raise ValueError("JuliaCaller could not find ~/.julia/v*/Pope/Scripts")
+        self.POPE_PATH = path
+        print("Found julia version %s" % majorminor)
 
     def jcall(self, scriptname, *args):
         cmd = ["julia", os.path.join(self.POPE_PATH, scriptname)]
         cmd.extend(args)
         print("Running '%s'" % " ".join(cmd))
-        # p = subprocess.Popen(cmd)
-        # returncode = p.wait()
-        # if returncode != 0:
-        #     raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
+        # I (Joe) don't see why not to use just subprocess.call or .check_call
+        # if you're going to raise an error anyway??
+        p = subprocess.Popen(cmd)
+        returncode = p.wait()
+        if returncode != 0:
+            raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
 
     def createNoise(self, inputFiles):
         args = ["-u"] + inputFiles
