@@ -2,14 +2,21 @@ import json
 import itertools
 import socket
 
+from PyQt5 import QtWidgets
+
 
 class JSONClient(object):
 
-    def __init__(self, addr, codec=json):
+    def __init__(self, addr, codec=json, qtParent = None):
         self._socket = socket.create_connection(addr)
         self._id_iter = itertools.count()
         self._codec = codec
         self._closed = False
+        self.qtParent = qtParent
+
+    def setQtParent(self, qtParent):
+        """ let this know about Qt so it can pop-up error messages"""
+        self.qtParent = qtParent
 
     def _message(self, name, params):
         return dict(id=next(self._id_iter),
@@ -42,7 +49,11 @@ class JSONClient(object):
             if verbose:
                 print "Yikes! Request is: ", request
                 print "Reponse is: ", response
-            raise Exception(response.get('error'))
+            if self.qtParent is None:
+                raise Exception(response.get('error'))
+            else:
+                em = QtWidgets.QErrorMessage(self.qtParent)
+                em.showMessage("DASTARD Error: \n%s"%response.get('error'))
 
         return response.get('result')
 
