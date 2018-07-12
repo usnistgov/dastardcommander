@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+"""
+dastard-commander (dc.py)
+
+A GUI client to operate and monitor the DASTARD server (Data Acquisition
+System for Triggering, Analyzing, and Recording Data).
+
+By Joe Fowler and Galen O'Neil
+NIST Boulder Laboratories
+May 2018 -
+"""
+
+_VERSION = "0.0.2"
+
 # Non-Qt imports
 import json
 import socket
@@ -47,6 +60,7 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle("dastard-commander %s    (connected to %s:%d)" % (_VERSION, host, port))
         self.reconnect = False
         self.disconnectReason = ""
         self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
@@ -199,12 +213,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Enable the window once the following message types have been received
         require = ("TRIANGLE", "SIMPULSE", "LANCERO")
-        all = True
+        allseen = True
         for k in require:
             if k not in self.last_messages:
-                all = False
+                allseen = False
                 break
-        if all:
+        if allseen:
             self.ui.tabWidget.setEnabled(True)
 
     def buildStatusBar(self):
@@ -297,7 +311,7 @@ class MainWindow(QtWidgets.QMainWindow):
             except IndexError:
                 return
 
-    def updateLanceroCardChoices(self, cards=[]):
+    def updateLanceroCardChoices(self, cards=None):
         """Build the check boxes to specify which Lancero cards to use.
         cards is a list of integers: which cards are available on the sever"""
 
@@ -311,6 +325,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.lanceroCheckBoxes = {}
         self.lanceroDelays = {}
+        if cards is None:
+            cards = []
         if len(cards) == 0:
             self.ui.noLanceroLabel.show()
         else:
