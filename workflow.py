@@ -30,6 +30,7 @@ class JuliaCaller(object):
             raise ValueError("JuliaCaller could not find ~/.julia/v*/Pope/Scripts")
         self.POPE_PATH = path
         print("Found julia version %s" % majorminor)
+        print("Found Pope scripts in %s" % path)
 
     def jcall(self, scriptname, *args):
         cmd = ["julia", os.path.join(self.POPE_PATH, scriptname)]
@@ -209,7 +210,13 @@ class Workflow(QtWidgets.QWidget):
         elif os.path.isfile(outName):
             print("{} already exists, skipping noise_analysis.jl".format(outName))
         else:
-            self.julia.jcall(inputFiles)
+            try:
+                self.julia.createNoise(inputFiles)
+            except OSError as e:
+                dialog = QtWidgets.QMessageBox()
+                dialog.setText("Create Noise failed: {}".format(e))
+                dialog.exec_()
+                return
 
         self.noiseModelFilename = outName
         self.ui.label_noiseModel.setText("noise model: %s" % self.noiseModelFilename)
@@ -217,7 +224,13 @@ class Workflow(QtWidgets.QWidget):
         if os.path.isfile(plotName):
             print("{} already exists, skipping noise_plots.jl".format(plotName))
         else:
-            self.julia.jcall(outName)
+            try:
+                self.julia.plotNoise(outName)
+            except OSError as e:
+                dialog = QtWidgets.QMessageBox()
+                dialog.setText("Plot Noise failed: {}".format(e))
+                dialog.exec_()
+                return
 
         self.noisePlotFilename = plotName
         self.ui.pushButton_viewNoisePlot.setEnabled(True)
@@ -248,7 +261,13 @@ class Workflow(QtWidgets.QWidget):
         if os.path.isfile(outName):
             print("{} exists, skipping create_basis.jl".format(outName))
         else:
-            self.julia.createBasis(pulseFile, self.noiseModelFilename)
+            try:
+                self.julia.createBasis(pulseFile, self.noiseModelFilename)
+            except OSError as e:
+                dialog = QtWidgets.QMessageBox()
+                dialog.setText("Create Projectors failed: {}".format(e))
+                dialog.exec_()
+                return
 
         self.projectorsFilename = outName
         self.ui.label_projectors.setText("noise model: %s" % self.projectorsFilename)
@@ -256,7 +275,13 @@ class Workflow(QtWidgets.QWidget):
         if os.path.isfile(plotName):
             print("{} already exists, skipping basis_plots.jl".format(plotName))
         else:
-            self.julia.plotBasis(outName)
+            try:
+                self.julia.plotBasis(outName)
+            except OSError as e:
+                dialog = QtWidgets.QMessageBox()
+                dialog.setText("Plot Basis failed: {}".format(e))
+                dialog.exec_()
+                return
 
         self.projectorsPlotFilename = plotName
         self.ui.pushButton_viewProjectorsPlot.setEnabled(True)
