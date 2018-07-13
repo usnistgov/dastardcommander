@@ -80,8 +80,10 @@ class WritingControl(QtWidgets.QWidget):
         else:
             request = {
                 "Request": "Start",
-                "WriteLJH22": True,
-                "Path": self.ui.baseDirectoryEdit.text()
+                "Path": self.ui.baseDirectoryEdit.text(),
+                "WriteLJH22": self.ui.checkBox_LJH22.isChecked(),
+                "WriteLJH3": self.ui.checkBox_LJH3.isChecked(),
+                "WriteOFF": self.ui.checkBox_OFF.isChecked()
             }
 
         try:
