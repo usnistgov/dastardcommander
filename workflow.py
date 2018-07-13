@@ -25,9 +25,9 @@ class JuliaCaller(object):
 
         versiontext = subprocess.check_output(["julia", "-v"]).split()[2]
         majorminor = ".".join(versiontext.split(".")[:2])
-        path = os.path.expanduser("~/.julia/v%s/Pope/Scripts" % majorminor)
+        path = os.path.expanduser("~/.julia/v%s/Pope/scripts" % majorminor)
         if not os.path.isdir(path):
-            raise ValueError("JuliaCaller could not find ~/.julia/v*/Pope/Scripts")
+            raise OSError("JuliaCaller could not find ~/.julia/v*/Pope/scripts")
         self.POPE_PATH = path
         print("Found julia version %s" % majorminor)
         print("Found Pope scripts in %s" % path)
@@ -85,7 +85,15 @@ class Workflow(QtWidgets.QWidget):
         self.NumberOfChans = None  # to be set by handleNumberWritten
         self.currentlyWriting = None  # to be set by handleWritingMessage
         self.reset()
-        self.julia = JuliaCaller()
+        
+        try:
+            self.julia = JuliaCaller()
+        except OSError:
+            self.julia = None
+            self.uipushButton_takeNoise.setEnabled(False)
+            self.pushButton_takePulses.setEnabled(False)
+            self.pushButton_createNoiseModel.setEnabled(False)
+            self.pushButton_createProjectors.setEnabled(False)
         # self.testingInit() # REMOVE
 
     def testingInit(self):
