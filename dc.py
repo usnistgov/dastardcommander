@@ -54,6 +54,7 @@ Ui_HostPortDialog, _ = PyQt5.uic.loadUiType("host_port.ui")
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, host, port, parent=None):
         self.client = rpc_client
+        self.client.setQtParent(self)
         self.host = host
         self.port = port
 
