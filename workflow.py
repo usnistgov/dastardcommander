@@ -36,17 +36,14 @@ class JuliaCaller(object):
         cmd = ["julia", os.path.join(self.POPE_PATH, scriptname)]
         cmd.extend(args)
         print("Running '%s'" % " ".join(cmd))
-        # I (Joe) don't see why not to use just subprocess.call or .check_call
-        # if you're going to raise an error anyway??
+        # we don't use check_call here because Popen prints output in real time, while check_call does not
         p = subprocess.Popen(cmd)
         returncode = p.wait()
         if returncode != 0:
             raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
 
-    def createNoise(self, inputFiles):
-        args = ["-u"] + inputFiles
-        # -u instructs noise_analysis to "update" the file by adding new channels, this shouldn't be
-        # neccesary but it doesn't seem to work without it
+    def createNoise(self, pulseFile):
+        args = ["--dontcrash"] + pulseFile
         self.jcall("noise_analysis.jl", *args)
 
     def plotNoise(self, outName):
@@ -85,7 +82,7 @@ class Workflow(QtWidgets.QWidget):
         self.NumberOfChans = None  # to be set by handleNumberWritten
         self.currentlyWriting = None  # to be set by handleWritingMessage
         self.reset()
-        
+
         try:
             self.julia = JuliaCaller()
         except OSError:
@@ -105,6 +102,9 @@ class Workflow(QtWidgets.QWidget):
         self.pulseFilename = "/tmp/20180709/0000/20180709_run0000_chan*.ljh"
         self.ui.label_noiseFile.setText("current noise file: %s" % self.noiseFilename)
         self.ui.label_pulseFile.setText("current noise file: %s" % self.pulseFilename)
+        self.ui.pushButton_createNoiseModel.setEnabled(True)
+        self.ui.pushButton_createProjectors.setEnabled(True)
+
 
     def reset(self):
         self.noiseFilename = None
@@ -112,13 +112,16 @@ class Workflow(QtWidgets.QWidget):
         self.pulseFilename = None
         self.ui.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
         self.noiseModelFilename = None
+        self.ui.pushButton_createNoiseModel.setEnabled(False)
         self.ui.label_noiseModel.setText("noise model: %s" % self.noiseModelFilename)
         self.noisePlotFilename = None
         self.ui.pushButton_viewNoisePlot.setEnabled(False)
         self.projectorsFilename = None
+        self.ui.pushButton_createProjectors.setEnabled(False)
         self.ui.label_projectors.setText("projectors file: %s" % self.projectorsFilename)
         self.projectorsPlotFilename = None
         self.ui.pushButton_viewProjectorsPlot.setEnabled(False)
+        self.ui.pushButton_loadProjectors.setEnabled(False)
 
     def handleTakeNoise(self):
         """
@@ -160,6 +163,10 @@ class Workflow(QtWidgets.QWidget):
         # # stop writing files
         self.dc.writingTab.stop()
 
+        #enable next step
+        self.ui.pushButton_createNoiseModel.setEnabled(True)
+
+
     def handleTakePulses(self):
         """
         take noise data, record filename for future use
@@ -189,6 +196,8 @@ class Workflow(QtWidgets.QWidget):
                                                 0, RECORDS_TOTAL, parent=self)
         progressBar.setModal(True)  # prevent users from clicking elsewhere in gui
         progressBar.show()
+        self.dc.ui.tabWidget.setCurrentWidget(self.dc.ui.tabObserve)
+        self.numberWritten = 0
         while self.numberWritten < RECORDS_TOTAL:
             time.sleep(0.1)
             # remember filenames
@@ -200,9 +209,15 @@ class Workflow(QtWidgets.QWidget):
             if progressBar.wasCanceled():
                 break  # should I do anything else here, like invalidate the data?
         progressBar.close()
+        self.dc.ui.tabWidget.setCurrentWidget(self.dc.ui.tabWorkflow)
+
 
         # # stop writing files
         self.dc.writingTab.stop()
+
+        #enable next step
+        self.ui.pushButton_createProjectors.setEnabled(True)
+
 
     def handleCreateNoiseModel(self):
         # create output file name (easier than getting it from script output?)
@@ -212,10 +227,8 @@ class Workflow(QtWidgets.QWidget):
         plotName = self.noiseFilename[:-9]+"noise.pdf"
         print outName
 
-        inputFiles = glob.glob(self.noiseFilename)
-        if len(inputFiles) == 0:
-            print("found no input files for {}".format(self.noiseFilename))
-        elif os.path.isfile(outName):
+        inputFile = glob.glob(self.noiseFilename)[0]
+        if os.path.isfile(outName):
             print("{} already exists, skipping noise_analysis.jl".format(outName))
         else:
             try:
@@ -262,7 +275,7 @@ class Workflow(QtWidgets.QWidget):
 
     def handleCreateProjectors(self):
         # call pope script
-        outName = self.pulseFilename[:-9]+"model.h5"
+        outName = self.pulseFilename[:-9]+"model.hdf5"
         plotName = self.pulseFilename[:-9]+"model_modelplots.pdf"
         print outName
         pulseFile = glob.glob(self.pulseFilename)[0]
@@ -293,6 +306,8 @@ class Workflow(QtWidgets.QWidget):
 
         self.projectorsPlotFilename = plotName
         self.ui.pushButton_viewProjectorsPlot.setEnabled(True)
+        self.ui.pushButton_loadProjectors.setEnabled(True)
+
 
     def handleViewProjectorsPlot(self):
         self.openPdf(self.projectorsPlotFilename)

@@ -617,7 +617,7 @@ the corresponding Error chan (Lancero only).</string>
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>If checked, any trigger in an error channel will also 
+        <string>If checked, any trigger in an error channel will also
 trigger the corresponding FB chan (Lancero only).</string>
        </property>
        <property name="text">

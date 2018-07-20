@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>752</width>
+    <width>925</width>
     <height>712</height>
    </rect>
   </property>
@@ -638,7 +638,7 @@
           <x>30</x>
           <y>20</y>
           <width>262</width>
-          <height>201</height>
+          <height>241</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -724,14 +724,21 @@
            </item>
           </layout>
          </item>
+         <item row="7" column="0">
+          <widget class="QPushButton" name="pushButton_sendEdgeMulti">
+           <property name="text">
+            <string>Send EdgeMulti</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="horizontalLayoutWidget">
         <property name="geometry">
          <rect>
           <x>30</x>
-          <y>250</y>
-          <width>311</width>
+          <y>270</y>
+          <width>387</width>
           <height>41</height>
          </rect>
         </property>
@@ -753,20 +760,14 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_sendMix">
+           <property name="text">
+            <string>Send Mix</string>
+           </property>
+          </widget>
+         </item>
         </layout>
-       </widget>
-       <widget class="QPushButton" name="pushButton_sendExperimental">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>381</y>
-          <width>161</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Send Experimental</string>
-        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="tabObserve">
@@ -783,7 +784,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>752</width>
+     <width>925</width>
      <height>22</height>
     </rect>
    </property>

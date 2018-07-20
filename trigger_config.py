@@ -3,7 +3,7 @@ import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
 
-Ui_Trigger, _ = PyQt5.uic.loadUiType("triggerconfig.ui")
+Ui_Trigger, _ = PyQt5.uic.loadUiType("trigger_config.ui")
 
 
 class TriggerConfig(QtWidgets.QWidget):
@@ -64,6 +64,8 @@ class TriggerConfig(QtWidgets.QWidget):
     def handleTriggerMessage(self, dicts):
         """Handle the trigger state message (in list-of-dicts form)"""
         for d in dicts:
+            d["EdgeMulti"]=False # ignore all EdgeMulti settings from the server
+            # so that we don't send them back... avoid EdgeMulti being stuck on
             for ch in d["ChannelIndicies"]:
                 self.trigger_state[ch] = d
         self.updateTriggerGUIElements()
