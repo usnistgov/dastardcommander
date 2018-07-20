@@ -43,7 +43,7 @@ class JuliaCaller(object):
             raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
 
     def createNoise(self, pulseFile):
-        args = ["--dontcrash"] + pulseFile
+        args = ["--dontcrash", pulseFile]
         self.jcall("noise_analysis.jl", *args)
 
     def plotNoise(self, outName):
@@ -232,7 +232,7 @@ class Workflow(QtWidgets.QWidget):
             print("{} already exists, skipping noise_analysis.jl".format(outName))
         else:
             try:
-                self.julia.createNoise(inputFiles)
+                self.julia.createNoise(inputFile)
             except OSError as e:
                 dialog = QtWidgets.QMessageBox()
                 dialog.setText("Create Noise failed: {}".format(e))
