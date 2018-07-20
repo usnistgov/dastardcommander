@@ -122,8 +122,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
-        ignore_topics = ("CURRENTTIME", )
-        if topic in ignore_topics:
+        ignoreTopic = set(["CURRENTTIME"])
+        if topic in ignoreTopic:
             return
 
         try:
@@ -209,7 +209,10 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 print("%s is not a topic we handle yet." % topic)
 
-        print("%s %5d: %s" % (topic, self.nmsg, d))
+        quietTopics = set(["TRIGGERRATE","NUMBERWRITTEN","ALIVE"])
+        if topic not in quietTopics or self.nmsg < 15:
+            print("%s %5d: %s" % (topic, self.nmsg, d))
+
         self.nmsg += 1
         self.last_messages[topic] = message
 
