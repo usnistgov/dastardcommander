@@ -69,7 +69,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
-        self.ui.pushButton_sendExperimental.clicked.connect(self.sendExperimental)
+        self.ui.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
+        self.ui.pushButton_sendMix.clicked.connect(self.sendMix)
         self.running = False
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
@@ -121,8 +122,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
-        ignore_topics = ("CURRENTTIME", )
-        if topic in ignore_topics:
+        ignoreTopic = set(["CURRENTTIME"])
+        if topic in ignoreTopic:
             return
 
         try:
@@ -208,7 +209,10 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 print("%s is not a topic we handle yet." % topic)
 
-        print("%s %5d: %s" % (topic, self.nmsg, d))
+        quietTopics = set(["TRIGGERRATE","NUMBERWRITTEN","ALIVE"])
+        if topic not in quietTopics or self.nmsg < 15:
+            print("%s %5d: %s" % (topic, self.nmsg, d))
+
         self.nmsg += 1
         self.last_messages[topic] = message
 
@@ -573,20 +577,21 @@ class MainWindow(QtWidgets.QMainWindow):
             print(json.dumps(failures, sort_keys=True, indent=4))
 
     @pyqtSlot()
-    def sendExperimental(self):
+    def sendEdgeMulti(self):
         config = {
-            "ChanNums": range(len(self.channel_names)),
-            "TriggerState": {
-                "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
-                "EdgeMultiMakeShortRecords": self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
-                "EdgeMultiMakeContaminatedRecords": self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
-                "EdgeMultiVerifyNMonotone": self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),
-                "EdgeLevel": self.ui.spinBox_EdgeLevel.value()
-            }
+            "ChannelIndicies": range(len(self.channel_names)),
+            "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
+            "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
+            "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),
+            "EdgeMultiMakeShortRecords": self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
+            "EdgeMultiMakeContaminatedRecords": self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
+            "EdgeMultiVerifyNMonotone": self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),
+            "EdgeLevel": self.ui.spinBox_EdgeLevel.value()
         }
-        print("experimental trigger config")
-        print(config)
         self.client.call("SourceControl.ConfigureTriggers", config)
+
+    @pyqtSlot()
+    def sendMix(self):
         mixFraction = self.ui.doubleSpinBox_MixFraction.value()
         if mixFraction == 0.0:
             return
@@ -595,7 +600,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if i % 2 == 0:  # only odd channels get mix
                 continue
             config = {
-                "ProcessorIndex": i,
+                "ChannelIndex": i,
                 "MixFraction": mixFraction
             }
             try:

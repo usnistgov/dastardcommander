@@ -3,7 +3,7 @@ import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
 
-Ui_Trigger, _ = PyQt5.uic.loadUiType("triggerconfig.ui")
+Ui_Trigger, _ = PyQt5.uic.loadUiType("trigger_config.ui")
 
 
 class TriggerConfig(QtWidgets.QWidget):
@@ -64,7 +64,9 @@ class TriggerConfig(QtWidgets.QWidget):
     def handleTriggerMessage(self, dicts):
         """Handle the trigger state message (in list-of-dicts form)"""
         for d in dicts:
-            for ch in d["ChanNumbers"]:
+            d["EdgeMulti"]=False # ignore all EdgeMulti settings from the server
+            # so that we don't send them back... avoid EdgeMulti being stuck on
+            for ch in d["ChannelIndicies"]:
                 self.trigger_state[ch] = d
         self.updateTriggerGUIElements()
 
@@ -152,7 +154,7 @@ class TriggerConfig(QtWidgets.QWidget):
         # Now we need to split states if any of allstates refers to channels both
         # in AND out of self.chosenChannels. Those dictionaries each become 2 dictionaries.
         for state in allstates:
-            chans = state["ChanNumbers"]
+            chans = state["ChannelIndicies"]
             keep = []
             splitoff = []
             for c in chans:
@@ -161,11 +163,11 @@ class TriggerConfig(QtWidgets.QWidget):
                 else:
                     splitoff.append(c)
             if len(splitoff) > 0:
-                state["ChanNumbers"] = keep
+                state["ChannelIndicies"] = keep
                 for c in keep:
                     self.trigger_state[c] = state
                 newstate = state.copy()
-                newstate["ChanNumbers"] = splitoff
+                newstate["ChannelIndicies"] = splitoff
                 for c in splitoff:
                     self.trigger_state[c] = newstate
 

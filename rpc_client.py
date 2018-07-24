@@ -31,6 +31,9 @@ class JSONClient(object):
             # because signals like editingFinished can trigger slots when you try
             # to close a window while editing a QLineEdit (see issue #22).
             # If you skip this test, you get a segfault; this will be graceful.
+        if verbose:
+            print("SENDING")
+            print(json.dumps(params,indent=4))
         request = self._message(name, params)
         id = request.get('id')
         msg = self._codec.dumps(request)
