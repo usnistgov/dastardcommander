@@ -473,21 +473,21 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
     def _startTriangle(self):
-            config = {
-                "Nchan": self.ui.triangleNchan.value(),
-                "SampleRate": self.ui.triangleSampleRate.value(),
-                "Max": self.ui.triangleMaximum.value(),
-                "Min": self.ui.triangleMinimum.value(),
-            }
-            okay = self.client.call("SourceControl.ConfigureTriangleSource", config)
-            if not okay:
-                print "Could not ConfigureTriangleSource"
-                return
-            okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
-            if not okay:
-                print "Could not Start Triangle "
-                return
-            print "Starting Triangle"
+        config = {
+            "Nchan": self.ui.triangleNchan.value(),
+            "SampleRate": self.ui.triangleSampleRate.value(),
+            "Max": self.ui.triangleMaximum.value(),
+            "Min": self.ui.triangleMinimum.value(),
+        }
+        okay = self.client.call("SourceControl.ConfigureTriangleSource", config)
+        if not okay:
+            print "Could not ConfigureTriangleSource"
+            return
+        okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
+        if not okay:
+            print "Could not Start Triangle "
+            return
+        print "Starting Triangle"
 
     def _startSimPulse(self):
         config = {

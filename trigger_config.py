@@ -33,7 +33,7 @@ class TriggerConfig(QtWidgets.QWidget):
                             self.ui.edgeEdit]
 
     def _closing(self):
-        """The main window calls this to block and editingFinished events from
+        """The main window calls this to block any editingFinished events from
         being processed when the main window is closing."""
         for w in self.editWidgets:
             w.blockSignals(True)
