@@ -119,6 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimer.timeout.connect(lambda: self.closeReconnect("missing heartbeat"))
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
+        self.fully_configured = False
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
@@ -206,10 +207,16 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "NUMBERWRITTEN":
                 self.writingTab.handleNumberWritten(d)
                 self.workflowTab.handleNumberWritten(d)
+
+            elif topic == "NEWDASTARD":
+                if self.fully_configured:
+                    self.fully_configured = False
+                    self.closeReconnect("New Dastard started")
+
             else:
                 print("%s is not a topic we handle yet." % topic)
 
-        quietTopics = set(["TRIGGERRATE","NUMBERWRITTEN","ALIVE"])
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE"])
         if topic not in quietTopics or self.nmsg < 15:
             print("%s %5d: %s" % (topic, self.nmsg, d))
 
@@ -224,6 +231,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 allseen = False
                 break
         if allseen:
+            self.fully_configured = True
             self.ui.tabWidget.setEnabled(True)
 
     def buildStatusBar(self):
@@ -462,7 +470,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
-        # These only make sense for Lancero
         if sourceID == 0:
             self._startTriangle()
         elif sourceID == 1:
