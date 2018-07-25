@@ -568,7 +568,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for channum, config in configs.items():
                 print("sending ProjectorsBasis for {}".format(channum))
                 try:
-                    self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False)
+                    self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False)
                     success_chans.append(channum)
                 except Exception as ex:
                     failures[channum] = ex.args[0]

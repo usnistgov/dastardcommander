@@ -55,7 +55,7 @@ def getConfigs(filename):
         projectors = h5[key]["svdbasis"]["projectors"].value
         basis = h5[key]["svdbasis"]["basis"].value
         config = {
-            "ProcessorInd": channum,
+            "ChannelIndex": channum,
             "ProjectorsBase64": toMatBase64(projectors)[0],
             "BasisBase64": toMatBase64(basis)[0],
         }

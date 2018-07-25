@@ -49,12 +49,13 @@ class JSONClient(object):
                              response.get('error')))
 
         if response.get('error') is not None:
+            print("error"+response.get('error'))
             if verbose:
                 print "Yikes! Request is: ", request
                 print "Reponse is: ", response
-            if self.qtParent is None:
+            if self.qtParent is None or not errorBox:
                 raise Exception(response.get('error'))
-            elif errorBox:
+            else:
                 em = QtWidgets.QErrorMessage(self.qtParent)
                 em.showMessage("DASTARD Error: \n%s\n%s"%(response.get('error'),request))
 
