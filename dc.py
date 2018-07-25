@@ -564,7 +564,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dir = self.lastdir
         fileName, _ = QFileDialog.getOpenFileName(
             self, "Find Projectors Basis file", dir,
-            "Model Files (*_model.h5);;All Files (*)", options=options)
+            "Model Files (*_model.hdf5);;All Files (*)", options=options)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
             print("opening: {}".format(fileName))
@@ -573,15 +573,17 @@ class MainWindow(QtWidgets.QMainWindow):
             success_chans = []
             failures = OrderedDict()
             for channum, config in configs.items():
+                print("sending ProjectorsBasis for {}".format(channum))
                 try:
-                    self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False)
+                    self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False)
                     success_chans.append(channum)
                 except Exception as ex:
                     failures[channum] = ex.args[0]
+            result = "success on chans: {}\n".format(success_chans) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+            resultBox = QtWidgets.QMessageBox(self)
+            resultBox.setText(result)
+            resultBox.show()
 
-            print("success on chans: {}".format(success_chans))
-            print("failures:")
-            print(json.dumps(failures, sort_keys=True, indent=4))
 
     @pyqtSlot()
     def sendEdgeMulti(self):
