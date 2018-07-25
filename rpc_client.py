@@ -23,7 +23,7 @@ class JSONClient(object):
                     params=[params],
                     method=name)
 
-    def call(self, name, params, verbose=True):
+    def call(self, name, params, verbose=True, errorBox=True):
         if self._closed:
             print "%s(...) ignored because JSON-RPC client is closed." % name
             return None
@@ -54,9 +54,9 @@ class JSONClient(object):
                 print "Reponse is: ", response
             if self.qtParent is None:
                 raise Exception(response.get('error'))
-            else:
+            elif errorBox:
                 em = QtWidgets.QErrorMessage(self.qtParent)
-                em.showMessage("DASTARD Error: \n%s"%response.get('error'))
+                em.showMessage("DASTARD Error: \n%s\n%s"%(response.get('error'),request))
 
         return response.get('result')
 
