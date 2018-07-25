@@ -87,10 +87,10 @@ class Workflow(QtWidgets.QWidget):
             self.julia = JuliaCaller()
         except OSError:
             self.julia = None
-            self.uipushButton_takeNoise.setEnabled(False)
-            self.pushButton_takePulses.setEnabled(False)
-            self.pushButton_createNoiseModel.setEnabled(False)
-            self.pushButton_createProjectors.setEnabled(False)
+            self.ui.pushButton_takeNoise.setEnabled(False)
+            self.ui.pushButton_takePulses.setEnabled(False)
+            self.ui.pushButton_createNoiseModel.setEnabled(False)
+            self.ui.pushButton_createProjectors.setEnabled(False)
         # self.testingInit() # REMOVE
 
     def testingInit(self):
