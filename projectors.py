@@ -43,7 +43,7 @@ def getConfigs(filename):
     self.client.call("SourceControl.ConfigureProjectorsBasis", config)
     to set Projectors and Bases
     extracts the channel numbers and projectors and basis from the h5 file
-    filename - points to a _model.h5 file created by Pope
+    filename - points to a _model.hdf5 file created by Pope
     """
     out = OrderedDict()
     if not h5py.is_hdf5(filename):
