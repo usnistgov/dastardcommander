@@ -11,7 +11,7 @@ NIST Boulder Laboratories
 May 2018 -
 """
 
-_VERSION = "0.0.2"
+_VERSION = "0.1.0"
 
 # Non-Qt imports
 import json
