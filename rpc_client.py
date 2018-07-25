@@ -35,17 +35,23 @@ class JSONClient(object):
             print("SENDING")
             print(json.dumps(params,indent=4))
         request = self._message(name, params)
-        id = request.get('id')
+        reqid = request.get('id')
         msg = self._codec.dumps(request)
         self._socket.sendall(msg.encode())
 
-        # This will actually have to loop if resp is bigger
+        # This will actually have to loop if resp is bigger than 4096 bytes
         response = self._socket.recv(4096)
-        response = self._codec.loads(response.decode())
+        try:
+            response = self._codec.loads(response.decode())
+        except ValueError:  # This means RPC server is gone
+            print "RPC server is missing."
+            self.qtParent.reconnect = True
+            self.close()
+            return None
 
-        if response.get('id') != id:
-            raise Exception("expected id=%s, received id=%s: %s" %
-                            (id, response.get('id'),
+        if response.get('id') != reqid:
+            raise ValueError("JSON-RPC expected id=%s, received id=%s: %s" %
+                            (reqid, response.get('id'),
                              response.get('error')))
 
         if response.get('error') is not None:
@@ -62,5 +68,7 @@ class JSONClient(object):
         return response.get('result')
 
     def close(self):
-        self._closed = True
-        self._socket.close()
+        if not self._closed:
+            self._closed = True
+            self._socket.close()
+            self.qtParent.close()

@@ -11,8 +11,6 @@ NIST Boulder Laboratories
 May 2018 -
 """
 
-_VERSION = "0.1.0"
-
 # Non-Qt imports
 import json
 import socket
@@ -36,6 +34,8 @@ import writing
 import projectors
 import observe
 import workflow
+
+_VERSION = "0.1.0"
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -119,6 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimer.timeout.connect(lambda: self.closeReconnect("missing heartbeat"))
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
+        self.fullyConfigured = False
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
@@ -206,10 +207,16 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "NUMBERWRITTEN":
                 self.writingTab.handleNumberWritten(d)
                 self.workflowTab.handleNumberWritten(d)
+
+            elif topic == "NEWDASTARD":
+                if self.fullyConfigured:
+                    self.fullyConfigured = False
+                    self.closeReconnect("New Dastard started")
+
             else:
                 print("%s is not a topic we handle yet." % topic)
 
-        quietTopics = set(["TRIGGERRATE","NUMBERWRITTEN","ALIVE"])
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE"])
         if topic not in quietTopics or self.nmsg < 15:
             print("%s %5d: %s" % (topic, self.nmsg, d))
 
@@ -224,6 +231,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 allseen = False
                 break
         if allseen:
+            self.fullyConfigured = True
             self.ui.tabWidget.setEnabled(True)
 
     def buildStatusBar(self):
@@ -462,7 +470,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
-        # These only make sense for Lancero
         if sourceID == 0:
             self._startTriangle()
         elif sourceID == 1:
@@ -473,21 +480,21 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
     def _startTriangle(self):
-            config = {
-                "Nchan": self.ui.triangleNchan.value(),
-                "SampleRate": self.ui.triangleSampleRate.value(),
-                "Max": self.ui.triangleMaximum.value(),
-                "Min": self.ui.triangleMinimum.value(),
-            }
-            okay = self.client.call("SourceControl.ConfigureTriangleSource", config)
-            if not okay:
-                print "Could not ConfigureTriangleSource"
-                return
-            okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
-            if not okay:
-                print "Could not Start Triangle "
-                return
-            print "Starting Triangle"
+        config = {
+            "Nchan": self.ui.triangleNchan.value(),
+            "SampleRate": self.ui.triangleSampleRate.value(),
+            "Max": self.ui.triangleMaximum.value(),
+            "Min": self.ui.triangleMinimum.value(),
+        }
+        okay = self.client.call("SourceControl.ConfigureTriangleSource", config)
+        if not okay:
+            print "Could not ConfigureTriangleSource"
+            return
+        okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
+        if not okay:
+            print "Could not Start Triangle "
+            return
+        print "Starting Triangle"
 
     def _startSimPulse(self):
         config = {
