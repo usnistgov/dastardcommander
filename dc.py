@@ -11,8 +11,6 @@ NIST Boulder Laboratories
 May 2018 -
 """
 
-_VERSION = "0.1.0"
-
 # Non-Qt imports
 import json
 import socket
@@ -36,6 +34,8 @@ import writing
 import projectors
 import observe
 import workflow
+
+_VERSION = "0.1.0"
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -119,7 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimer.timeout.connect(lambda: self.closeReconnect("missing heartbeat"))
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
-        self.fully_configured = False
+        self.fullyConfigured = False
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
@@ -209,8 +209,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.workflowTab.handleNumberWritten(d)
 
             elif topic == "NEWDASTARD":
-                if self.fully_configured:
-                    self.fully_configured = False
+                if self.fullyConfigured:
+                    self.fullyConfigured = False
                     self.closeReconnect("New Dastard started")
 
             else:
@@ -231,7 +231,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 allseen = False
                 break
         if allseen:
-            self.fully_configured = True
+            self.fullyConfigured = True
             self.ui.tabWidget.setEnabled(True)
 
     def buildStatusBar(self):
