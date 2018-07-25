@@ -262,8 +262,8 @@ class TriggerConfig(QtWidgets.QWidget):
 
         delay = self.ui.autoTimeEdit.text()
         try:
-            msdelay = int(float(delay)*1e6+0.5)
-            self.setstate("AutoDelay", msdelay)
+            nsdelay = int(round(float(delay)*1e6))
+            self.setstate("AutoDelay", nsdelay)
         except ValueError:
             pass
         for state in self.alltriggerstates():
