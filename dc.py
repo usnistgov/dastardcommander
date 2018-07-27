@@ -592,6 +592,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),
+            "EdgeMultiNoise": self.ui.checkBox_EdgeMultiNoise.isChecked(),
             "EdgeMultiMakeShortRecords": self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
             "EdgeMultiMakeContaminatedRecords": self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
             "EdgeMultiVerifyNMonotone": self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),

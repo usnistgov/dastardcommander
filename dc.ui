@@ -638,7 +638,7 @@
           <x>30</x>
           <y>20</y>
           <width>262</width>
-          <height>241</height>
+          <height>271</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -688,7 +688,7 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
+         <item row="6" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QSpinBox" name="spinBox_EdgeMultiVerifyNMonotone">
@@ -706,7 +706,7 @@
            </item>
           </layout>
          </item>
-         <item row="6" column="0">
+         <item row="7" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QSpinBox" name="spinBox_EdgeLevel">
@@ -724,10 +724,17 @@
            </item>
           </layout>
          </item>
-         <item row="7" column="0">
+         <item row="8" column="0">
           <widget class="QPushButton" name="pushButton_sendEdgeMulti">
            <property name="text">
             <string>Send EdgeMulti</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="checkBox_EdgeMultiNoise">
+           <property name="text">
+            <string>Noise</string>
            </property>
           </widget>
          </item>
@@ -737,7 +744,7 @@
         <property name="geometry">
          <rect>
           <x>30</x>
-          <y>270</y>
+          <y>300</y>
           <width>387</width>
           <height>41</height>
          </rect>
@@ -768,6 +775,22 @@
           </widget>
          </item>
         </layout>
+       </widget>
+       <widget class="QLabel" name="label_20">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>20</y>
+          <width>211</width>
+          <height>171</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Warning, it's really easy to end up with zero triggers if you set easy to achieve trigger conditions because of the auto cutting pulse pile-up nature. Try starting with Contaminated Rrecords on to see SOMETHING.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="tabObserve">
