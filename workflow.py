@@ -137,6 +137,7 @@ class Workflow(QtWidgets.QWidget):
         self.dc.triggerTab.goNoiseMode()
         # start writing files
         self.dc.writingTab.start()
+
         comment = """Noise Data\nWorkflow: Take Noise button pushed"""
         self.dc.client.call("SourceControl.WriteComment", comment)
         # wait for 1000 records/channels

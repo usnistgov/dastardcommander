@@ -338,9 +338,11 @@ class TriggerConfig(QtWidgets.QWidget):
         samples = self.ui.recordLengthSpinBox
         if samples.value() != nsamp:
             samples.setValue(nsamp)
+            self.lastRecordLength = nsamp
         pretrig = self.ui.pretrigLengthSpinBox
         if pretrig.value() != npre:
             pretrig.setValue(npre)
+            self.lastPretrigLength = npre
 
     @pyqtSlot(int)
     def changedRecordLength(self, reclen):
@@ -375,5 +377,8 @@ class TriggerConfig(QtWidgets.QWidget):
     def sendRecordLengthsToServer(self):
         samp = self.ui.recordLengthSpinBox.value()
         presamp = self.ui.pretrigLengthSpinBox.value()
-        print "Here we tell the server records are %d (%d pretrigger)" % (samp, presamp)
-        self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp})
+        if (samp != self.lastRecordLength or
+        presamp != self.lastPretrigLength):
+            self.lastRecordLength = samp
+            self.lastPretrigLength = presamp
+            self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp})

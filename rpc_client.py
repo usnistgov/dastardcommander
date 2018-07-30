@@ -64,7 +64,7 @@ class JSONClient(object):
             else:
                 em = QtWidgets.QErrorMessage(self.qtParent)
                 em.showMessage("DASTARD Error: \n%s\n%s"%(response.get('error'),request))
-
+                raise Exception(response.get('error'))
         return response.get('result')
 
     def close(self):

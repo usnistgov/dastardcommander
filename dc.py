@@ -123,9 +123,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
-        ignoreTopic = set(["CURRENTTIME"])
-        if topic in ignoreTopic:
-            return
 
         try:
             d = json.loads(message)
@@ -134,6 +131,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 topic, message)
             print "Error is: %s" % e
             return
+            
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE"])
+        if topic not in quietTopics or self.nmsg < 15:
+            print("%s %5d: %s" % (topic, self.nmsg, d))
 
         if topic == "ALIVE":
             self.heartbeat(d)
@@ -215,10 +216,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             else:
                 print("%s is not a topic we handle yet." % topic)
-
-        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE"])
-        if topic not in quietTopics or self.nmsg < 15:
-            print("%s %5d: %s" % (topic, self.nmsg, d))
 
         self.nmsg += 1
         self.last_messages[topic] = message
