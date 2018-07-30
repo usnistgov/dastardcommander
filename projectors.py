@@ -30,7 +30,7 @@ def toMatBase64(array):
     v - the value that was base64 encoded, is of a custom np.dtype specific to the length of the projectors
     array - an np.array with dtype float64 (or convertable to float64)
     """
-    ncol, nrow = array.shape
+    nrow, ncol = array.shape
     dt = np.dtype([('version', np.uint32), ('magic', np.uint8, (4,)), ("nrow", np.int64),
                ("ncol",np.int64), ("zeros",np.int64,2), ("data", np.float64,nrow*ncol)])
     a = np.array([( 1,[ord("G"),ord("F"),ord("A"),0],nrow,ncol,[0,0],array.ravel())],dt)
@@ -43,7 +43,7 @@ def getConfigs(filename):
     self.client.call("SourceControl.ConfigureProjectorsBasis", config)
     to set Projectors and Bases
     extracts the channel numbers and projectors and basis from the h5 file
-    filename - points to a _model.h5 file created by Pope
+    filename - points to a _model.hdf5 file created by Pope
     """
     out = OrderedDict()
     if not h5py.is_hdf5(filename):
@@ -54,10 +54,28 @@ def getConfigs(filename):
         channum = int(key)
         projectors = h5[key]["svdbasis"]["projectors"].value
         basis = h5[key]["svdbasis"]["basis"].value
-        config = {
-            "ProcessorInd": channum,
-            "ProjectorsBase64": toMatBase64(projectors)[0],
-            "BasisBase64": toMatBase64(basis)[0],
-        }
+        rows,cols = projectors.shape
+        # projectors has size (n,z) where it is (rows,cols)
+        # basis has size (z,n)
+        # coefs has size (n,1)
+        # coefs (n,1) = projectors (n,z) * data (z,1)
+        # modelData (z,1) = basis (z,n) * coefs (n,1)
+        # n = number of basis (eg 3)
+        # z = record length (eg 4)
+        nBasis = rows
+        recordLength = cols
+        if nBasis > recordLength:
+            print("projectors transposed for dastard, fix projector maker")
+            config = {
+                "ChannelIndex": channum,
+                "ProjectorsBase64": toMatBase64(projectors.T)[0],
+                "BasisBase64": toMatBase64(basis.T)[0],
+            }
+        else:
+            config = {
+                "ChannelIndex": channum,
+                "ProjectorsBase64": toMatBase64(projectors)[0],
+                "BasisBase64": toMatBase64(basis)[0],
+            }
         out[channum]=config
     return out

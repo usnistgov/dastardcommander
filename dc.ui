@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>752</width>
+    <width>925</width>
     <height>712</height>
    </rect>
   </property>
@@ -638,7 +638,7 @@
           <x>30</x>
           <y>20</y>
           <width>262</width>
-          <height>201</height>
+          <height>271</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -688,7 +688,7 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
+         <item row="6" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QSpinBox" name="spinBox_EdgeMultiVerifyNMonotone">
@@ -706,7 +706,7 @@
            </item>
           </layout>
          </item>
-         <item row="6" column="0">
+         <item row="7" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QSpinBox" name="spinBox_EdgeLevel">
@@ -724,14 +724,28 @@
            </item>
           </layout>
          </item>
+         <item row="8" column="0">
+          <widget class="QPushButton" name="pushButton_sendEdgeMulti">
+           <property name="text">
+            <string>Send EdgeMulti</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="checkBox_EdgeMultiNoise">
+           <property name="text">
+            <string>Noise</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
        <widget class="QWidget" name="horizontalLayoutWidget">
         <property name="geometry">
          <rect>
           <x>30</x>
-          <y>250</y>
-          <width>311</width>
+          <y>300</y>
+          <width>387</width>
           <height>41</height>
          </rect>
         </property>
@@ -753,19 +767,29 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_sendMix">
+           <property name="text">
+            <string>Send Mix</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
-       <widget class="QPushButton" name="pushButton_sendExperimental">
+       <widget class="QLabel" name="label_20">
         <property name="geometry">
          <rect>
-          <x>40</x>
-          <y>381</y>
-          <width>161</width>
-          <height>51</height>
+          <x>320</x>
+          <y>20</y>
+          <width>211</width>
+          <height>171</height>
          </rect>
         </property>
         <property name="text">
-         <string>Send Experimental</string>
+         <string>Warning, it's really easy to end up with zero triggers if you set easy to achieve trigger conditions because of the auto cutting pulse pile-up nature. Try starting with Contaminated Rrecords on to see SOMETHING.</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>
@@ -783,7 +807,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>752</width>
+     <width>925</width>
      <height>22</height>
     </rect>
    </property>

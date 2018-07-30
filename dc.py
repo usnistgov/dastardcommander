@@ -11,8 +11,6 @@ NIST Boulder Laboratories
 May 2018 -
 """
 
-_VERSION = "0.0.2"
-
 # Non-Qt imports
 import json
 import socket
@@ -37,6 +35,8 @@ import projectors
 import observe
 import workflow
 
+_VERSION = "0.1.0"
+
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
 # at load time.
@@ -54,6 +54,7 @@ Ui_HostPortDialog, _ = PyQt5.uic.loadUiType("host_port.ui")
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, host, port, parent=None):
         self.client = rpc_client
+        self.client.setQtParent(self)
         self.host = host
         self.port = port
 
@@ -68,7 +69,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
-        self.ui.pushButton_sendExperimental.clicked.connect(self.sendExperimental)
+        self.ui.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
+        self.ui.pushButton_sendMix.clicked.connect(self.sendMix)
         self.running = False
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
@@ -117,11 +119,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimer.timeout.connect(lambda: self.closeReconnect("missing heartbeat"))
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
+        self.fullyConfigured = False
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
-        ignore_topics = ("CURRENTTIME", )
-        if topic in ignore_topics:
+        ignoreTopic = set(["CURRENTTIME"])
+        if topic in ignoreTopic:
             return
 
         try:
@@ -204,10 +207,19 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "NUMBERWRITTEN":
                 self.writingTab.handleNumberWritten(d)
                 self.workflowTab.handleNumberWritten(d)
+
+            elif topic == "NEWDASTARD":
+                if self.fullyConfigured:
+                    self.fullyConfigured = False
+                    self.closeReconnect("New Dastard started")
+
             else:
                 print("%s is not a topic we handle yet." % topic)
 
-        print("%s %5d: %s" % (topic, self.nmsg, d))
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE"])
+        if topic not in quietTopics or self.nmsg < 15:
+            print("%s %5d: %s" % (topic, self.nmsg, d))
+
         self.nmsg += 1
         self.last_messages[topic] = message
 
@@ -219,6 +231,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 allseen = False
                 break
         if allseen:
+            self.fullyConfigured = True
             self.ui.tabWidget.setEnabled(True)
 
     def buildStatusBar(self):
@@ -457,7 +470,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
-        # These only make sense for Lancero
         if sourceID == 0:
             self._startTriangle()
         elif sourceID == 1:
@@ -468,21 +480,21 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
     def _startTriangle(self):
-            config = {
-                "Nchan": self.ui.triangleNchan.value(),
-                "SampleRate": self.ui.triangleSampleRate.value(),
-                "Max": self.ui.triangleMaximum.value(),
-                "Min": self.ui.triangleMinimum.value(),
-            }
-            okay = self.client.call("SourceControl.ConfigureTriangleSource", config)
-            if not okay:
-                print "Could not ConfigureTriangleSource"
-                return
-            okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
-            if not okay:
-                print "Could not Start Triangle "
-                return
-            print "Starting Triangle"
+        config = {
+            "Nchan": self.ui.triangleNchan.value(),
+            "SampleRate": self.ui.triangleSampleRate.value(),
+            "Max": self.ui.triangleMaximum.value(),
+            "Min": self.ui.triangleMinimum.value(),
+        }
+        okay = self.client.call("SourceControl.ConfigureTriangleSource", config)
+        if not okay:
+            print "Could not ConfigureTriangleSource"
+            return
+        okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
+        if not okay:
+            print "Could not Start Triangle "
+            return
+        print "Starting Triangle"
 
     def _startSimPulse(self):
         config = {
@@ -552,7 +564,7 @@ class MainWindow(QtWidgets.QMainWindow):
             dir = self.lastdir
         fileName, _ = QFileDialog.getOpenFileName(
             self, "Find Projectors Basis file", dir,
-            "Model Files (*_model.h5);;All Files (*)", options=options)
+            "Model Files (*_model.hdf5);;All Files (*)", options=options)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
             print("opening: {}".format(fileName))
@@ -561,31 +573,35 @@ class MainWindow(QtWidgets.QMainWindow):
             success_chans = []
             failures = OrderedDict()
             for channum, config in configs.items():
+                print("sending ProjectorsBasis for {}".format(channum))
                 try:
-                    self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False)
+                    self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False)
                     success_chans.append(channum)
                 except Exception as ex:
                     failures[channum] = ex.args[0]
+            result = "success on chans: {}\n".format(success_chans) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+            resultBox = QtWidgets.QMessageBox(self)
+            resultBox.setText(result)
+            resultBox.show()
 
-            print("success on chans: {}".format(success_chans))
-            print("failures:")
-            print(json.dumps(failures, sort_keys=True, indent=4))
 
     @pyqtSlot()
-    def sendExperimental(self):
+    def sendEdgeMulti(self):
         config = {
-            "ChanNums": range(len(self.channel_names)),
-            "TriggerState": {
-                "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
-                "EdgeMultiMakeShortRecords": self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
-                "EdgeMultiMakeContaminatedRecords": self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
-                "EdgeMultiVerifyNMonotone": self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),
-                "EdgeLevel": self.ui.spinBox_EdgeLevel.value()
-            }
+            "ChannelIndicies": range(len(self.channel_names)),
+            "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
+            "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
+            "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),
+            "EdgeMultiNoise": self.ui.checkBox_EdgeMultiNoise.isChecked(),
+            "EdgeMultiMakeShortRecords": self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
+            "EdgeMultiMakeContaminatedRecords": self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
+            "EdgeMultiVerifyNMonotone": self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),
+            "EdgeLevel": self.ui.spinBox_EdgeLevel.value()
         }
-        print("experimental trigger config")
-        print(config)
         self.client.call("SourceControl.ConfigureTriggers", config)
+
+    @pyqtSlot()
+    def sendMix(self):
         mixFraction = self.ui.doubleSpinBox_MixFraction.value()
         if mixFraction == 0.0:
             return
@@ -594,7 +610,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if i % 2 == 0:  # only odd channels get mix
                 continue
             config = {
-                "ProcessorIndex": i,
+                "ChannelIndex": i,
                 "MixFraction": mixFraction
             }
             try:

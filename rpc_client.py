@@ -2,21 +2,28 @@ import json
 import itertools
 import socket
 
+from PyQt5 import QtWidgets
+
 
 class JSONClient(object):
 
-    def __init__(self, addr, codec=json):
+    def __init__(self, addr, codec=json, qtParent = None):
         self._socket = socket.create_connection(addr)
         self._id_iter = itertools.count()
         self._codec = codec
         self._closed = False
+        self.qtParent = qtParent
+
+    def setQtParent(self, qtParent):
+        """ let this know about Qt so it can pop-up error messages"""
+        self.qtParent = qtParent
 
     def _message(self, name, params):
         return dict(id=next(self._id_iter),
                     params=[params],
                     method=name)
 
-    def call(self, name, params, verbose=True):
+    def call(self, name, params, verbose=True, errorBox=True):
         if self._closed:
             print "%s(...) ignored because JSON-RPC client is closed." % name
             return None
@@ -24,28 +31,44 @@ class JSONClient(object):
             # because signals like editingFinished can trigger slots when you try
             # to close a window while editing a QLineEdit (see issue #22).
             # If you skip this test, you get a segfault; this will be graceful.
+        if verbose:
+            print("SENDING")
+            print(json.dumps(params,indent=4))
         request = self._message(name, params)
-        id = request.get('id')
+        reqid = request.get('id')
         msg = self._codec.dumps(request)
         self._socket.sendall(msg.encode())
 
-        # This will actually have to loop if resp is bigger
+        # This will actually have to loop if resp is bigger than 4096 bytes
         response = self._socket.recv(4096)
-        response = self._codec.loads(response.decode())
+        try:
+            response = self._codec.loads(response.decode())
+        except ValueError:  # This means RPC server is gone
+            print "RPC server is missing."
+            self.qtParent.reconnect = True
+            self.close()
+            return None
 
-        if response.get('id') != id:
-            raise Exception("expected id=%s, received id=%s: %s" %
-                            (id, response.get('id'),
+        if response.get('id') != reqid:
+            raise ValueError("JSON-RPC expected id=%s, received id=%s: %s" %
+                            (reqid, response.get('id'),
                              response.get('error')))
 
         if response.get('error') is not None:
+            print("error"+response.get('error'))
             if verbose:
                 print "Yikes! Request is: ", request
                 print "Reponse is: ", response
-            raise Exception(response.get('error'))
+            if self.qtParent is None or not errorBox:
+                raise Exception(response.get('error'))
+            else:
+                em = QtWidgets.QErrorMessage(self.qtParent)
+                em.showMessage("DASTARD Error: \n%s\n%s"%(response.get('error'),request))
 
         return response.get('result')
 
     def close(self):
-        self._closed = True
-        self._socket.close()
+        if not self._closed:
+            self._closed = True
+            self._socket.close()
+            self.qtParent.close()
