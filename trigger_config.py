@@ -31,6 +31,8 @@ class TriggerConfig(QtWidgets.QWidget):
                             self.ui.autoTimeEdit,
                             self.ui.levelEdit,
                             self.ui.edgeEdit]
+        self.lastPretrigLength = -1 # init to a value that definitly wont match next value
+        self.lastRecordLength = -1  # init to a value that definitly wont match next value
 
     def _closing(self):
         """The main window calls this to block any editingFinished events from
@@ -379,6 +381,7 @@ class TriggerConfig(QtWidgets.QWidget):
         presamp = self.ui.pretrigLengthSpinBox.value()
         if (samp != self.lastRecordLength or
         presamp != self.lastPretrigLength):
+            # only send a message to server if it is different
             self.lastRecordLength = samp
             self.lastPretrigLength = presamp
             self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp})
