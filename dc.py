@@ -79,7 +79,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTab.client = self.client
         self.writingTab = writing.WritingControl(self.ui.tabWriting, host)
         self.writingTab.client = self.client
-        self.observeTab = observe.Observe(self.ui.tabObserve)
+        self.observeTab = observe.Observe(self.ui.tabObserve, host=host)
         self.workflowTab = workflow.Workflow(self, parent=self.ui.tabWorkflow)
 
         self.microscopes = []
@@ -212,6 +212,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 if self.fullyConfigured:
                     self.fullyConfigured = False
                     self.closeReconnect("New Dastard started")
+
+            elif topic == "TESMAP":
+                self.observe.handleTESMap(d)
+
+            elif topic == "TESMAPFILE":
+                self.observe.handleTESMapFile(d)
 
             else:
                 print("%s is not a topic we handle yet." % topic)

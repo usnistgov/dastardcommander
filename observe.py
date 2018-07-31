@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
 
 import numpy as np
+import os
 import json
 from matplotlib import cm
 
@@ -15,12 +16,14 @@ class Observe(QtWidgets.QWidget):
     dc has processed both a CHANNELNAMES message and a STATUS message (to get the
     number of rows and columns)."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, host=""):
         QtWidgets.QWidget.__init__(self, parent)
+        self.host = host
         self.ui = Ui_Observe()
         self.ui.setupUi(self)
         self.ui.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
         self.ui.pushButton_autoScale.clicked.connect(self.handleAutoScaleClicked)
+        self.ui.mapLoadButton.clicked.connect(self.handleLoadMap)
         self.crm = None
         self.countsSeens = []
         self.cols = 0
@@ -28,6 +31,7 @@ class Observe(QtWidgets.QWidget):
         self.channel_names = []
         self.auxPerChan = 0
         self.lastTotalRate = 0
+        self.mapfile = ""
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
@@ -133,6 +137,30 @@ class Observe(QtWidgets.QWidget):
     def handleAutoScaleClicked(self):
         self.ui.doubleSpinBox_colorScale.setEnabled(not self.ui.pushButton_autoScale.isChecked())
         self.lastTotalRate = 0  # make sure auto scale actually happens
+
+    def handleLoadMap(self):
+        if self.host == "localhost":
+            file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select a TES map file", self.mapfile,
+                                                            "Maps (*.cfg *.txt)")
+            if file == "":
+                return
+            # Here RPC and check for success
+
+        else:
+            raise ValueError("Not implemented yet!")
+
+        # TODO: remove the following
+        head, tail = os.path.split(file)
+        self.ui.mapFileLabel.setText("Map File: %s" % tail)
+
+    def handleTESMapFile(self):
+        pass
+        # self.mapfile = file
+        # head, tail = os.path.split(file)
+        # self.ui.mapFileLabel.setText("Map File: %s" % tail)
+
+    def handleTESMap(self):
+        pass
 
 
 class CountRateMap(QtWidgets.QWidget):
