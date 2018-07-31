@@ -139,17 +139,22 @@ class Observe(QtWidgets.QWidget):
         self.lastTotalRate = 0  # make sure auto scale actually happens
 
     def handleLoadMap(self):
-        if self.host == "localhost":
+        if self.host == "xxlocalhost":
             file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select a TES map file", self.mapfile,
                                                             "Maps (*.cfg *.txt)")
             if file == "":
                 return
-            # Here RPC and check for success
 
         else:
-            raise ValueError("Not implemented yet!")
+            file, okay = QtWidgets.QInputDialog.getText(
+                self, "Choose map file",
+                "Enter full path to map file on %s (remote server):" % self.host,
+                QtWidgets.QLineEdit.Normal, self.mapfile)
+            if not okay or file == "":
+                return
 
-        # TODO: remove the following
+        # TODO: Here RPC and check for success
+        # TODO: Remove the following
         head, tail = os.path.split(file)
         self.ui.mapFileLabel.setText("Map File: %s" % tail)
 
