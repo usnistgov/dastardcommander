@@ -25,7 +25,8 @@ class Observe(QtWidgets.QWidget):
         self.ui.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
         self.ui.pushButton_autoScale.clicked.connect(self.handleAutoScaleClicked)
         self.ui.mapLoadButton.clicked.connect(self.handleLoadMap)
-        self.crm = None
+        self.crm_grid = None
+        self.crm_map = None
         self.countsSeens = []
         self.cols = 0
         self.rows = 0
@@ -41,7 +42,7 @@ class Observe(QtWidgets.QWidget):
         if len(self.channel_names) == 0:
             print("got trigger rate message before channel names")
             return
-        if self.crm is None:
+        if self.crm_grid is None:
             self.buildCRM()
 
         countsSeen = np.array(d["CountsSeen"])
@@ -54,7 +55,10 @@ class Observe(QtWidgets.QWidget):
             countRates += cs
         countRates /= len(self.countsSeens)
         colorScale = self.getColorScale(countRates)
-        self.crm.setCountRates(countRates, colorScale)
+        if self.crm_grid is not None:
+            self.crm_grid.setCountRates(countRates, colorScale)
+        if self.crm_map is not None:
+            self.crm_map.setCountRates(countRates, colorScale)
         integrationComplete = len(self.countsSeens) == integrationTime
         arrayCps = countRates.sum()
         self.setArrayCps(arrayCps, integrationComplete)
@@ -65,7 +69,6 @@ class Observe(QtWidgets.QWidget):
             fracDiff = np.abs(self.lastTotalRate-totalRate)/(self.lastTotalRate+totalRate)
             self.lastTotalRate = totalRate
             if fracDiff > 0.2:
-                print ("autoScale!!")
                 maxRate = np.amax(countRates)
                 self.ui.doubleSpinBox_colorScale.setValue(maxRate)
         return self.ui.doubleSpinBox_colorScale.value()
@@ -79,25 +82,37 @@ class Observe(QtWidgets.QWidget):
         channel_names = self.channel_names
         rows = self.rows
         cols = self.cols
-        print "Need channel_names. Have: ", channel_names
         if channel_names is None or len(channel_names) < cols*rows:
             channel_names = []
             for col in range(cols):
                 for row in range(rows):
-                    channel_names.append("XXr{}c{}chan{}".format(row, col, len(channel_names)))
+                    channel_names.append("chan{}r{}c{}".format(len(channel_names), row, col))
         assert(len(channel_names) == cols*rows*(1+self.auxPerChan))
         return channel_names
 
     def buildCRM(self):
-        self.deleteCRM()
-        self.crm = CountRateMap(self, self.cols, self.rows, self.getChannelNames())
-        self.ui.GridTab.layout().addWidget(self.crm)
+        self.deleteCRMGrid()
+        self.crm_grid = CountRateMap(self, self.cols, self.rows, self.getChannelNames())
+        self.ui.GridTab.layout().addWidget(self.crm_grid)
 
-    def deleteCRM(self):
-        if self.crm is not None:
-            self.crm.parent = None
-            self.crm.deleteLater()
-            self.crm = None
+    def deleteCRMGrid(self):
+        if self.crm_grid is not None:
+            self.crm_grid.parent = None
+            self.crm_grid.deleteLater()
+            self.crm_grid = None
+
+    def buildCRMMap(self):
+        self.deleteCRMMap()
+        print ("Buidling CRM map with %d cols x %d rows" % (self.cols, self.rows))
+        self.crm_map = CountRateMap(self, self.cols, self.rows, self.getChannelNames(),
+                                    xy=self.pixelMap)
+        self.ui.mapContainer.layout().addWidget(self.crm_map)
+
+    def deleteCRMMap(self):
+        if self.crm_map is not None:
+            self.crm_map.parent = None
+            self.crm_map.deleteLater()
+            self.crm_map = None
 
     def handleStatusUpdate(self, d):
         if not d["Running"]:
@@ -123,16 +138,18 @@ class Observe(QtWidgets.QWidget):
         if rows != self.rows or cols != self.cols:
             self.cols = cols
             self.rows = rows
-            self.deleteCRM()
+            self.deleteCRMGrid()
+            self.deleteCRMMap()
 
     def handleStop(self):
         self.cols = 0
         self.rows = 0
-        self.deleteCRM()
+        self.deleteCRMGrid()
+        self.deleteCRMMap()
 
     def resetIntegration(self):
         self.countsSeens = []
-        self.crm.setCountRates(np.zeros(len(self.crm.buttons)), 1)
+        self.crm_grid.setCountRates(np.zeros(len(self.crm_grid.buttons)), 1)
         self.setArrayCps(0, False)
 
     def handleAutoScaleClicked(self):
@@ -141,11 +158,11 @@ class Observe(QtWidgets.QWidget):
 
     def handleLoadMap(self):
         if self.host == "localhost":
-            file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select a TES map file", self.mapfile,
-                                                            "Maps (*.cfg *.txt)")
+            file, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Select a TES map file", self.mapfile,
+                "Maps (*.cfg *.txt)")
             if file == "":
                 return
-
         else:
             file, okay = QtWidgets.QInputDialog.getText(
                 self, "Choose map file",
@@ -153,7 +170,6 @@ class Observe(QtWidgets.QWidget):
                 QtWidgets.QLineEdit.Normal, self.mapfile)
             if not okay or file == "":
                 return
-
         okay = self.client.call("MapServer.Load", file)
 
     def handleTESMapFile(self, filename):
@@ -162,9 +178,14 @@ class Observe(QtWidgets.QWidget):
         self.ui.mapFileLabel.setText("Map File: %s" % tail)
 
     def handleTESMap(self, msg):
-        print "handleTESMap with spacing ", msg["Spacing"]
-        for i, p in enumerate(msg["Pixels"]):
-            print "%3d  (%6d, %6d)" % (i, p["X"], p["Y"])
+        scale = 1.0/float(msg["Spacing"])
+        minx = np.min([p["X"] for p in msg["Pixels"]])
+        maxy = np.max([p["Y"] for p in msg["Pixels"]])
+        print "MinX = ",minx, " MaxY=", maxy
+        self.pixelMap = [((p["X"]-minx)*scale, (maxy-p["Y"])*scale) for p in msg["Pixels"]]
+        print "handleTESMap with spacing ", msg["Spacing"], " scale ", scale
+        print self.pixelMap
+        self.buildCRMMap()
 
 
 class CountRateMap(QtWidgets.QWidget):
@@ -174,13 +195,16 @@ class CountRateMap(QtWidgets.QWidget):
     class is new."""
     buttonFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
 
-    def __init__(self, parent, cols, rows, channel_names):
+    def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.buttons = []
         self.cols = cols
         self.rows = rows
         self.channel_names = channel_names
-        self.initButtons()
+        if xy is None:
+            self.initButtons(scale=25)
+        else:
+            self.initButtons(scale=20, xy=xy)
 
     def addButton(self, x, y, xwidth, ywidth, tooltip):
         button = QtWidgets.QPushButton(self)
@@ -206,7 +230,7 @@ class CountRateMap(QtWidgets.QWidget):
             self.rows = rows
             self.initButtons()
 
-    def initButtons(self, scale=25):
+    def initButtons(self, scale=25, xy=None):
         self.deleteButtons()
         print(self.channel_names)
         row = col = 0
@@ -214,7 +238,13 @@ class CountRateMap(QtWidgets.QWidget):
             if not name.startswith("chan"):
                 self.buttons.append(None)
                 continue
-            self.addButton(scale*row, scale*col, scale, scale, name)
+            if xy is None:
+                x = scale*row
+                y = scale*col
+            else:
+                x = scale*xy[i][0]
+                y = scale*xy[i][1]
+            self.addButton(x, y, scale-1, scale-1, name)
             row += 1
             if row >= self.rows:
                 row = 0

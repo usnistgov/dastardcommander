@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>842</width>
-    <height>485</height>
+    <width>768</width>
+    <height>578</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,28 +28,29 @@
         <layout class="QVBoxLayout" name="verticalLayout_4"/>
        </widget>
        <widget class="QWidget" name="MapTab">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <attribute name="title">
          <string>Map</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QWidget" name="mapContainer" native="true"/>
-         </item>
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
+          <widget class="QWidget" name="mapContainer" native="true">
+           <property name="minimumSize">
             <size>
-             <width>20</width>
-             <height>286</height>
+             <width>400</width>
+             <height>400</height>
             </size>
            </property>
-          </spacer>
+           <layout class="QVBoxLayout" name="verticalLayout_5"/>
+          </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <layout class="QHBoxLayout" name="mapTabHorizLayout">
            <item>
             <widget class="QPushButton" name="mapLoadButton">
              <property name="maximumSize">
