@@ -19,6 +19,7 @@ class Observe(QtWidgets.QWidget):
     def __init__(self, parent=None, host=""):
         QtWidgets.QWidget.__init__(self, parent)
         self.host = host
+        self.client = None
         self.ui = Ui_Observe()
         self.ui.setupUi(self)
         self.ui.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
@@ -139,7 +140,7 @@ class Observe(QtWidgets.QWidget):
         self.lastTotalRate = 0  # make sure auto scale actually happens
 
     def handleLoadMap(self):
-        if self.host == "xxlocalhost":
+        if self.host == "localhost":
             file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select a TES map file", self.mapfile,
                                                             "Maps (*.cfg *.txt)")
             if file == "":
@@ -153,19 +154,17 @@ class Observe(QtWidgets.QWidget):
             if not okay or file == "":
                 return
 
-        # TODO: Here RPC and check for success
-        # TODO: Remove the following
-        head, tail = os.path.split(file)
+        okay = self.client.call("MapServer.Load", file)
+
+    def handleTESMapFile(self, filename):
+        self.mapfile = filename
+        head, tail = os.path.split(filename)
         self.ui.mapFileLabel.setText("Map File: %s" % tail)
 
-    def handleTESMapFile(self):
-        pass
-        # self.mapfile = file
-        # head, tail = os.path.split(file)
-        # self.ui.mapFileLabel.setText("Map File: %s" % tail)
-
-    def handleTESMap(self):
-        pass
+    def handleTESMap(self, msg):
+        print "handleTESMap with spacing ", msg["Spacing"]
+        for i, p in enumerate(msg["Pixels"]):
+            print "%3d  (%6d, %6d)" % (i, p["X"], p["Y"])
 
 
 class CountRateMap(QtWidgets.QWidget):
