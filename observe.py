@@ -86,7 +86,7 @@ class Observe(QtWidgets.QWidget):
     def buildCRM(self):
         self.deleteCRM()
         self.crm = CountRateMap(self, self.cols, self.rows, self.getChannelNames())
-        self.ui.verticalLayout_countRateMap.addWidget(self.crm)
+        self.ui.GridTab.layout().addWidget(self.crm)
 
     def deleteCRM(self):
         if self.crm is not None:
