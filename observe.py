@@ -182,7 +182,7 @@ class CountRateMap(QtWidgets.QWidget):
             if not name.startswith("chan"):
                 self.buttons.append(None)
                 continue
-            self.addButton(scale*row, scale*col, scale, scale, name)
+            self.addButton(scale*row, scale*col, scale, scale, "{}, row{}col{} matterchan{}".format(name,row,col,2*(self.rows*col+row)+1))
             row += 1
             if row >= self.rows:
                 row = 0
@@ -191,7 +191,7 @@ class CountRateMap(QtWidgets.QWidget):
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
         assert(len(countRates) == len(self.buttons))
-        cmap = cm.get_cmap('plasma')
+        cmap = cm.get_cmap('YlOrRd')
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
             if button is None:
