@@ -538,6 +538,8 @@ class MainWindow(QtWidgets.QMainWindow):
             "ActiveCards": activate,
             "AvailableCards": []   # This is filled in only by server, not us.
         }
+        print "START LANCERO CONFIG"
+        print config
         self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox = True)
         self.client.call("SourceControl.Start", "LANCEROSOURCE", errorBox = True, throwError=False)
         self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(True)

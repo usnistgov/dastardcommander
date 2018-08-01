@@ -32,8 +32,7 @@ class JSONClient(object):
             # to close a window while editing a QLineEdit (see issue #22).
             # If you skip this test, you get a segfault; this will be graceful.
         if verbose:
-            print("SENDING")
-            print(json.dumps(params,indent=4))
+            print("SEND {} {}".format(name,json.dumps(params,indent=4)))
         request = self._message(name, params)
         reqid = request.get('id')
         msg = self._codec.dumps(request)
@@ -58,7 +57,7 @@ class JSONClient(object):
             message = "DASTARD Error\nRequest: {}\nError: {}".format(request,response.get('error'))
             if verbose:
                 print message
-            if errorBox:
+            if errorBox and self.qtParent is not None:
                 em = QtWidgets.QErrorMessage(self.qtParent)
                 em.showMessage(message)
             if throwError:
