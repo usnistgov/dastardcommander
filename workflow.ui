@@ -225,6 +225,22 @@
     <string>View Projectors Plots</string>
    </property>
   </widget>
+  <widget class="QCheckBox" name="checkBox_useEdgeMultiForTakePulses">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>360</y>
+     <width>211</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>UseEdgeMulti for Take Pulses</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
