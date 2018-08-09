@@ -571,7 +571,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     success_chans.append(channelIndex)
                 else:
                     failures[channelIndex] = error
-            result = "success on channelIndicies (not channelName): {}\n".format(success_chans) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+            result = "success on channelIndicies (not channelName): {}\n".format(sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
             resultBox = QtWidgets.QMessageBox(self)
             resultBox.setText(result)
             resultBox.show()
