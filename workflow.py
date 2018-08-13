@@ -137,6 +137,7 @@ class Workflow(QtWidgets.QWidget):
         self.dc.triggerTab.goNoiseMode()
         # start writing files
         self.dc.writingTab.start()
+
         comment = """Noise Data\nWorkflow: Take Noise button pushed"""
         self.dc.client.call("SourceControl.WriteComment", comment)
         # wait for 1000 records/channels
@@ -180,7 +181,10 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        self.dc.triggerTab.goPulseMode()
+        if self.checkBox_useEdgeMultiForTakePulses.isChecked():
+            self.dc.sendEdgeMulti()
+        else:
+            self.dc.triggerTab.goPulseMode()
         # start writing files
         self.dc.writingTab.start()
         comment = """Pulse Data for analysis training\nWorkflow: Take Pulses button pushed"""

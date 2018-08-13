@@ -92,10 +92,8 @@ class WritingControl(QtWidgets.QWidget):
                 "WriteOFF": self.ui.checkBox_OFF.isChecked()
             }
 
-        try:
-            self.client.call("SourceControl.WriteControl", request)
-        except Exception as e:
-            print "Could not %s writing: " % request["Request"], e
+        self.client.call("SourceControl.WriteControl", request)
+
 
     def stoppedWriting(self):
         print "STOPPED WRITING"

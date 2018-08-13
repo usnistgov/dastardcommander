@@ -59,6 +59,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.port = port
 
         QtWidgets.QMainWindow.__init__(self, parent)
+        self.setWindowIcon(QtGui.QIcon('dc.png'))
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setWindowTitle("dastard-commander %s    (connected to %s:%d)" % (_VERSION, host, port))
@@ -123,9 +124,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
-        ignoreTopic = set(["CURRENTTIME"])
-        if topic in ignoreTopic:
-            return
 
         try:
             d = json.loads(message)
@@ -134,6 +132,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 topic, message)
             print "Error is: %s" % e
             return
+
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE"])
+        if topic not in quietTopics or self.nmsg < 15:
+            print("%s %5d: %s" % (topic, self.nmsg, d))
 
         if topic == "ALIVE":
             self.heartbeat(d)
@@ -215,10 +217,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             else:
                 print("%s is not a topic we handle yet." % topic)
-
-        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE"])
-        if topic not in quietTopics or self.nmsg < 15:
-            print("%s %5d: %s" % (topic, self.nmsg, d))
 
         self.nmsg += 1
         self.last_messages[topic] = message
@@ -540,16 +538,10 @@ class MainWindow(QtWidgets.QMainWindow):
             "ActiveCards": activate,
             "AvailableCards": []   # This is filled in only by server, not us.
         }
-        okay = self.client.call("SourceControl.ConfigureLanceroSource", config)
-        if not okay:
-            print "Could not ConfigureLanceroSource"
-            return
-
-        okay = self.client.call("SourceControl.Start", "LANCEROSOURCE")
-        if not okay:
-            print "Could not Start Lancero"
-            return
-        print "Starting Lancero device"
+        print "START LANCERO CONFIG"
+        print config
+        self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox = True)
+        self.client.call("SourceControl.Start", "LANCEROSOURCE", errorBox = True, throwError=False)
         self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(True)
         self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(True)
         self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
@@ -624,6 +616,7 @@ class MainWindow(QtWidgets.QMainWindow):
 class HostPortDialog(QtWidgets.QDialog):
     def __init__(self, host, port, disconnectReason, settings, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
+        self.setWindowIcon(QtGui.QIcon('dc.png'))
         self.ui = Ui_HostPortDialog()
         self.ui.setupUi(self)
         self.ui.hostName.setText(host)

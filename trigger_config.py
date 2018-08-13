@@ -31,6 +31,8 @@ class TriggerConfig(QtWidgets.QWidget):
                             self.ui.autoTimeEdit,
                             self.ui.levelEdit,
                             self.ui.edgeEdit]
+        self.lastPretrigLength = -1 # init to a value that definitly wont match next value
+        self.lastRecordLength = -1  # init to a value that definitly wont match next value
 
     def _closing(self):
         """The main window calls this to block any editingFinished events from
@@ -338,9 +340,11 @@ class TriggerConfig(QtWidgets.QWidget):
         samples = self.ui.recordLengthSpinBox
         if samples.value() != nsamp:
             samples.setValue(nsamp)
+            self.lastRecordLength = nsamp
         pretrig = self.ui.pretrigLengthSpinBox
         if pretrig.value() != npre:
             pretrig.setValue(npre)
+            self.lastPretrigLength = npre
 
     @pyqtSlot(int)
     def changedRecordLength(self, reclen):
@@ -375,5 +379,9 @@ class TriggerConfig(QtWidgets.QWidget):
     def sendRecordLengthsToServer(self):
         samp = self.ui.recordLengthSpinBox.value()
         presamp = self.ui.pretrigLengthSpinBox.value()
-        print "Here we tell the server records are %d (%d pretrigger)" % (samp, presamp)
-        self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp})
+        if (samp != self.lastRecordLength or
+        presamp != self.lastPretrigLength):
+            # only send a message to server if it is different
+            self.lastRecordLength = samp
+            self.lastPretrigLength = presamp
+            self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp})
