@@ -191,7 +191,8 @@ class CountRateMap(QtWidgets.QWidget):
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
         assert(len(countRates) == len(self.buttons))
-        cmap = cm.get_cmap('YlOrRd')
+        # cmap = cm.get_cmap('YlOrRd')
+        cmap = cm.get_cmap('Wistia')
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
             if button is None:

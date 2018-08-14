@@ -33,7 +33,7 @@ class JuliaCaller(object):
         print("Found Pope scripts in %s" % path)
 
     def jcall(self, scriptname, args, wait=True):
-        cmd = ["julia", os.path.join(self.POPE_PATH, scriptname)]
+        cmd = ["nice","-n","19","julia", os.path.join(self.POPE_PATH, scriptname)]
         cmd.extend(args)
         print("Running '%s'" % " ".join(cmd))
         # we don't use check_call here because Popen prints output in real time, while check_call does not
@@ -49,15 +49,15 @@ class JuliaCaller(object):
 
     def plotNoise(self, outName):
         args = [outName]
-        # self.jcall("noise_plots.jl", args, wait=False)
+        self.jcall("noise_plots.jl", args, wait=False)
 
     def createBasis(self, pulseFile, noiseModel):
-        args = ["--n_basis", "5", pulseFile, noiseModel]
+        args = ["--n_basis", "7", "--tsvd_method", "TSVDmass3", pulseFile, noiseModel]
         self.jcall("basis_create.jl", args)
 
     def plotBasis(self, outName):
         args = [outName]
-        # self.jcall("basis_plots.jl", args, wait=False)
+        self.jcall("basis_plots.jl", args, wait=False)
 
 
 class Workflow(QtWidgets.QWidget):
@@ -125,6 +125,8 @@ class Workflow(QtWidgets.QWidget):
         self.projectorsPlotFilename = None
         self.ui.pushButton_viewProjectorsPlot.setEnabled(False)
         self.ui.pushButton_loadProjectors.setEnabled(False)
+        self.ui.label_loadedProjectors.setText("projectors loaded? no")
+
 
     def handleTakeNoise(self):
         """
@@ -184,7 +186,7 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        if self.checkBox_useEdgeMultiForTakePulses.isChecked():
+        if self.ui.checkBox_useEdgeMultiForTakePulses.isChecked():
             self.dc.sendEdgeMulti()
         else:
             self.dc.triggerTab.goPulseMode()
@@ -283,7 +285,7 @@ class Workflow(QtWidgets.QWidget):
     def handleCreateProjectors(self):
         # call pope script
         outName = self.pulseFilename[:-9]+"model.hdf5"
-        plotName = self.pulseFilename[:-9]+"model_modelplots.pdf"
+        plotName = self.pulseFilename[:-9]+"model_plots.pdf"
         print outName
         pulseFile = glob.glob(self.pulseFilename)[0]
         if os.path.isfile(outName):
@@ -344,6 +346,7 @@ class Workflow(QtWidgets.QWidget):
         resultBox = QtWidgets.QMessageBox(self)
         resultBox.setText(result)
         resultBox.show()
+        self.ui.label_loadedProjectors.setText("projectors loaded? yes")
 
 
     def handleStatusUpdate(self, d):
@@ -352,10 +355,10 @@ class Workflow(QtWidgets.QWidget):
                 self.reset()
             self.nsamples = d["Nsamples"]
             self.npresamples = d["Npresamp"]
+        self.NumberOfChans = d["Nchannels"]
 
     def handleNumberWritten(self, d):
         self.numberWritten = np.sum(d["NumberWritten"])
-        self.NumberOfChans = len(d["NumberWritten"])
 
     def handleWritingMessage(self, d):
         self.currentlyWriting = d["Active"]
