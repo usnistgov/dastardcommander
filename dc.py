@@ -449,7 +449,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self._setGuiRunning(True)
 
     def _stop(self):
-        okay = self.client.call("SourceControl.Stop", "")
+        okay, error = self.client.call("SourceControl.Stop", "")
         if not okay:
             print "Could not Stop data"
             return
@@ -491,11 +491,11 @@ class MainWindow(QtWidgets.QMainWindow):
             "Max": self.ui.triangleMaximum.value(),
             "Min": self.ui.triangleMinimum.value(),
         }
-        okay = self.client.call("SourceControl.ConfigureTriangleSource", config)
+        okay, error = self.client.call("SourceControl.ConfigureTriangleSource", config)
         if not okay:
             print "Could not ConfigureTriangleSource"
             return
-        okay = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
+        okay, error = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
         if not okay:
             print "Could not Start Triangle "
             return
@@ -509,11 +509,11 @@ class MainWindow(QtWidgets.QMainWindow):
             "Pedestal": self.ui.simPulseBaseline.value(),
             "Nsamp": self.ui.simPulseSamplesPerPulse.value(),
         }
-        okay = self.client.call("SourceControl.ConfigureSimPulseSource", config)
+        okay, error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
         if not okay:
             print "Could not ConfigureSimPulseSource"
             return
-        okay = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
+        okay, error = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
         if not okay:
             print "Could not Start SimPulse"
             return
@@ -567,18 +567,18 @@ class MainWindow(QtWidgets.QMainWindow):
         if fileName:
             self.lastdir = os.path.dirname(fileName)
             print("opening: {}".format(fileName))
-            configs = projectors.getConfigs(fileName)
+            configs = projectors.getConfigs(fileName, self.channel_names)
             print("Sending model for {} chans".format(len(configs)))
             success_chans = []
             failures = OrderedDict()
-            for channum, config in configs.items():
-                print("sending ProjectorsBasis for {}".format(channum))
-                try:
-                    self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False)
-                    success_chans.append(channum)
-                except Exception as ex:
-                    failures[channum] = ex.args[0]
-            result = "success on chans: {}\n".format(success_chans) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+            for channelIndex, config in configs.items():
+                print("sending ProjectorsBasis for {}".format(channelIndex))
+                okay, error = self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
+                if okay:
+                    success_chans.append(channelIndex)
+                else:
+                    failures[channelIndex] = error
+            result = "success on channelIndicies (not channelName): {}\n".format(sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
             resultBox = QtWidgets.QMessageBox(self)
             resultBox.setText(result)
             resultBox.show()
@@ -587,7 +587,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def sendEdgeMulti(self):
         config = {
-            "ChannelIndicies": range(len(self.channel_names)),
+            "ChannelIndicies": range(1,len(self.channel_names),2), # hardcode lancero only behavior of odd channels for now
             "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),

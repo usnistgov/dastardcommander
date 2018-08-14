@@ -32,29 +32,32 @@ class JuliaCaller(object):
         print("Found julia version %s" % majorminor)
         print("Found Pope scripts in %s" % path)
 
-    def jcall(self, scriptname, *args):
-        cmd = ["julia", os.path.join(self.POPE_PATH, scriptname)]
+    def jcall(self, scriptname, args, wait=True):
+        cmd = ["nice","-n","19","julia", os.path.join(self.POPE_PATH, scriptname)]
         cmd.extend(args)
         print("Running '%s'" % " ".join(cmd))
         # we don't use check_call here because Popen prints output in real time, while check_call does not
         p = subprocess.Popen(cmd)
-        returncode = p.wait()
-        if returncode != 0:
-            raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
+        if wait:
+            returncode = p.wait()
+            if returncode != 0:
+                raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
 
     def createNoise(self, pulseFile):
         args = ["--dontcrash", pulseFile]
-        self.jcall("noise_analysis.jl", *args)
+        self.jcall("noise_analysis.jl", args)
 
     def plotNoise(self, outName):
-        self.jcall("noise_plots.jl", outName)
+        args = [outName]
+        self.jcall("noise_plots.jl", args, wait=False)
 
     def createBasis(self, pulseFile, noiseModel):
-        args = ["--n_basis", "5", pulseFile, noiseModel]
-        self.jcall("basis_create.jl", *args)
+        args = ["--n_basis", "7", "--tsvd_method", "TSVDmass3", pulseFile, noiseModel]
+        self.jcall("basis_create.jl", args)
 
     def plotBasis(self, outName):
-        self.jcall("basis_plots.jl", outName)
+        args = [outName]
+        self.jcall("basis_plots.jl", args, wait=False)
 
 
 class Workflow(QtWidgets.QWidget):
@@ -122,6 +125,8 @@ class Workflow(QtWidgets.QWidget):
         self.projectorsPlotFilename = None
         self.ui.pushButton_viewProjectorsPlot.setEnabled(False)
         self.ui.pushButton_loadProjectors.setEnabled(False)
+        self.ui.label_loadedProjectors.setText("projectors loaded? no")
+
 
     def handleTakeNoise(self):
         """
@@ -181,7 +186,7 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        if self.checkBox_useEdgeMultiForTakePulses.isChecked():
+        if self.ui.checkBox_useEdgeMultiForTakePulses.isChecked():
             self.dc.sendEdgeMulti()
         else:
             self.dc.triggerTab.goPulseMode()
@@ -280,7 +285,7 @@ class Workflow(QtWidgets.QWidget):
     def handleCreateProjectors(self):
         # call pope script
         outName = self.pulseFilename[:-9]+"model.hdf5"
-        plotName = self.pulseFilename[:-9]+"model_modelplots.pdf"
+        plotName = self.pulseFilename[:-9]+"model_plots.pdf"
         print outName
         pulseFile = glob.glob(self.pulseFilename)[0]
         if os.path.isfile(outName):
@@ -295,7 +300,7 @@ class Workflow(QtWidgets.QWidget):
                 return
 
         self.projectorsFilename = outName
-        self.ui.label_projectors.setText("noise model: %s" % self.projectorsFilename)
+        self.ui.label_projectors.setText("projectors: %s" % self.projectorsFilename)
 
         if os.path.isfile(plotName):
             print("{} already exists, skipping basis_plots.jl".format(plotName))
@@ -326,26 +331,23 @@ class Workflow(QtWidgets.QWidget):
             em.showMessage("{} does not exist".format(self.projectorsFilename))
             return
         print("opening: {}".format(self.projectorsFilename))
-        configs = projectors.getConfigs(self.projectorsFilename)
+        configs = projectors.getConfigs(self.projectorsFilename, self.dc.channel_names)
         print("Sending model for {} chans".format(len(configs)))
         success_chans = []
         failures = OrderedDict()
-        for channum, config in configs.items():
-            try:
-                self.dc.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False)
-                success_chans.append(channum)
-            except Exception as ex:
-                failures[channum] = ex.args[0]
+        for channelIndex, config in configs.items():
+            print("sending ProjectorsBasis for {}".format(channelIndex))
+            okay, error = self.dc.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
+            if okay:
+                success_chans.append(channelIndex)
+            else:
+                failures[channelIndex] = error
+        result = "success on channelIndicies (not channelName): {}\n".format(sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+        resultBox = QtWidgets.QMessageBox(self)
+        resultBox.setText(result)
+        resultBox.show()
+        self.ui.label_loadedProjectors.setText("projectors loaded? yes")
 
-        reportstr = "success on chans: {}\n".format(sorted(success_chans))
-        reportstr += "failures:\n"
-        reportstr += json.dumps(failures, sort_keys=True, indent=4)
-        print(reportstr)
-        if len(failures) == 0:
-            self.ui.label_loadedProjectors.setText("loaded?: yes")
-        else:
-            em = QtWidgets.QErrorMessage(self)
-            em.showMessage(reportstr)
 
     def handleStatusUpdate(self, d):
         if self.nsamples != d["Nsamples"] or self.npresamples != d["Npresamp"]:
@@ -353,10 +355,10 @@ class Workflow(QtWidgets.QWidget):
                 self.reset()
             self.nsamples = d["Nsamples"]
             self.npresamples = d["Npresamp"]
+        self.NumberOfChans = d["Nchannels"]
 
     def handleNumberWritten(self, d):
         self.numberWritten = np.sum(d["NumberWritten"])
-        self.NumberOfChans = len(d["NumberWritten"])
 
     def handleWritingMessage(self, d):
         self.currentlyWriting = d["Active"]
