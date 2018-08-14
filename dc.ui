@@ -391,52 +391,11 @@
              <rect>
               <x>0</x>
               <y>20</y>
-              <width>351</width>
+              <width>386</width>
               <height>311</height>
              </rect>
             </property>
             <layout class="QGridLayout" name="gridLayout_3">
-             <item row="0" column="1">
-              <layout class="QGridLayout" name="gridLayout_4">
-               <item row="2" column="1">
-                <widget class="QPushButton" name="noFibersButton">
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0" colspan="2">
-                <widget class="QLabel" name="label_15">
-                 <property name="text">
-                  <string>Fiber Select</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0" colspan="2">
-                <widget class="QCheckBox" name="parallelStreaming">
-                 <property name="text">
-                  <string>Parallel Streaming</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QPushButton" name="allFibersButton">
-                 <property name="text">
-                  <string>All</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0" colspan="2">
-                <layout class="QGridLayout" name="lanceroFiberLayout"/>
-               </item>
-              </layout>
-             </item>
              <item row="0" column="0">
               <layout class="QVBoxLayout" name="verticalLayout_3">
                <item>
@@ -530,6 +489,13 @@
                    <property name="topMargin">
                     <number>0</number>
                    </property>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_16">
+                     <property name="text">
+                      <string>Error Nsamp</string>
+                     </property>
+                    </widget>
+                   </item>
                    <item row="1" column="1">
                     <widget class="QSpinBox" name="nsampSpinBox">
                      <property name="toolTip">
@@ -550,16 +516,57 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_16">
+                   <item row="2" column="0">
+                    <widget class="QCheckBox" name="checkBox_lanceroAutoRestart">
                      <property name="text">
-                      <string>Error Nsamp</string>
+                      <string>Auto Restart (not working)</string>
                      </property>
                     </widget>
                    </item>
                   </layout>
                  </item>
                 </layout>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="1">
+              <layout class="QGridLayout" name="gridLayout_4">
+               <item row="2" column="1">
+                <widget class="QPushButton" name="noFibersButton">
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="2">
+                <widget class="QLabel" name="label_15">
+                 <property name="text">
+                  <string>Fiber Select</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0" colspan="2">
+                <widget class="QCheckBox" name="parallelStreaming">
+                 <property name="text">
+                  <string>Parallel Streaming</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QPushButton" name="allFibersButton">
+                 <property name="text">
+                  <string>All</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0" colspan="2">
+                <layout class="QGridLayout" name="lanceroFiberLayout"/>
                </item>
               </layout>
              </item>
@@ -688,7 +695,7 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
+         <item row="7" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QSpinBox" name="spinBox_EdgeMultiVerifyNMonotone">
@@ -706,25 +713,28 @@
            </item>
           </layout>
          </item>
-         <item row="7" column="0">
+         <item row="8" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QSpinBox" name="spinBox_EdgeLevel">
              <property name="maximum">
               <number>65000</number>
              </property>
+             <property name="minimum">
+              <number>-65000</number>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="label_17">
              <property name="text">
-              <string>Threshold</string>
+              <string>Threshold (negative for negative edges)</string>
              </property>
             </widget>
            </item>
           </layout>
          </item>
-         <item row="8" column="0">
+         <item row="9" column="0">
           <widget class="QPushButton" name="pushButton_sendEdgeMulti">
            <property name="text">
             <string>Send EdgeMulti</string>
@@ -735,6 +745,13 @@
           <widget class="QCheckBox" name="checkBox_EdgeMultiNoise">
            <property name="text">
             <string>Noise</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QCheckBox" name="checkBox_edgeMultiTriggerOnError">
+           <property name="text">
+            <string>Trigger On Error Channels</string>
            </property>
           </widget>
          </item>

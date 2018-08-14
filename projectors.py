@@ -37,7 +37,7 @@ def toMatBase64(array):
     s = base64.b64encode(a)
     return s, a[0]
 
-def getConfigs(filename):
+def getConfigs(filename, channelNames):
     """
     returns an OrderedDict mapping channel number to a dict for use in calling
     self.client.call("SourceControl.ConfigureProjectorsBasis", config)
@@ -45,13 +45,15 @@ def getConfigs(filename):
     extracts the channel numbers and projectors and basis from the h5 file
     filename - points to a _model.hdf5 file created by Pope
     """
+    nameNumberToIndex = getNameNumberToIndex(channelNames)
     out = OrderedDict()
     if not h5py.is_hdf5(filename):
         print("{} is not a valid hdf5 file")
         return out
     h5 = h5py.File(filename,"r")
     for key in h5.keys():
-        channum = int(key)
+        nameNumber = int(key)
+        channelIndex = nameNumberToIndex[nameNumber]
         projectors = h5[key]["svdbasis"]["projectors"].value
         basis = h5[key]["svdbasis"]["basis"].value
         rows,cols = projectors.shape
@@ -67,15 +69,36 @@ def getConfigs(filename):
         if nBasis > recordLength:
             print("projectors transposed for dastard, fix projector maker")
             config = {
-                "ChannelIndex": channum,
+                "ChannelIndex": channelIndex,
                 "ProjectorsBase64": toMatBase64(projectors.T)[0],
                 "BasisBase64": toMatBase64(basis.T)[0],
             }
         else:
             config = {
-                "ChannelIndex": channum,
+                "ChannelIndex": channelIndex,
                 "ProjectorsBase64": toMatBase64(projectors)[0],
                 "BasisBase64": toMatBase64(basis)[0],
             }
-        out[channum]=config
+        out[nameNumber]=config
     return out
+
+# dastard channelNames go from chan1 to chanN and err1 to errN
+# we need to mape from channelName to channelIndex (0-2N-1)
+def getNameNumberToIndex(channelNames):
+    nameNumberToIndex = {}
+    for (i,name) in enumerate(channelNames):
+        if not name.startswith("chan"):
+            continue
+        nameNumber = int(name[4:])
+        nameNumberToIndex[nameNumber]=i
+        # for now since we only use this with lancero sources, error for non-odd index
+        if i%2 != 1:
+            raise Exception("all fb channelIndicies on a lancero source are odd, we shouldn't load projectors for even channelIndicies")
+    return nameNumberToIndex
+#
+# def remapConfigs(configs0, channelNames):
+#     nameNumberToIndex = getNameNumberToIndex(channelNames)
+#     configs = {}
+#     for (nameNumber,config) in configs0.items():
+#         configs[nameNumberToIndex[nameNumber]] = config
+#     return configs

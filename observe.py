@@ -244,7 +244,7 @@ class CountRateMap(QtWidgets.QWidget):
             else:
                 x = scale*xy[i][0]
                 y = scale*xy[i][1]
-            self.addButton(x, y, scale-1, scale-1, name)
+            self.addButton(x, y, scale-1, scale-1, "{}, row{}col{} matterchan{}".format(name,row,col,2*(self.rows*col+row)+1))
             row += 1
             if row >= self.rows:
                 row = 0
@@ -253,7 +253,8 @@ class CountRateMap(QtWidgets.QWidget):
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
         assert(len(countRates) == len(self.buttons))
-        cmap = cm.get_cmap('plasma')
+        # cmap = cm.get_cmap('YlOrRd')
+        cmap = cm.get_cmap('Wistia')
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
             if button is None:
