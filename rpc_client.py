@@ -9,6 +9,7 @@ class JSONClient(object):
 
     def __init__(self, addr, codec=json, qtParent = None):
         self._socket = socket.create_connection(addr)
+        self._socket.settimeout(7.0)
         self._id_iter = itertools.count()
         self._codec = codec
         self._closed = False
@@ -60,9 +61,11 @@ class JSONClient(object):
             if errorBox and self.qtParent is not None:
                 em = QtWidgets.QErrorMessage(self.qtParent)
                 em.showMessage(message)
-            if throwError:
+            elif throwError:
                 raise Exception(message)
-        return response.get('result')
+            else:
+                print "PANIC unhandled response.get(error)"
+        return response.get('result'), response.get("error")
 
     def close(self):
         if not self._closed:

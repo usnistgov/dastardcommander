@@ -720,12 +720,15 @@
              <property name="maximum">
               <number>65000</number>
              </property>
+             <property name="minimum">
+              <number>-65000</number>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="label_17">
              <property name="text">
-              <string>Threshold</string>
+              <string>Threshold (negative for negative edges)</string>
              </property>
             </widget>
            </item>
