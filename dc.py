@@ -543,7 +543,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "CardDelay": delays,
             "Nsamp": nsamp,
             "ActiveCards": activate,
-            "AvailableCards": []   # This is filled in only by server, not us.
+            "AvailableCards": [],   # This is filled in only by server, not us.
             "AutoRestart" : self.ui.checkBox_lanceroAutoRestart.isChecked()
         }
         print "START LANCERO CONFIG"
