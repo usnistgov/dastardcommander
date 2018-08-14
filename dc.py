@@ -588,7 +588,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def sendEdgeMulti(self):
         config = {
-            "ChannelIndicies": range(1,len(self.channel_names),2), # hardcode lancero only behavior of odd channels for now
+            "ChannelIndicies": range(len(self.channel_names)), 
             "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),
