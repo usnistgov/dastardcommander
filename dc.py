@@ -544,6 +544,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "Nsamp": nsamp,
             "ActiveCards": activate,
             "AvailableCards": []   # This is filled in only by server, not us.
+            "AutoRestart" : self.ui.checkBox_lanceroAutoRestart.isChecked()
         }
         print "START LANCERO CONFIG"
         print config
@@ -598,6 +599,9 @@ class MainWindow(QtWidgets.QMainWindow):
             "EdgeLevel": self.ui.spinBox_EdgeLevel.value()
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
+        if not self.ui.checkBox_edgeMultiTriggerOnError.isChecked():
+            config = {"ChannelIndicies": range(0,len(self.channel_names),2)}
+            self.client.call("SourceControl.ConfigureTriggers", config)
 
     @pyqtSlot()
     def sendMix(self):
