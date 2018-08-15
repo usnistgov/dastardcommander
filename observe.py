@@ -74,7 +74,7 @@ class Observe(QtWidgets.QWidget):
         return self.ui.doubleSpinBox_colorScale.value()
 
     def setArrayCps(self, arrayCps, integrationComplete):
-        s = "{} cps/array".format(arrayCps)
+        s = "{:.2f} cps/array".format(arrayCps)
         self.ui.label_arrayCps.setText(s)
         self.ui.label_arrayCps.setEnabled(integrationComplete)
 
