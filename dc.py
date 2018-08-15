@@ -442,18 +442,20 @@ class MainWindow(QtWidgets.QMainWindow):
     def startStop(self):
         """Slot to handle pressing the Start/Stop data button."""
         if self.running:
-            self._stop()
-            self._setGuiRunning(False)
+            okay = self._stop()
+            self._setGuiRunning(False) # I think we want to do this even if stop failed, because thats usually due to an already stopped source?
         else:
-            self._start()
-            self._setGuiRunning(True)
+            okay = self._start()
+            if okay:
+                self._setGuiRunning(True)
 
     def _stop(self):
         okay, error = self.client.call("SourceControl.Stop", "")
         if not okay:
             print "Could not Stop data"
-            return
+            return False
         print "Stopping Data"
+        return True
 
     def _setGuiRunning(self, running, sourceName=""):
         self.running = running
@@ -476,13 +478,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def _start(self):
         sourceID = self.ui.dataSource.currentIndex()
         if sourceID == 0:
-            self._startTriangle()
+            return self._startTriangle()
         elif sourceID == 1:
-            self._startSimPulse()
+            return self._startSimPulse()
         elif sourceID == 2:
-            self._startLancero()
+            return self._startLancero()
         else:
-            return
+            raise ValueError("invalid sourceID. have {}, want 0,1 or 2".format(sourceID))
 
     def _startTriangle(self):
         config = {
@@ -494,12 +496,13 @@ class MainWindow(QtWidgets.QMainWindow):
         okay, error = self.client.call("SourceControl.ConfigureTriangleSource", config)
         if not okay:
             print "Could not ConfigureTriangleSource"
-            return
+            return False
         okay, error = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
         if not okay:
             print "Could not Start Triangle "
-            return
+            return False
         print "Starting Triangle"
+        return True
 
     def _startSimPulse(self):
         config = {
@@ -512,12 +515,13 @@ class MainWindow(QtWidgets.QMainWindow):
         okay, error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
         if not okay:
             print "Could not ConfigureSimPulseSource"
-            return
+            return False
         okay, error = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
         if not okay:
             print "Could not Start SimPulse"
-            return
+            return False
         print "Starting Sim Pulses"
+        return True
 
     def _startLancero(self):
         mask = 0
@@ -548,12 +552,17 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         print "START LANCERO CONFIG"
         print config
-        self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox = True)
-        self.client.call("SourceControl.Start", "LANCEROSOURCE", errorBox = True, throwError=False)
+        okay, error = self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox = True)
+        if not okay:
+            return False
+        okay, error = self.client.call("SourceControl.Start", "LANCEROSOURCE", errorBox = True, throwError=False)
+        if not okay:
+            return False
         self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(True)
         self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(True)
         self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
         self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
+        return True
 
     @pyqtSlot()
     def loadProjectorsBasis(self):
@@ -588,7 +597,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def sendEdgeMulti(self):
         config = {
-            "ChannelIndicies": range(len(self.channel_names)), 
+            "ChannelIndicies": range(len(self.channel_names)),
             "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),

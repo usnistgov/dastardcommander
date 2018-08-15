@@ -55,12 +55,14 @@ class JSONClient(object):
                              response.get('error')))
 
         if response.get('error') is not None:
-            message = "DASTARD Error\nRequest: {}\nError: {}".format(request,response.get('error'))
+            message = "Request: {}\n\nError: {}".format(request,response.get('error'))
             if verbose:
                 print message
             if errorBox and self.qtParent is not None:
-                em = QtWidgets.QErrorMessage(self.qtParent)
-                em.showMessage(message)
+                resultBox = QtWidgets.QMessageBox(self.qtParent)
+                resultBox.setText(message)
+                resultBox.setWindowTitle("DASTARD RPC Error") # doesn't work on mac, from qt docs "On macOS, the window title is ignored (as required by the macOS Guidelines)."
+                resultBox.show()
             elif throwError:
                 raise Exception(message)
             else:
