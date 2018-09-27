@@ -103,7 +103,7 @@ class Observe(QtWidgets.QWidget):
 
     def buildCRMMap(self):
         self.deleteCRMMap()
-        print ("Buidling CRM map with %d cols x %d rows" % (self.cols, self.rows))
+        print ("Building CountRateMap with %d cols x %d rows" % (self.cols, self.rows))
         self.crm_map = CountRateMap(self, self.cols, self.rows, self.getChannelNames(),
                                     xy=self.pixelMap)
         self.ui.mapContainer.layout().addWidget(self.crm_map)
@@ -233,8 +233,8 @@ class CountRateMap(QtWidgets.QWidget):
     def initButtons(self, scale=25, xy=None):
         self.deleteButtons()
         print(self.channel_names)
-        row = col = 0
-        for i, name in enumerate(self.channel_names):
+        row = col = i = 0
+        for name in self.channel_names:
             if not name.startswith("chan"):
                 self.buttons.append(None)
                 continue
@@ -246,9 +246,11 @@ class CountRateMap(QtWidgets.QWidget):
                 y = scale*xy[i][1]
             self.addButton(x, y, scale-1, scale-1, "{}, row{}col{} matterchan{}".format(name,row,col,2*(self.rows*col+row)+1))
             row += 1
+            i += 1
             if row >= self.rows:
                 row = 0
                 col += 1
+
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
