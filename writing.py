@@ -125,7 +125,7 @@ class WritingControl(QtWidgets.QWidget):
         default = "Operator, settings, purpose..."
         reply, error = self.client.call("SourceControl.ReadComment", 0, errorBox=False) #
         dialog = QtWidgets.QInputDialog(parent) # the synchronous function getMultiLineText is blocking, which causes us to fail to see heartbeats, and crashes dc, so instead we build a QInputDialog and connect to a signal
-        dialog.setInputMode(QtWidgets.QInputDialog.InputMode.TextInput)
+        dialog.setInputMode(QtWidgets.QInputDialog.TextInput)
         dialog.setLabelText(label)
         dialog.setWindowTitle(title)
         if error is None:
