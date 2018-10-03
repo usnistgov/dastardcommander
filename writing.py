@@ -123,12 +123,15 @@ class WritingControl(QtWidgets.QWidget):
         title = "Enter a comment to be stored"
         label = "Enter a comment to be stored with the data file as comment.txt"
         default = "Operator, settings, purpose..."
-        reply, error = self.client.call("SourceControl.ReadComment", 0, errorBox=False) #
-        dialog = QtWidgets.QInputDialog(parent) # the synchronous function getMultiLineText is blocking, which causes us to fail to see heartbeats, and crashes dc, so instead we build a QInputDialog and connect to a signal
+        reply, error = self.client.call("SourceControl.ReadComment", 0, errorBox=False)
+        # The synchronous function getMultiLineText is blocking, which causes us to
+        # miss heartbeats and crashes dc. Instead, we build a QInputDialog
+        # and connect to a signal
+        dialog = QtWidgets.QInputDialog(parent)
         dialog.setInputMode(QtWidgets.QInputDialog.TextInput)
         dialog.setLabelText(label)
         dialog.setWindowTitle(title)
-        if error is None:
+        if error is None and len(reply) > 0:
             dialog.setTextValue(reply)
         else:
             dialog.setTextValue(default)
