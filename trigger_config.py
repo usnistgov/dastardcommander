@@ -68,8 +68,9 @@ class TriggerConfig(QtWidgets.QWidget):
         for d in dicts:
             d["EdgeMulti"]=False # ignore all EdgeMulti settings from the server
             # so that we don't send them back... avoid EdgeMulti being stuck on
-            for ch in d["ChannelIndicies"]:
-                self.trigger_state[ch] = d
+            for channelIndex in d["ChannelIndicies"]:
+                if channelIndex % 2 == 1:
+                    self.trigger_state[channelIndex] = d
         self.updateTriggerGUIElements()
 
     @pyqtSlot()
