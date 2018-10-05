@@ -179,10 +179,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "SIMPULSE":
                 self.ui.simPulseNchan.setValue(d["Nchan"])
-                self.ui.simPulseSampleRate.setValue(d["SampleRate"])
                 self.ui.simPulseBaseline.setValue(d["Pedestal"])
-                self.ui.simPulseAmplitude.setValue(d["Amplitude"])
+                self.ui.simPulseSampleRate.setValue(d["SampleRate"])
                 self.ui.simPulseSamplesPerPulse.setValue(d["Nsamp"])
+                a = d["Amplitudes"]
+                if a is None:
+                    a = [10000.0]
+                self.ui.simPulseAmplitude.setValue(a[0])
 
             elif topic == "LANCERO":
                 self.updateLanceroCardChoices(d["AvailableCards"])
@@ -505,10 +508,12 @@ class MainWindow(QtWidgets.QMainWindow):
         return True
 
     def _startSimPulse(self):
+        a0 = self.ui.simPulseAmplitude.value()
+        amps = [a0, a0*0.8, a0*0.6]
         config = {
             "Nchan": self.ui.simPulseNchan.value(),
             "SampleRate": self.ui.simPulseSampleRate.value(),
-            "Amplitude": self.ui.simPulseAmplitude.value(),
+            "Amplitudes": amps,
             "Pedestal": self.ui.simPulseBaseline.value(),
             "Nsamp": self.ui.simPulseSamplesPerPulse.value(),
         }

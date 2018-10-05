@@ -92,7 +92,7 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QComboBox" name="dataSource">
-          <property name="currentText">
+          <property name="currentText" stdset="0">
            <string>Simulated pulse source</string>
           </property>
           <property name="currentIndex">
@@ -717,11 +717,11 @@
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QSpinBox" name="spinBox_EdgeLevel">
-             <property name="maximum">
-              <number>65000</number>
-             </property>
              <property name="minimum">
               <number>-65000</number>
+             </property>
+             <property name="maximum">
+              <number>65000</number>
              </property>
             </widget>
            </item>
