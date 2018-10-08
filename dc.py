@@ -446,7 +446,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """Slot to handle pressing the Start/Stop data button."""
         if self.running:
             okay = self._stop()
-            self._setGuiRunning(False) # I think we want to do this even if stop failed, because thats usually due to an already stopped source?
+            self._setGuiRunning(False)
+            # I think we want to do this even if stop failed, because it's usually due to an already stopped source?
         else:
             okay = self._start()
             if okay:
@@ -553,14 +554,14 @@ class MainWindow(QtWidgets.QMainWindow):
             "Nsamp": nsamp,
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
-            "AutoRestart" : self.ui.checkBox_lanceroAutoRestart.isChecked()
+            "AutoRestart": self.ui.checkBox_lanceroAutoRestart.isChecked()
         }
         print "START LANCERO CONFIG"
         print config
-        okay, error = self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox = True)
+        okay, error = self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox=True)
         if not okay:
             return False
-        okay, error = self.client.call("SourceControl.Start", "LANCEROSOURCE", errorBox = True, throwError=False)
+        okay, error = self.client.call("SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False)
         if not okay:
             return False
         self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(True)
@@ -598,7 +599,6 @@ class MainWindow(QtWidgets.QMainWindow):
             resultBox.setText(result)
             resultBox.show()
 
-
     @pyqtSlot()
     def sendEdgeMulti(self):
         config = {
@@ -614,7 +614,7 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
         if not self.ui.checkBox_edgeMultiTriggerOnError.isChecked():
-            config = {"ChannelIndicies": range(0,len(self.channel_names),2)}
+            config = {"ChannelIndicies": range(0, len(self.channel_names), 2)}
             self.client.call("SourceControl.ConfigureTriggers", config)
 
     @pyqtSlot()
