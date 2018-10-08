@@ -225,6 +225,17 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "TESMAPFILE":
                 self.observeTab.handleTESMapFile(d)
 
+            elif topic == "MIX":
+                # We only permit setting a single, common mix value from DC, so
+                # we have to convert a variety of mixes to a single representative value.
+                try:
+                    mix = d[1]
+                    self.ui.doubleSpinBox_MixFraction.setValue(mix)
+                except Exception as e:
+                    print("Could not set mix; selecting 0")
+                    self.ui.doubleSpinBox_MixFraction.setValue(0.0)
+
+
             else:
                 print("%s is not a topic we handle yet." % topic)
 
