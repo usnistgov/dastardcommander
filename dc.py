@@ -235,7 +235,6 @@ class MainWindow(QtWidgets.QMainWindow):
                     print("Could not set mix; selecting 0")
                     self.ui.doubleSpinBox_MixFraction.setValue(0.0)
 
-
             else:
                 print("%s is not a topic we handle yet." % topic)
 
