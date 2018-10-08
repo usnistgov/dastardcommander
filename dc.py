@@ -183,7 +183,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.simPulseSampleRate.setValue(d["SampleRate"])
                 self.ui.simPulseSamplesPerPulse.setValue(d["Nsamp"])
                 a = d["Amplitudes"]
-                if a is None:
+                if a is None or len(a) == 0:
                     a = [10000.0]
                 self.ui.simPulseAmplitude.setValue(a[0])
 
