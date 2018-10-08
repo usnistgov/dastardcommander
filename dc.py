@@ -623,19 +623,18 @@ class MainWindow(QtWidgets.QMainWindow):
         if mixFraction == 0.0:
             return
 
-        for i in range(len(self.channel_names)):
-            if i % 2 == 0:  # only odd channels get mix
-                continue
-            config = {
-                "ChannelIndex": i,
-                "MixFraction": mixFraction
-            }
-            try:
-                self.client.call("SourceControl.ConfigureMixFraction", config)
-                print("experimental mix config")
-                print config
-            except Exception as e:
-                print "Could not set mix: {}".format(e)
+        channels = [i for i in range(1, len(self.channel_names), 2)]  # only odd channels get mix
+        mixFractions = [mixFraction for _ in range(len(channels))]
+        config = {
+            "ChannelIndices": channels,
+            "MixFractions": mixFractions
+        }
+        try:
+            self.client.call("SourceControl.ConfigureMixFraction", config)
+            print("experimental mix config")
+            print config
+        except Exception as e:
+            print "Could not set mix: {}".format(e)
 
 
 class HostPortDialog(QtWidgets.QDialog):

@@ -74,7 +74,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -769,11 +769,17 @@
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QDoubleSpinBox" name="doubleSpinBox_MixFraction">
+           <property name="decimals">
+            <number>2</number>
+           </property>
            <property name="minimum">
-            <double>-1000.000000000000000</double>
+            <double>-10.000000000000000</double>
            </property>
            <property name="maximum">
-            <double>1000.000000000000000</double>
+            <double>10.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.010000000000000</double>
            </property>
           </widget>
          </item>
