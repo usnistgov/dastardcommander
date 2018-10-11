@@ -117,12 +117,15 @@ class TriggerConfig(QtWidgets.QWidget):
                 print("Channel prefix %s not in known prefixes: %s" % (prefix, self.channel_prefixes))
                 continue
             for cnum in cnums.split(","):
+                # Ignore the "" that follows a trailing comma
+                if len(cnum) == 0:
+                    continue
                 name = prefix+cnum
                 try:
                     idx = self.channel_names.index(name)
                     self.chosenChannels.append(idx)
                 except ValueError:
-                    print ("Channel %s not known" % (name))
+                    print ("Channel '%s' is not known" % (name))
         print "The chosen channels are ", self.chosenChannels
 
     def getstate(self, name):
