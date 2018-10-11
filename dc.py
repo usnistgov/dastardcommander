@@ -73,6 +73,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.ui.pushButton_sendMix.clicked.connect(self.sendMix)
         self.running = False
+        self.sourceIsTDM = False
+        self.cols = 0
+        self.rows = 0
+        self.streams = 0
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
@@ -264,15 +268,16 @@ class MainWindow(QtWidgets.QMainWindow):
         if run:
             status = "%s source active, %d channels" % (
                 data["SourceName"], data["Nchannels"])
-            cols = data.get("Ncol", [])
-            rows = data.get("Nrow", [])
-            ndev = min(len(cols), len(rows))
+            self.streams = data["Nchannels"]
+            self.cols = data.get("Ncol", [])
+            self.rows = data.get("Nrow", [])
+            ndev = min(len(self.cols), len(self.rows))
             if ndev == 1:
-                status += " (%d rows x %d cols)" % (rows[0], cols[0])
+                status += " (%d rows x %d cols)" % (self.rows[0], self.cols[0])
             elif ndev > 1:
                 status += " ("
                 for i in range(ndev):
-                    status += "%d x %d" % (rows[i], cols[i])
+                    status += "%d x %d" % (self.rows[i], self.cols[i])
                     if i < ndev-1:
                         status += ", "
                 status += " rows x cols)"
@@ -325,7 +330,17 @@ class MainWindow(QtWidgets.QMainWindow):
         """Launch one instance of microscope.
         TODO: don't hard-wire in the location of the binary!"""
         try:
-            args = ("microscope", "tcp://%s:%d" % (self.host, self.port+2))
+            if self.sourceIsTDM:
+                c, r = self.cols[0], self.rows[0]
+                args = ["microscope", "-c%d" % c, "-r%d" % r]
+            else:
+                c, r = 1, self.streams
+                while r > 40:
+                    c *= 2
+                    r = (r+1) // 2
+                args = ["microscope", "-c%d" % c, "-r%d" % r,
+                        "--no-error-channel"]
+            args.append("tcp://%s:%d" % (self.host, self.port+2))
             sps = subprocess.Popen(args)
             self.microscopes.append(sps)
         except OSError as e:
@@ -480,6 +495,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.dataSource.setEnabled(not running)
         self.ui.dataSourcesStackedWidget.setEnabled(not running)
         self.ui.tabTriggering.setEnabled(running)
+        self.ui.launchMicroscopeButton.setEnabled(running)
         if running:
             self.ui.tabWidget.setCurrentWidget(self.ui.tabTriggering)
 
@@ -490,13 +506,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
 
     def _start(self):
+        self.sourceIsTDM = False
         sourceID = self.ui.dataSource.currentIndex()
         if sourceID == 0:
             return self._startTriangle()
         elif sourceID == 1:
             return self._startSimPulse()
         elif sourceID == 2:
-            return self._startLancero()
+            result = self._startLancero()
+            if result:
+                self.sourceIsTDM = True
+            return result
         else:
             raise ValueError("invalid sourceID. have {}, want 0,1 or 2".format(sourceID))
 
