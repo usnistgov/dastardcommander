@@ -159,6 +159,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
+                self.sourceIsTDM = (source == "Lancero")
                 if source == "Triangles":
                     self.ui.dataSource.setCurrentIndex(0)
                     self.ui.triangleNchan.setValue(nchan)
