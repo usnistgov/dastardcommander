@@ -31,8 +31,9 @@ class TriggerConfig(QtWidgets.QWidget):
                             self.ui.autoTimeEdit,
                             self.ui.levelEdit,
                             self.ui.edgeEdit]
-        self.lastPretrigLength = -1 # init to a value that definitly wont match next value
-        self.lastRecordLength = -1  # init to a value that definitly wont match next value
+        # Initialize these two to a value that definitly won't match next value
+        self.lastPretrigLength = -1
+        self.lastRecordLength = -1
 
     def _closing(self):
         """The main window calls this to block any editingFinished events from
@@ -66,11 +67,10 @@ class TriggerConfig(QtWidgets.QWidget):
     def handleTriggerMessage(self, dicts):
         """Handle the trigger state message (in list-of-dicts form)"""
         for d in dicts:
-            d["EdgeMulti"]=False # ignore all EdgeMulti settings from the server
+            d["EdgeMulti"]=False  # ignore all EdgeMulti settings from the server
             # so that we don't send them back... avoid EdgeMulti being stuck on
             for channelIndex in d["ChannelIndicies"]:
-                if channelIndex % 2 == 1:
-                    self.trigger_state[channelIndex] = d
+                self.trigger_state[channelIndex] = d
         self.updateTriggerGUIElements()
 
     @pyqtSlot()
