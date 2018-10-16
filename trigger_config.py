@@ -41,6 +41,18 @@ class TriggerConfig(QtWidgets.QWidget):
         for w in self.editWidgets:
             w.blockSignals(True)
 
+    def isTDM(self, tdm):
+        combo = self.ui.channelChooserBox
+        if tdm:
+            if combo.count() == 2:
+                combo.addItem("Signal channels")
+                combo.addItem("TDM error channels")
+            combo.setCurrentIndex(2)
+        else:
+            while combo.count() > 2:
+                combo.removeItem(2)
+            combo.setCurrentIndex(1)
+
     @pyqtSlot()
     def goPulseMode(self):
         self.ui.autoTrigActive.setChecked(False)
@@ -67,7 +79,7 @@ class TriggerConfig(QtWidgets.QWidget):
     def handleTriggerMessage(self, dicts):
         """Handle the trigger state message (in list-of-dicts form)"""
         for d in dicts:
-            d["EdgeMulti"]=False  # ignore all EdgeMulti settings from the server
+            d["EdgeMulti"] = False  # ignore all EdgeMulti settings from the server
             # so that we don't send them back... avoid EdgeMulti being stuck on
             for channelIndex in d["ChannelIndicies"]:
                 self.trigger_state[channelIndex] = d
@@ -76,6 +88,9 @@ class TriggerConfig(QtWidgets.QWidget):
     @pyqtSlot()
     def channelChooserChanged(self):
         """The channel selector menu was activated: update the edit box"""
+        idx = self.ui.channelChooserBox.currentIndex()
+        if idx < 0:
+            return
         cctext = self.ui.channelChooserBox.currentText()
         if cctext.startswith("All"):
             allprefixes = [self.chanbyprefix(p) for p in self.channel_prefixes]
@@ -84,11 +99,15 @@ class TriggerConfig(QtWidgets.QWidget):
         elif cctext.startswith("user"):
             return
         else:
-            prefix = cctext.split()[0].lower()
-            if prefix == "fb":
+            prefix = cctext.split()[0]
+            if prefix == "Signal":
                 prefix = "chan"
+            elif prefix == "TDM":
+                prefix = "err"
             result = self.chanbyprefix(prefix)
         self.ui.channelsChosenEdit.setPlainText(result)
+        if idx != self.ui.channelChooserBox.currentIndex():
+            self.ui.channelChooserBox.setCurrentIndex(idx)
 
     def chanbyprefix(self, prefix):
         """Return a string listing all channels for the given prefix"""
@@ -126,6 +145,7 @@ class TriggerConfig(QtWidgets.QWidget):
                     self.chosenChannels.append(idx)
                 except ValueError:
                     print ("Channel '%s' is not known" % (name))
+        self.ui.channelChooserBox.setCurrentIndex(0)
         print "The chosen channels are ", self.chosenChannels
 
     def getstate(self, name):

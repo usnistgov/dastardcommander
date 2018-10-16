@@ -209,7 +209,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
                 print "New channames: ", self.channel_names
-                self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
+                if self.sourceIsTDM:
+                    self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
+                else:
+                    self.triggerTab.ui.channelChooserBox.setCurrentIndex(1)
                 self.triggerTab.channelChooserChanged()
 
             elif topic == "TRIGCOUPLING":
@@ -492,6 +495,7 @@ class MainWindow(QtWidgets.QMainWindow):
         label = "Start Data"
         if running:
             label = "Stop Data"
+            self.triggerTab.isTDM(self.sourceIsTDM)
         self.ui.startStopButton.setText(label)
         self.ui.dataSource.setEnabled(not running)
         self.ui.dataSourcesStackedWidget.setEnabled(not running)
