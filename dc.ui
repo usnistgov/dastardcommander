@@ -92,7 +92,7 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QComboBox" name="dataSource">
-          <property name="currentText" stdset="0">
+          <property name="currentText">
            <string>Simulated pulse source</string>
           </property>
           <property name="currentIndex">
@@ -809,7 +809,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>Warning, it's really easy to end up with zero triggers if you set easy to achieve trigger conditions because of the auto cutting pulse pile-up nature. Try starting with Contaminated Rrecords on to see SOMETHING.</string>
+         <string>Warning, it's really easy to end up with zero triggers if you set easy to achieve trigger conditions because of the auto cutting pulse pile-up nature. Try starting with Contaminated Records on to see SOMETHING.</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
