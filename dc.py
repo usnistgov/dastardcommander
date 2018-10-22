@@ -35,7 +35,7 @@ import projectors
 import observe
 import workflow
 
-_VERSION = "0.1.1"
+_VERSION = "0.2.0"
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -209,7 +209,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
                 print "New channames: ", self.channel_names
-                self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
+                if self.sourceIsTDM:
+                    self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
+                else:
+                    self.triggerTab.ui.channelChooserBox.setCurrentIndex(1)
                 self.triggerTab.channelChooserChanged()
 
             elif topic == "TRIGCOUPLING":
@@ -333,14 +336,14 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             if self.sourceIsTDM:
                 c, r = self.cols[0], self.rows[0]
-                args = ["microscope", "-c%d" % c, "-r%d" % r]
             else:
                 c, r = 1, self.streams
                 while r > 40:
                     c *= 2
                     r = (r+1) // 2
-                args = ["microscope", "-c%d" % c, "-r%d" % r,
-                        "--no-error-channel"]
+            args = ["microscope", "-c%d" % c, "-r%d" % r]
+            if not self.sourceIsTDM:
+                args.append("--no-error-channel")
             args.append("tcp://%s:%d" % (self.host, self.port+2))
             sps = subprocess.Popen(args)
             self.microscopes.append(sps)
@@ -492,6 +495,7 @@ class MainWindow(QtWidgets.QMainWindow):
         label = "Start Data"
         if running:
             label = "Stop Data"
+            self.triggerTab.isTDM(self.sourceIsTDM)
         self.ui.startStopButton.setText(label)
         self.ui.dataSource.setEnabled(not running)
         self.ui.dataSourcesStackedWidget.setEnabled(not running)
@@ -500,11 +504,20 @@ class MainWindow(QtWidgets.QMainWindow):
         if running:
             self.ui.tabWidget.setCurrentWidget(self.ui.tabTriggering)
 
-        enable = running and (sourceName == "Lancero")
-        self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(enable)
-        self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(enable)
+        runningTDM = running and self.sourceIsTDM
+        self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(runningTDM)
+        self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(runningTDM)
         self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
         self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
+
+        # Fix the trigger-on-error checkbox. If running nonTDM, it should be checked AND hidden
+        checkbox = self.ui.checkBox_edgeMultiTriggerOnError
+        runningNonTDM = running and not self.sourceIsTDM
+        if runningNonTDM:
+            checkbox.setChecked(True)
+            checkbox.hide()
+        else:
+            checkbox.show()
 
     def _start(self):
         self.sourceIsTDM = False
@@ -644,7 +657,12 @@ class MainWindow(QtWidgets.QMainWindow):
             "EdgeLevel": self.ui.spinBox_EdgeLevel.value()
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
-        if not self.ui.checkBox_edgeMultiTriggerOnError.isChecked():
+
+        # Reset trigger on even-numbered channels if source is TDM and the relevant
+        # check box ("Trigger on Error Channels") isn't checked.
+        omitEvenChannels = (self.sourceIsTDM and not
+                            self.ui.checkBox_edgeMultiTriggerOnError.isChecked)
+        if omitEvenChannels:
             config = {"ChannelIndicies": range(0, len(self.channel_names), 2)}
             self.client.call("SourceControl.ConfigureTriggers", config)
 

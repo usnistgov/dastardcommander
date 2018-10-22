@@ -255,12 +255,12 @@
          </item>
          <item>
           <property name="text">
-           <string>FB channels</string>
+           <string>Signal channels</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Err channels</string>
+           <string>TDM error channels</string>
           </property>
          </item>
         </widget>
@@ -703,7 +703,7 @@ trigger the corresponding FB chan (Lancero only).</string>
  <connections>
   <connection>
    <sender>channelChooserBox</sender>
-   <signal>currentIndexChanged(int)</signal>
+   <signal>activated(int)</signal>
    <receiver>triggerConfigTab</receiver>
    <slot>channelChooserChanged(int)</slot>
    <hints>
