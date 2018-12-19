@@ -72,6 +72,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
         self.ui.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.ui.pushButton_sendMix.clicked.connect(self.sendMix)
+        self.ui.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
+        self.ui.pushButton_pauseExperimental.clicked.connect(self.handlePauseExperimental)
+        self.ui.pushButton_unpauseExperimental.clicked.connect(self.handleUnpauseExperimental)
         self.running = False
         self.sourceIsTDM = False
         self.cols = 0
@@ -138,7 +141,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print "Error is: %s" % e
             return
 
-        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE"])
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE", "EXTERNALTRIGGER"])
         if topic not in quietTopics or self.nmsg < 15:
             print("%s %5d: %s" % (topic, self.nmsg, d))
 
@@ -243,6 +246,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     print("Could not set mix; selecting 0")
                     self.ui.doubleSpinBox_MixFraction.setValue(0.0)
 
+            elif topic == "EXTERNALTRIGGER":
+                self.observeTab.handleExternalTriggerMessage(d)
+                
             else:
                 print("%s is not a topic we handle yet." % topic)
 
@@ -684,6 +690,27 @@ class MainWindow(QtWidgets.QMainWindow):
             print config
         except Exception as e:
             print "Could not set mix: {}".format(e)
+
+    @pyqtSlot()
+    def sendExperimentStateLabel(self):
+        config = {
+            "Label": self.ui.lineEdit_experimentStateLabel.text(),
+        }
+        self.client.call("SourceControl.SetExperimentStateLabel", config)
+
+    @pyqtSlot()
+    def handlePauseExperimental(self):
+        config = {
+            "Request": "Pause"
+        }
+        self.client.call("SourceControl.WriteControl", config)
+
+    @pyqtSlot()
+    def handleUnpauseExperimental(self):
+        config = {
+            "Request": "Unpause "+self.ui.lineEdit_unpauseExperimentalLabel.text()
+        }
+        self.client.call("SourceControl.WriteControl", config)
 
 
 class HostPortDialog(QtWidgets.QDialog):

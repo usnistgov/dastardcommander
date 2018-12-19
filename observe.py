@@ -187,6 +187,10 @@ class Observe(QtWidgets.QWidget):
         print self.pixelMap
         self.buildCRMMap()
 
+    def handleExternalTriggerMessage(self, msg):
+        n = msg["NumberObservedInLastSecond"]
+        self.ui.label_externalTriggersInLastSecond.setText("{} external triggers in last second".format(n))
+
 
 class CountRateMap(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
