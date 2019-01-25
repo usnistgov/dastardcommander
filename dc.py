@@ -537,8 +537,11 @@ class MainWindow(QtWidgets.QMainWindow):
             if result:
                 self.sourceIsTDM = True
             return result
+        elif sourceID == 4:
+            result = self._startAbaco()
+            return result
         else:
-            raise ValueError("invalid sourceID. have {}, want 0,1 or 2".format(sourceID))
+            raise ValueError("invalid sourceID. have {}, want 0,1,2 or 4".format(sourceID))
 
     def _startTriangle(self):
         config = {
@@ -618,6 +621,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(True)
         self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
         self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
+        return True
+
+    def _startAbaco(self):
+        config = {
+        }
+        okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
+        if not okay:
+            print "Could not ConfigureAbacoSource"
+            return False
+        okay, error = self.client.call("SourceControl.Start", "ABACOSOURCE")
+        if not okay:
+            print "Could not Start Abaco"
+            return False
+        print "Starting Abaco"
         return True
 
     @pyqtSlot()

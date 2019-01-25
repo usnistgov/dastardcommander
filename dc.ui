@@ -92,7 +92,7 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QComboBox" name="dataSource">
-          <property name="currentText" stdset="0">
+          <property name="currentText">
            <string>Simulated pulse source</string>
           </property>
           <property name="currentIndex">
@@ -133,7 +133,7 @@
         <item>
          <widget class="QStackedWidget" name="dataSourcesStackedWidget">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="trianglePage">
            <widget class="QFrame" name="gridFrame">
@@ -571,6 +571,36 @@
               </layout>
              </item>
             </layout>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="roachPage">
+           <widget class="QLabel" name="label_22">
+            <property name="geometry">
+             <rect>
+              <x>370</x>
+              <y>130</y>
+              <width>201</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>ROACH configuration</string>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="abacoPage">
+           <widget class="QLabel" name="label_21">
+            <property name="geometry">
+             <rect>
+              <x>330</x>
+              <y>100</y>
+              <width>201</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Abaco configuration</string>
+            </property>
            </widget>
           </widget>
          </widget>
