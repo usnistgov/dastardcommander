@@ -120,7 +120,7 @@
           </item>
           <item>
            <property name="text">
-            <string>Abaco uMUX</string>
+            <string>Abaco µMUX</string>
            </property>
           </item>
           <item>
@@ -133,7 +133,7 @@
         <item>
          <widget class="QStackedWidget" name="dataSourcesStackedWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="trianglePage">
            <widget class="QFrame" name="gridFrame">
@@ -589,18 +589,48 @@
            </widget>
           </widget>
           <widget class="QWidget" name="abacoPage">
-           <widget class="QLabel" name="label_21">
+           <widget class="QFrame" name="abacoFrame">
             <property name="geometry">
              <rect>
-              <x>330</x>
-              <y>100</y>
-              <width>201</width>
-              <height>16</height>
+              <x>40</x>
+              <y>30</y>
+              <width>260</width>
+              <height>67</height>
              </rect>
             </property>
-            <property name="text">
-             <string>Abaco configuration</string>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
             </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QLabel" name="label_21">
+               <property name="font">
+                <font>
+                 <family>Helvetica</family>
+                 <pointsize>14</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Abaco configuration</string>
+               </property>
+               <property name="textFormat">
+                <enum>Qt::AutoText</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_23">
+               <property name="text">
+                <string>No devices found at /dev/xdma0_c2h_*</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </widget>
          </widget>
