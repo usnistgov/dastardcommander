@@ -171,6 +171,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ui.simPulseNchan.setValue(nchan)
                 elif source == "Lancero":
                     self.ui.dataSource.setCurrentIndex(2)
+                elif source == "Abaco":
+                    self.ui.dataSource.setCurrentIndex(4)
 
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
@@ -203,6 +205,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 ns = d["Nsamp"]
                 if ns > 0 and ns <= 16:
                     self.ui.nsampSpinBox.setValue(ns)
+
+            elif topic == "ABACO":
+                self.updateAbacoCardChoices(d["AvailableCards"])
 
             elif topic == "CHANNELNAMES":
                 self.channel_names[:] = []   # Careful: don't replace the variable
@@ -248,7 +253,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "EXTERNALTRIGGER":
                 self.observeTab.handleExternalTriggerMessage(d)
-                
+
             else:
                 print("%s is not a topic we handle yet." % topic)
 
@@ -409,6 +414,39 @@ class MainWindow(QtWidgets.QMainWindow):
             sb.setToolTip("Card delay for card %d" % c)
             self.lanceroDelays[c] = sb
             layout.addWidget(sb, i+1, 1)
+
+    def updateAbacoCardChoices(self, cards=None):
+        """Build the check boxes to specify which Abaco cards to use.
+        cards is a list of integers: which cards are available on the sever"""
+
+        layout = self.ui.abacoChooserLayout
+        # Empty the layout
+        while True:
+            item = layout.takeAt(0)
+            if item is None:
+                break
+            del item
+
+        self.abacoCheckBoxes = {}
+        if cards is None:
+            cards = []
+        if len(cards) == 0:
+            self.ui.noAbacoLabel.show()
+        else:
+            self.ui.noAbacoLabel.hide()
+            layout.addWidget(QtWidgets.QLabel("Card number"), 0, 0)
+
+        narrow = QtWidgets.QSizePolicy()
+        narrow.setHorizontalStretch(2)
+        wide = QtWidgets.QSizePolicy()
+        wide.setHorizontalStretch(10)
+
+        for i, c in enumerate(cards):
+            cb = QtWidgets.QCheckBox("abaco %d" % c)
+            cb.setChecked(True)
+            cb.setSizePolicy(wide)
+            self.abacoCheckBoxes[c] = cb
+            layout.addWidget(cb, i+1, 0)
 
     def buildLanceroFiberBoxes(self, nfibers):
         """Build the check boxes to specify which fibers to use."""
@@ -624,7 +662,14 @@ class MainWindow(QtWidgets.QMainWindow):
         return True
 
     def _startAbaco(self):
+        activate = []
+        for k, v in self.abacoCheckBoxes.items():
+            if v.isChecked():
+                activate.append(k)
+
         config = {
+            "ActiveCards": activate,
+            "AvailableCards": [],   # This is filled in only by server, not us.
         }
         okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
         if not okay:
