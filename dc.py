@@ -171,6 +171,8 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ui.simPulseNchan.setValue(nchan)
                 elif source == "Lancero":
                     self.ui.dataSource.setCurrentIndex(2)
+                elif source == "Roach":
+                    self.ui.dataSource.setCurrentIndex(3)
                 elif source == "Abaco":
                     self.ui.dataSource.setCurrentIndex(4)
 
@@ -205,6 +207,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 ns = d["Nsamp"]
                 if ns > 0 and ns <= 16:
                     self.ui.nsampSpinBox.setValue(ns)
+
+            elif topic == "ROACH":
+                pass
 
             elif topic == "ABACO":
                 self.updateAbacoCardChoices(d["AvailableCards"])
@@ -261,7 +266,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.last_messages[topic] = message
 
         # Enable the window once the following message types have been received
-        require = ("TRIANGLE", "SIMPULSE", "LANCERO")
+        require = ("TRIANGLE", "SIMPULSE", "LANCERO", "ABACO")
         allseen = True
         for k in require:
             if k not in self.last_messages:
@@ -575,11 +580,14 @@ class MainWindow(QtWidgets.QMainWindow):
             if result:
                 self.sourceIsTDM = True
             return result
+        elif sourceID == 3:
+            result = self._startRoach()
+            return result
         elif sourceID == 4:
             result = self._startAbaco()
             return result
         else:
-            raise ValueError("invalid sourceID. have {}, want 0,1,2 or 4".format(sourceID))
+            raise ValueError("invalid sourceID. have {}, want 0,1,2,3 or 4".format(sourceID))
 
     def _startTriangle(self):
         config = {
@@ -659,6 +667,32 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(True)
         self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
         self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
+        return True
+
+    def _startRoach(self):
+        config = {
+            "HostPort": [],
+            "Rates": []
+            }
+        for id in (1, 2):
+            if not self.ui.__dict__["roachDeviceCheckBox_%d" % id].isChecked():
+                continue
+            ipwidget = self.ui.__dict__["roachIPLineEdit_%d" % id]
+            portwidget = self.ui.__dict__["roachPortSpinBox_%d" % id]
+            ratewidget = self.ui.__dict__["roachFrameRateDoubleSpinBox_%d" % id]
+            hostport = "%s:%d" % (ipwidget.text(), portwidget.value())
+            rate = ratewidget.value()
+            config["HostPort"].append(hostport)
+            config["Rates"].append(rate)
+        okay, error = self.client.call("SourceControl.ConfigureRoachSource", config)
+        if not okay:
+            print "Could not ConfigureRoachSource"
+            return False
+        okay, error = self.client.call("SourceControl.Start", "ROACHSOURCE")
+        if not okay:
+            print "Could not Start ROACH"
+            return False
+        print "Starting ROACH"
         return True
 
     def _startAbaco(self):
