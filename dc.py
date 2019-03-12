@@ -397,6 +397,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     print "Could not parse hostport='%s'" % hostport
 
+    @pyqtSlot()
+    def toggledRoachDeviceActive(self):
+        a1 = self.ui.roachDeviceCheckBox_1.isChecked()
+        a2 = self.ui.roachDeviceCheckBox_2.isChecked()
+        self.ui.roachIPLineEdit_1.setEnabled(a1)
+        self.ui.roachPortSpinBox_1.setEnabled(a1)
+        self.ui.roachFrameRateDoubleSpinBox_1.setEnabled(a1)
+        self.ui.roachIPLineEdit_2.setEnabled(a2)
+        self.ui.roachPortSpinBox_2.setEnabled(a2)
+        self.ui.roachFrameRateDoubleSpinBox_2.setEnabled(a2)
+
     def updateLanceroCardChoices(self, cards=None):
         """Build the check boxes to specify which Lancero cards to use.
         cards is a list of integers: which cards are available on the sever"""
@@ -498,6 +509,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ui.allFibersButton.clicked.connect(checkAll)
         self.ui.noFibersButton.clicked.connect(clearAll)
+        self.ui.roachDeviceCheckBox_1.toggled.connect(self.toggledRoachDeviceActive)
+        self.ui.roachDeviceCheckBox_2.toggled.connect(self.toggledRoachDeviceActive)
+
         self.toggleParallelStreaming(self.ui.parallelStreaming.isChecked())
         self.ui.parallelStreaming.toggled.connect(self.toggleParallelStreaming)
 
