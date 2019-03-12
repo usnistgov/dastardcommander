@@ -209,7 +209,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.ui.nsampSpinBox.setValue(ns)
 
             elif topic == "ROACH":
-                pass
+                self.updateRoachSettings(d)
 
             elif topic == "ABACO":
                 self.updateAbacoCardChoices(d["AvailableCards"])
@@ -376,6 +376,26 @@ class MainWindow(QtWidgets.QMainWindow):
                 m.terminate()
             except IndexError:
                 return
+
+    def updateRoachSettings(self, settings):
+        rates = settings["Rates"]
+        if rates is not None:
+            rateguis = (self.ui.roachFrameRateDoubleSpinBox_1,
+                        self.ui.roachFrameRateDoubleSpinBox_2)
+            for r, rategui in zip(rates, rateguis):
+                rategui.setValue(r)
+
+        hosts = settings["HostPort"]
+        if hosts is not None:
+            ips = (self.ui.roachIPLineEdit_1, self.ui.roachIPLineEdit_2)
+            ports = (self.ui.roachPortSpinBox_1, self.ui.roachPortSpinBox_2)
+            for hostport, ipgui, portgui in zip(hosts, ips, ports):
+                parts = hostport.split(":")
+                if len(parts) == 2:
+                    ipgui.setText(parts[0])
+                    portgui.setValue(int(parts[1]))
+                else:
+                    print "Could not parse hostport='%s'" % hostport
 
     def updateLanceroCardChoices(self, cards=None):
         """Build the check boxes to specify which Lancero cards to use.
