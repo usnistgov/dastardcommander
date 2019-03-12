@@ -66,7 +66,11 @@ class Observe(QtWidgets.QWidget):
     def getColorScale(self, countRates):
         if self.ui.pushButton_autoScale.isChecked():
             totalRate = countRates.sum()
-            fracDiff = np.abs(self.lastTotalRate-totalRate)/(self.lastTotalRate+totalRate)
+            # Be careful not to have divide-by-zero error here.
+            fracDiff = 0.0
+            denom = self.lastTotalRate + totalRate
+            if denom > 0:
+                fracDiff = np.abs(self.lastTotalRate-totalRate)/denom
             self.lastTotalRate = totalRate
             if fracDiff > 0.2:
                 maxRate = np.amax(countRates)
