@@ -26,7 +26,7 @@ class JSONClient(object):
 
     def call(self, name, params, verbose=True, errorBox=True, throwError=False):
         if self._closed:
-            print "%s(...) ignored because JSON-RPC client is closed." % name
+            print("%s(...) ignored because JSON-RPC client is closed." % name)
             return None
             # This might seem like it should be impossible to reach, but it is possible
             # because signals like editingFinished can trigger slots when you try
@@ -44,7 +44,7 @@ class JSONClient(object):
         try:
             response = self._codec.loads(response.decode())
         except ValueError:  # This means RPC server is gone
-            print "RPC server is missing."
+            print("RPC server is missing.")
             self.qtParent.reconnect = True
             self.close()
             return None
@@ -57,7 +57,7 @@ class JSONClient(object):
         if response.get('error') is not None:
             message = "Request: {}\n\nError: {}".format(request,response.get('error'))
             if verbose:
-                print message
+                print(message)
             if errorBox and self.qtParent is not None:
                 resultBox = QtWidgets.QMessageBox(self.qtParent)
                 resultBox.setText(message)
@@ -66,7 +66,7 @@ class JSONClient(object):
             elif throwError:
                 raise Exception(message)
             else:
-                print "PANIC unhandled response.get(error)"
+                print("PANIC unhandled response.get(error)")
         return response.get('result'), response.get("error")
 
     def close(self):

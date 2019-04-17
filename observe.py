@@ -133,7 +133,7 @@ class Observe(QtWidgets.QWidget):
             rows = [1]
         else:
             rows = max(rows)
-        print "Rows, cols, nchan: ", rows, cols, nchannels
+        print("Rows, cols, nchan: ", rows, cols, nchannels)
         # If numbers don't add up, trust the column count
         if rows*cols != nchannels:
             rows = nchannels // cols
@@ -185,10 +185,10 @@ class Observe(QtWidgets.QWidget):
         scale = 1.0/float(msg["Spacing"])
         minx = np.min([p["X"] for p in msg["Pixels"]])
         maxy = np.max([p["Y"] for p in msg["Pixels"]])
-        print "MinX = ",minx, " MaxY=", maxy
+        print("MinX = ",minx, " MaxY=", maxy)
         self.pixelMap = [((p["X"]-minx)*scale, (maxy-p["Y"])*scale) for p in msg["Pixels"]]
-        print "handleTESMap with spacing ", msg["Spacing"], " scale ", scale
-        print self.pixelMap
+        print("handleTESMap with spacing ", msg["Spacing"], " scale ", scale)
+        print(self.pixelMap)
         self.buildCRMMap()
 
     def handleExternalTriggerMessage(self, msg):

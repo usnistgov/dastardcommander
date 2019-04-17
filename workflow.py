@@ -134,7 +134,7 @@ class Workflow(QtWidgets.QWidget):
         """
         # set triggers to auto for all fb channels
         self.reset()
-        print self.channel_names
+        print(self.channel_names)
         if self.currentlyWriting:
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
@@ -181,7 +181,7 @@ class Workflow(QtWidgets.QWidget):
         # this is wrong!!! but I need something here to make progress
         # the best option would be to have Joe implement the "trigger states" buttons
         # and activate the pulses trigger state
-        print self.channel_names
+        print(self.channel_names)
         if self.currentlyWriting:
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
@@ -234,7 +234,7 @@ class Workflow(QtWidgets.QWidget):
         # create pope script call
         outName = self.noiseFilename[:-9]+"noise.hdf5"
         plotName = self.noiseFilename[:-9]+"noise.pdf"
-        print outName
+        print(outName)
 
         inputFile = glob.glob(self.noiseFilename)[0]
         if os.path.isfile(outName):
@@ -268,8 +268,8 @@ class Workflow(QtWidgets.QWidget):
     def openPdf(self, path):
         if not path.endswith(".pdf"):
             raise Exception("path should end with .pdf, got {}".format(path))
-        print sys.platform
-        print self.noisePlotFilename
+        print(sys.platform)
+        print(self.noisePlotFilename)
         if sys.platform.startswith('darwin'):
             cmd = ["open", path]
         elif sys.platform.startswith('linux'):
@@ -286,7 +286,7 @@ class Workflow(QtWidgets.QWidget):
         # call pope script
         outName = self.pulseFilename[:-9]+"model.hdf5"
         plotName = self.pulseFilename[:-9]+"model_plots.pdf"
-        print outName
+        print(outName)
         pulseFile = glob.glob(self.pulseFilename)[0]
         if os.path.isfile(outName):
             print("{} exists, skipping create_basis.jl".format(outName))
@@ -335,8 +335,8 @@ class Workflow(QtWidgets.QWidget):
         print("Sending model for {} chans".format(len(configs)))
         success_chans = []
         failures = OrderedDict()
-        for channelIndex, config in configs.items():
             print("sending ProjectorsBasis for {}".format(channelIndex))
+        for channelIndex, config in list(configs.items()):
             okay, error = self.dc.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
             if okay:
                 success_chans.append(channelIndex)

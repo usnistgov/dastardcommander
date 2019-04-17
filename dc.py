@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 dastard-commander (dc.py)
@@ -136,9 +136,9 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             d = json.loads(message)
         except Exception as e:
-            print "Error processing status message [topic,msg]: %s, %s" % (
-                topic, message)
-            print "Error is: %s" % e
+            print(("Error processing status message [topic,msg]: %s, %s" % (
+                topic, message)))
+            print(("Error is: %s" % e))
             return
 
         quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE", "EXTERNALTRIGGER"])
@@ -202,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "LANCERO":
                 self.updateLanceroCardChoices(d["AvailableCards"])
                 mask = d["FiberMask"]
-                for k, v in self.fiberBoxes.items():
+                for k, v in list(self.fiberBoxes.items()):
                     v.setChecked(mask & (1 << k))
                 ns = d["Nsamp"]
                 if ns > 0 and ns <= 16:
@@ -221,7 +221,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
-                print "New channames: ", self.channel_names
+                print(("New channames: ", self.channel_names))
                 if self.sourceIsTDM:
                     self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
                 else:
@@ -395,7 +395,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     ipgui.setText(parts[0])
                     portgui.setValue(int(parts[1]))
                 else:
-                    print "Could not parse hostport='%s'" % hostport
+                    print(("Could not parse hostport='%s'" % hostport))
 
     @pyqtSlot()
     def toggledRoachDeviceActive(self):
@@ -498,7 +498,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fiberBoxes[i] = box
 
         def setAll(value):
-            for box in self.fiberBoxes.values():
+            for box in list(self.fiberBoxes.values()):
                 box.setChecked(value)
 
         def checkAll():
@@ -568,9 +568,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def _stop(self):
         okay, error = self.client.call("SourceControl.Stop", "")
         if not okay:
-            print "Could not Stop data"
+            print("Could not Stop data")
             return False
-        print "Stopping Data"
+        print("Stopping Data")
         return True
 
     def _setGuiRunning(self, running, sourceName=""):
@@ -632,13 +632,13 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         okay, error = self.client.call("SourceControl.ConfigureTriangleSource", config)
         if not okay:
-            print "Could not ConfigureTriangleSource"
+            print("Could not ConfigureTriangleSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
         if not okay:
-            print "Could not Start Triangle "
+            print("Could not Start Triangle ")
             return False
-        print "Starting Triangle"
+        print("Starting Triangle")
         return True
 
     def _startSimPulse(self):
@@ -653,18 +653,18 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         okay, error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
         if not okay:
-            print "Could not ConfigureSimPulseSource"
+            print("Could not ConfigureSimPulseSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
         if not okay:
-            print "Could not Start SimPulse"
+            print("Could not Start SimPulse")
             return False
-        print "Starting Sim Pulses"
+        print("Starting Sim Pulses")
         return True
 
     def _startLancero(self):
         mask = 0
-        for k, v in self.fiberBoxes.items():
+        for k, v in list(self.fiberBoxes.items()):
             if v.isChecked():
                 mask |= (1 << k)
         print("Fiber mask: 0x%4.4x" % mask)
@@ -675,7 +675,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         activate = []
         delays = []
-        for k, v in self.lanceroCheckBoxes.items():
+        for k, v in list(self.lanceroCheckBoxes.items()):
             if v.isChecked():
                 activate.append(k)
                 delays.append(self.lanceroDelays[k].value())
@@ -689,8 +689,8 @@ class MainWindow(QtWidgets.QMainWindow):
             "AvailableCards": [],   # This is filled in only by server, not us.
             "AutoRestart": self.ui.checkBox_lanceroAutoRestart.isChecked()
         }
-        print "START LANCERO CONFIG"
-        print config
+        print("START LANCERO CONFIG")
+        print(config)
         okay, error = self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox=True)
         if not okay:
             return False
@@ -720,18 +720,18 @@ class MainWindow(QtWidgets.QMainWindow):
             config["Rates"].append(rate)
         okay, error = self.client.call("SourceControl.ConfigureRoachSource", config)
         if not okay:
-            print "Could not ConfigureRoachSource"
+            print("Could not ConfigureRoachSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "ROACHSOURCE")
         if not okay:
-            print "Could not Start ROACH"
+            print("Could not Start ROACH")
             return False
-        print "Starting ROACH"
+        print("Starting ROACH")
         return True
 
     def _startAbaco(self):
         activate = []
-        for k, v in self.abacoCheckBoxes.items():
+        for k, v in list(self.abacoCheckBoxes.items()):
             if v.isChecked():
                 activate.append(k)
 
@@ -741,13 +741,13 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
         if not okay:
-            print "Could not ConfigureAbacoSource"
+            print("Could not ConfigureAbacoSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "ABACOSOURCE")
         if not okay:
-            print "Could not Start Abaco"
+            print("Could not Start Abaco")
             return False
-        print "Starting Abaco"
+        print("Starting Abaco")
         return True
 
     @pyqtSlot()
@@ -762,13 +762,13 @@ class MainWindow(QtWidgets.QMainWindow):
             "Model Files (*_model.hdf5);;All Files (*)", options=options)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
-            print("opening: {}".format(fileName))
+            print(("opening: {}".format(fileName)))
             configs = projectors.getConfigs(fileName, self.channel_names)
             print("Sending model for {} chans".format(len(configs)))
             success_chans = []
             failures = OrderedDict()
-            for channelIndex, config in configs.items():
-                print("sending ProjectorsBasis for {}".format(channelIndex))
+            for channelIndex, config in list(configs.items()):
+                print(("sending ProjectorsBasis for {}".format(channelIndex)))
                 okay, error = self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
                 if okay:
                     success_chans.append(channelIndex)
@@ -782,7 +782,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def sendEdgeMulti(self):
         config = {
-            "ChannelIndicies": range(len(self.channel_names)),
+            "ChannelIndicies": list(range(len(self.channel_names))),
             "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),
@@ -799,7 +799,7 @@ class MainWindow(QtWidgets.QMainWindow):
         omitEvenChannels = (self.sourceIsTDM and not
                             self.ui.checkBox_edgeMultiTriggerOnError.isChecked)
         if omitEvenChannels:
-            config = {"ChannelIndicies": range(0, len(self.channel_names), 2)}
+            config = {"ChannelIndicies": list(range(0, len(self.channel_names), 2))}
             self.client.call("SourceControl.ConfigureTriggers", config)
 
     @pyqtSlot()
@@ -817,9 +817,9 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.client.call("SourceControl.ConfigureMixFraction", config)
             print("experimental mix config")
-            print config
+            print(config)
         except Exception as e:
-            print "Could not set mix: {}".format(e)
+            print(("Could not set mix: {}".format(e)))
 
     @pyqtSlot()
     def sendExperimentStateLabel(self):
@@ -886,14 +886,14 @@ def main():
                            settings=settings)
         host, port = d.run()
         if host is None or port is None:
-            print "Could not start Dastard-commander without a valid host:port selection."
+            print("Could not start Dastard-commander without a valid host:port selection.")
             return
         try:
             client = rpc_client.JSONClient((host, port))
         except socket.error:
-            print "Could not connect to Dastard at %s:%d" % (host, port)
+            print(("Could not connect to Dastard at %s:%d" % (host, port)))
             continue
-        print "Dastard is at %s:%d" % (host, port)
+        print(("Dastard is at %s:%d" % (host, port)))
 
         dc = MainWindow(client, host, port)
         dc.show()
