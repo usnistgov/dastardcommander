@@ -23,7 +23,8 @@ class JuliaCaller(object):
         """Find which version of julia has POPE installed. Assume that the newest
         is the one you want"""
 
-        versiontext = subprocess.check_output(["julia", "-v"]).split()[2]
+        versiontext = subprocess.check_output(["julia", "-v"],
+                                              encoding="UTF-8").split()[2]
         majorminor = ".".join(versiontext.split(".")[:2])
         path = os.path.expanduser("~/.julia/v%s/Pope/scripts" % majorminor)
         if not os.path.isdir(path):
