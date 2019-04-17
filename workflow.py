@@ -335,7 +335,7 @@ class Workflow(QtWidgets.QWidget):
         print("Sending model for {} chans".format(len(configs)))
         success_chans = []
         failures = OrderedDict()
-            print("sending ProjectorsBasis for {}".format(channelIndex))
+        print("sending ProjectorsBasis for {}".format(channelIndex))
         for channelIndex, config in list(configs.items()):
             okay, error = self.dc.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
             if okay:

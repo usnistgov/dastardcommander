@@ -136,9 +136,9 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             d = json.loads(message)
         except Exception as e:
-            print(("Error processing status message [topic,msg]: %s, %s" % (
-                topic, message)))
-            print(("Error is: %s" % e))
+            print("Error processing status message [topic,msg]: %s, %s" % (
+                topic, message))
+            print("Error is: %s" % e)
             return
 
         quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE", "EXTERNALTRIGGER"])
@@ -221,7 +221,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
-                print(("New channames: ", self.channel_names))
+                print("New channames: ", self.channel_names)
                 if self.sourceIsTDM:
                     self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
                 else:
@@ -395,7 +395,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     ipgui.setText(parts[0])
                     portgui.setValue(int(parts[1]))
                 else:
-                    print(("Could not parse hostport='%s'" % hostport))
+                    print("Could not parse hostport='%s'" % hostport)
 
     @pyqtSlot()
     def toggledRoachDeviceActive(self):
@@ -762,13 +762,13 @@ class MainWindow(QtWidgets.QMainWindow):
             "Model Files (*_model.hdf5);;All Files (*)", options=options)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
-            print(("opening: {}".format(fileName)))
+            print("opening: {}".format(fileName))
             configs = projectors.getConfigs(fileName, self.channel_names)
             print("Sending model for {} chans".format(len(configs)))
             success_chans = []
             failures = OrderedDict()
             for channelIndex, config in list(configs.items()):
-                print(("sending ProjectorsBasis for {}".format(channelIndex)))
+                print("sending ProjectorsBasis for {}".format(channelIndex))
                 okay, error = self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
                 if okay:
                     success_chans.append(channelIndex)
@@ -819,7 +819,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("experimental mix config")
             print(config)
         except Exception as e:
-            print(("Could not set mix: {}".format(e)))
+            print("Could not set mix: {}".format(e))
 
     @pyqtSlot()
     def sendExperimentStateLabel(self):
@@ -891,9 +891,9 @@ def main():
         try:
             client = rpc_client.JSONClient((host, port))
         except socket.error:
-            print(("Could not connect to Dastard at %s:%d" % (host, port)))
+            print("Could not connect to Dastard at %s:%d" % (host, port))
             continue
-        print(("Dastard is at %s:%d" % (host, port)))
+        print("Dastard is at %s:%d" % (host, port))
 
         dc = MainWindow(client, host, port)
         dc.show()
