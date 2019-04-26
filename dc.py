@@ -200,11 +200,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.simPulseAmplitude.setValue(a[0])
 
             elif topic == "LANCERO":
-                self.updateLanceroCardChoices(d["AvailableCards"])
+                print(d.keys())
+                print(d["DastardOutput"].keys())
+                self.updateLanceroCardChoices(d["DastardOutput"]["AvailableCards"])
                 mask = d["FiberMask"]
                 for k, v in self.fiberBoxes.items():
                     v.setChecked(mask & (1 << k))
-                ns = d["Nsamp"]
+                ns = d["DastardOutput"]["Nsamp"]
                 if ns > 0 and ns <= 16:
                     self.ui.nsampSpinBox.setValue(ns)
 
