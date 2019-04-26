@@ -200,8 +200,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.simPulseAmplitude.setValue(a[0])
 
             elif topic == "LANCERO":
-                print(d.keys())
-                print(d["DastardOutput"].keys())
                 self.updateLanceroCardChoices(d["DastardOutput"]["AvailableCards"])
                 mask = d["FiberMask"]
                 for k, v in self.fiberBoxes.items():
