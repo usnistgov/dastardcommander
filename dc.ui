@@ -92,7 +92,7 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QComboBox" name="dataSource">
-          <property name="currentText" stdset="0">
+          <property name="currentText">
            <string>Triangle wave source</string>
           </property>
           <property name="currentIndex">
@@ -133,7 +133,7 @@
         <item>
          <widget class="QStackedWidget" name="dataSourcesStackedWidget">
           <property name="currentIndex">
-           <number>3</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="trianglePage">
            <widget class="QFrame" name="gridFrame">
@@ -450,6 +450,9 @@
                 <layout class="QVBoxLayout" name="verticalLayout_2">
                  <item>
                   <widget class="QRadioButton" name="lanceroClock50Button">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="toolTip">
                     <string>Choose for 50 MHz TDM master clock speed</string>
                    </property>
@@ -460,6 +463,9 @@
                  </item>
                  <item>
                   <widget class="QRadioButton" name="lanceroClock125Button">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="toolTip">
                     <string>Choose for 125 MHz TDM master clock speed</string>
                    </property>
@@ -498,6 +504,21 @@
                    </item>
                    <item row="1" column="1">
                     <widget class="QSpinBox" name="nsampSpinBox">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>50</width>
+                       <height>0</height>
+                      </size>
+                     </property>
                      <property name="toolTip">
                       <string>NSAMP setting for DFB cards
 (the number of error samples summed)</string>
@@ -569,6 +590,19 @@
                 <layout class="QGridLayout" name="lanceroFiberLayout"/>
                </item>
               </layout>
+             </item>
+             <item row="0" column="2">
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </widget>
