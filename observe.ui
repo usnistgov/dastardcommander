@@ -160,6 +160,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="label_auxCps">
+       <property name="text">
+        <string>??? aux cps</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="mapLoadButton">
        <property name="maximumSize">
         <size>

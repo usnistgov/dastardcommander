@@ -67,8 +67,14 @@ class Observe(QtWidgets.QWidget):
                 print("now have len(buttons)={}".format(len(self.crm_map.buttons)))
             self.crm_map.setCountRates(countRates, colorScale)
         integrationComplete = len(self.countsSeens) == integrationTime
-        arrayCps = countRates.sum()
-        self.setArrayCps(arrayCps, integrationComplete)
+        arrayCps = 0
+        auxCps = 0
+        for cr, channel_name in zip(countRates, self.channel_names):
+            if channel_name.startswith("chan"):
+                arrayCps+=cr
+            else:
+                auxCps+=cr
+        self.setArrayCps(arrayCps, integrationComplete, auxCps)
 
     def getColorScale(self, countRates):
         if self.ui.pushButton_autoScale.isChecked():
@@ -84,10 +90,12 @@ class Observe(QtWidgets.QWidget):
                 self.ui.doubleSpinBox_colorScale.setValue(maxRate)
         return self.ui.doubleSpinBox_colorScale.value()
 
-    def setArrayCps(self, arrayCps, integrationComplete):
+    def setArrayCps(self, arrayCps, integrationComplete, auxCps):
         s = "{:.2f} cps/array".format(arrayCps)
         self.ui.label_arrayCps.setText(s)
         self.ui.label_arrayCps.setEnabled(integrationComplete)
+        sAux = "{:.2f} aux cps".format(auxCps)
+        self.ui.label_auxCps.setText(sAux)
 
     def buildCRM(self):
         self.deleteCRMGrid()
