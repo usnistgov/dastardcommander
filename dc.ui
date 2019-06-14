@@ -1241,6 +1241,7 @@
      <string>Expert</string>
     </property>
     <addaction name="actionLoad_Projectors_Basis"/>
+    <addaction name="actionLoad_Mix"/>
    </widget>
    <addaction name="menuConnection"/>
    <addaction name="menuExpert"/>
@@ -1259,6 +1260,11 @@
   <action name="actionLoad_Projectors_Basis">
    <property name="text">
     <string>Load Projectors/Basis</string>
+   </property>
+  </action>
+  <action name="actionLoad_Mix">
+   <property name="text">
+    <string>Load Mix</string>
    </property>
   </action>
  </widget>

@@ -70,6 +70,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
+        self.ui.actionLoad_Mix.triggered.connect(self.loadMix)
         self.ui.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.ui.pushButton_sendMix.clicked.connect(self.sendMix)
         self.ui.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
@@ -778,6 +779,25 @@ class MainWindow(QtWidgets.QMainWindow):
             resultBox = QtWidgets.QMessageBox(self)
             resultBox.setText(result)
             resultBox.show()
+
+    @pyqtSlot()
+    def loadMix(self):
+        options = QFileDialog.Options()
+        if not hasattr(self, "lastdir_mix"):
+            dir = os.path.expanduser("~/nist_lab_internals/viper/cringe")
+        else:
+            dir = self.lastdir_mix
+        fileName, _ = QFileDialog.getOpenFileName(
+            self, "Find Projectors Basis file", dir,
+            "Mix Files (last_mix_values*);;All Files (*)", options=options)
+        if fileName:
+            self.lastdir_mix = os.path.dirname(fileName)
+            print("opening: {}".format(fileName))
+            mixFractions = np.load(fileName)
+            print("mixFractions.shape = ".format(mixFractions.shape))
+            config = {"ChannelIndices":  np.arange(1,self.numColumns*self.numRows*2,2).tolist(),
+                    "MixFractions": mixFractions.flatten().tolist()}
+            okay, error = self.client.call("SourceControl.ConfigureMixFraction", config, verbose=True, throwError=False)
 
     @pyqtSlot()
     def sendEdgeMulti(self):
