@@ -19,7 +19,7 @@ import sys
 import time
 import os
 from collections import OrderedDict, defaultdict
-
+import numpy as np
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -784,18 +784,18 @@ class MainWindow(QtWidgets.QMainWindow):
     def loadMix(self):
         options = QFileDialog.Options()
         if not hasattr(self, "lastdir_mix"):
-            dir = os.path.expanduser("~/nist_lab_internals/viper/cringe")
+            dir = os.path.expanduser("~/.cringe")
         else:
             dir = self.lastdir_mix
         fileName, _ = QFileDialog.getOpenFileName(
             self, "Find Projectors Basis file", dir,
-            "Mix Files (last_mix_values*);;All Files (*)", options=options)
+            "Mix Files (*.npy);;All Files (*)", options=options)
         if fileName:
             self.lastdir_mix = os.path.dirname(fileName)
             print("opening: {}".format(fileName))
             mixFractions = np.load(fileName)
-            print("mixFractions.shape = ".format(mixFractions.shape))
-            config = {"ChannelIndices":  np.arange(1,self.numColumns*self.numRows*2,2).tolist(),
+            print("mixFractions.shape = {}".format(mixFractions.shape))
+            config = {"ChannelIndices":  np.arange(1,len(mixFractions)*2,2).tolist(),
                     "MixFractions": mixFractions.flatten().tolist()}
             okay, error = self.client.call("SourceControl.ConfigureMixFraction", config, verbose=True, throwError=False)
 
