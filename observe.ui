@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>768</width>
+    <width>775</width>
     <height>601</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="GridTab">
         <attribute name="title">
@@ -48,30 +48,6 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5"/>
           </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="mapTabHorizLayout">
-           <item>
-            <widget class="QPushButton" name="mapLoadButton">
-             <property name="maximumSize">
-              <size>
-               <width>150</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Load map...</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="mapFileLabel">
-             <property name="text">
-              <string>Map File: -</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
          </item>
         </layout>
        </widget>
@@ -175,11 +151,35 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_externalTriggersInLastSecond">
-     <property name="text">
-      <string>??? external triggers in last second</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_externalTriggersInLastSecond">
+       <property name="text">
+        <string>??? external triggers in last second</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="mapLoadButton">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Load map...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="mapFileLabel">
+       <property name="text">
+        <string>Map File: -</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
