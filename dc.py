@@ -801,6 +801,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def sendEdgeMulti(self):
+        # first send the trigger mesage for all channels
         config = {
             "ChannelIndicies": range(len(self.channel_names)),
             "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
@@ -814,13 +815,12 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
 
-        # Reset trigger on even-numbered channels if source is TDM and the relevant
-        # check box ("Trigger on Error Channels") isn't checked.
-        omitEvenChannels = (self.sourceIsTDM and not
-                            self.ui.checkBox_edgeMultiTriggerOnError.isChecked)
-        if omitEvenChannels:
-            config = {"ChannelIndicies": range(0, len(self.channel_names), 2)}
-            self.client.call("SourceControl.ConfigureTriggers", config)
+        if self.sourceIsTDM:
+            # for TDM systems turn off triggering on error channels depending on ui state
+            if not self.ui.checkBox_edgeMultiTriggerOnError.isChecked():
+                config = {"ChannelIndicies": range(0, len(self.channel_names), 2)}
+                self.client.call("SourceControl.ConfigureTriggers", config)                
+ 
 
     @pyqtSlot()
     def sendMix(self):
