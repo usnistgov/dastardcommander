@@ -795,7 +795,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("opening: {}".format(fileName))
             mixFractions = np.load(fileName)
             print("mixFractions.shape = {}".format(mixFractions.shape))
-            config = {"ChannelIndices":  np.arange(1,len(mixFractions)*2,2).tolist(),
+            config = {"ChannelIndices":  np.arange(1,mixFractions.size*2,2).tolist(),
                     "MixFractions": mixFractions.flatten().tolist()}
             okay, error = self.client.call("SourceControl.ConfigureMixFraction", config, verbose=True, throwError=False)
 
