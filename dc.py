@@ -253,7 +253,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TESMAPFILE":
                 self.observeTab.handleTESMapFile(d)
-                self.observeWindow.handleTESMapFile(d)             
+                self.observeWindow.handleTESMapFile(d)
 
             elif topic == "MIX":
                 # We only permit setting a single, common mix value from DC, so
@@ -267,8 +267,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "EXTERNALTRIGGER":
                 self.observeTab.handleExternalTriggerMessage(d)
-                self.observeWindow.handleExternalTriggerMessage(d)   
-    
+                self.observeWindow.handleExternalTriggerMessage(d)
+
 
             else:
                 print("%s is not a topic we handle yet." % topic)
@@ -355,6 +355,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zmqthread.quit()
         self.zmqthread.wait()
         event.accept()
+        self.observeWindow.hide() # prevents close hanging due to still visible observeWindow
 
     @pyqtSlot()
     def launchMicroscope(self):
@@ -835,8 +836,8 @@ class MainWindow(QtWidgets.QMainWindow):
             # for TDM systems turn off triggering on error channels depending on ui state
             if not self.ui.checkBox_edgeMultiTriggerOnError.isChecked():
                 config = {"ChannelIndicies": range(0, len(self.channel_names), 2)}
-                self.client.call("SourceControl.ConfigureTriggers", config)                
- 
+                self.client.call("SourceControl.ConfigureTriggers", config)
+
 
     @pyqtSlot()
     def sendMix(self):
@@ -933,7 +934,6 @@ def main():
 
         dc = MainWindow(client, host, port)
         dc.show()
-
         retval = app.exec_()
         disconnectReason = dc.disconnectReason
         if not dc.reconnect:

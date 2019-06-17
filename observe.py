@@ -7,6 +7,7 @@ import numpy as np
 import os
 import json
 from matplotlib import cm
+from PyQt5.QtCore import QObject, pyqtSignal, QSettings, pyqtSlot
 
 Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
 
