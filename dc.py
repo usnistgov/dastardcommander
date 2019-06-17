@@ -71,6 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
         self.ui.actionLoad_Mix.triggered.connect(self.loadMix)
+        self.ui.actionPop_out_Observe.triggered.connect(self.popOutObserve)
         self.ui.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.ui.pushButton_sendMix.clicked.connect(self.sendMix)
         self.ui.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
@@ -90,6 +91,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.writingTab.client = self.client
         self.observeTab = observe.Observe(self.ui.tabObserve, host=host)
         self.observeTab.client = self.client
+        self.observeWindow = observe.Observe(host=host)
+        self.observeWindow.client = self.client
         self.workflowTab = workflow.Workflow(self, parent=self.ui.tabWorkflow)
 
         self.microscopes = []
@@ -98,6 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.channel_prefixes = set()
         self.triggerTab.channel_names = self.channel_names
         self.observeTab.channel_names = self.channel_names
+        self.observeWindow.channel_names = self.channel_names
         self.triggerTab.channel_prefixes = self.channel_prefixes
         self.workflowTab.channel_names = self.channel_names
         self.workflowTab.channel_prefixes = self.channel_prefixes
@@ -137,9 +141,9 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             d = json.loads(message)
         except Exception as e:
-            print "Error processing status message [topic,msg]: %s, %s" % (
-                topic, message)
-            print "Error is: %s" % e
+            print("Error processing status message [topic,msg]: %s, %s" % (
+                topic, message))
+            print("Error is: %s" % e)
             return
 
         quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE", "EXTERNALTRIGGER"])
@@ -151,12 +155,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         elif topic == "TRIGGERRATE":
             self.observeTab.handleTriggerRateMessage(d)
+            self.observeWindow.handleTriggerRateMessage(d)
 
         # All other messages are ignored if they haven't changed
         elif not self.last_messages[topic] == message:
             if topic == "STATUS":
                 self.updateStatusBar(d)
                 self.observeTab.handleStatusUpdate(d)
+                self.observeWindow.handleStatusUpdate(d)
                 self._setGuiRunning(d["Running"], d["SourceName"])
                 self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 self.workflowTab.handleStatusUpdate(d)
@@ -222,7 +228,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
-                print "New channames: ", self.channel_names
+                print ("New channames: ", self.channel_names)
                 if self.sourceIsTDM:
                     self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
                 else:
@@ -243,9 +249,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TESMAP":
                 self.observeTab.handleTESMap(d)
+                self.observeWindow.handleTESMap(d)
 
             elif topic == "TESMAPFILE":
                 self.observeTab.handleTESMapFile(d)
+                self.observeWindow.handleTESMapFile(d)             
 
             elif topic == "MIX":
                 # We only permit setting a single, common mix value from DC, so
@@ -259,6 +267,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "EXTERNALTRIGGER":
                 self.observeTab.handleExternalTriggerMessage(d)
+                self.observeWindow.handleExternalTriggerMessage(d)   
+    
 
             else:
                 print("%s is not a topic we handle yet." % topic)
@@ -396,7 +406,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     ipgui.setText(parts[0])
                     portgui.setValue(int(parts[1]))
                 else:
-                    print "Could not parse hostport='%s'" % hostport
+                    print("Could not parse hostport='%s'" % hostport)
 
     @pyqtSlot()
     def toggledRoachDeviceActive(self):
@@ -569,9 +579,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def _stop(self):
         okay, error = self.client.call("SourceControl.Stop", "")
         if not okay:
-            print "Could not Stop data"
+            print("Could not Stop data")
             return False
-        print "Stopping Data"
+        print("Stopping Data")
         return True
 
     def _setGuiRunning(self, running, sourceName=""):
@@ -633,13 +643,13 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         okay, error = self.client.call("SourceControl.ConfigureTriangleSource", config)
         if not okay:
-            print "Could not ConfigureTriangleSource"
+            print("Could not ConfigureTriangleSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
         if not okay:
-            print "Could not Start Triangle "
+            print("Could not Start Triangle ")
             return False
-        print "Starting Triangle"
+        print("Starting Triangle")
         return True
 
     def _startSimPulse(self):
@@ -654,13 +664,13 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         okay, error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
         if not okay:
-            print "Could not ConfigureSimPulseSource"
+            print("Could not ConfigureSimPulseSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
         if not okay:
-            print "Could not Start SimPulse"
+            print("Could not Start SimPulse")
             return False
-        print "Starting Sim Pulses"
+        print("Starting Sim Pulses")
         return True
 
     def _startLancero(self):
@@ -690,8 +700,8 @@ class MainWindow(QtWidgets.QMainWindow):
             "AvailableCards": [],   # This is filled in only by server, not us.
             "AutoRestart": self.ui.checkBox_lanceroAutoRestart.isChecked()
         }
-        print "START LANCERO CONFIG"
-        print config
+        print("START LANCERO CONFIG")
+        print(config)
         okay, error = self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox=True)
         if not okay:
             return False
@@ -721,13 +731,13 @@ class MainWindow(QtWidgets.QMainWindow):
             config["Rates"].append(rate)
         okay, error = self.client.call("SourceControl.ConfigureRoachSource", config)
         if not okay:
-            print "Could not ConfigureRoachSource"
+            print ("Could not ConfigureRoachSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "ROACHSOURCE")
         if not okay:
-            print "Could not Start ROACH"
+            print ("Could not Start ROACH")
             return False
-        print "Starting ROACH"
+        print ("Starting ROACH")
         return True
 
     def _startAbaco(self):
@@ -742,13 +752,13 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
         if not okay:
-            print "Could not ConfigureAbacoSource"
+            print("Could not ConfigureAbacoSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "ABACOSOURCE")
         if not okay:
-            print "Could not Start Abaco"
+            print ("Could not Start Abaco")
             return False
-        print "Starting Abaco"
+        print ("Starting Abaco")
         return True
 
     @pyqtSlot()
@@ -800,6 +810,12 @@ class MainWindow(QtWidgets.QMainWindow):
             okay, error = self.client.call("SourceControl.ConfigureMixFraction", config, verbose=True, throwError=False)
 
     @pyqtSlot()
+    def popOutObserve(self):
+        self.observeWindow.show()
+
+
+
+    @pyqtSlot()
     def sendEdgeMulti(self):
         # first send the trigger mesage for all channels
         config = {
@@ -837,9 +853,9 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.client.call("SourceControl.ConfigureMixFraction", config)
             print("experimental mix config")
-            print config
+            print (config)
         except Exception as e:
-            print "Could not set mix: {}".format(e)
+            print ("Could not set mix: {}".format(e))
 
     @pyqtSlot()
     def sendExperimentStateLabel(self):
@@ -906,14 +922,14 @@ def main():
                            settings=settings)
         host, port = d.run()
         if host is None or port is None:
-            print "Could not start Dastard-commander without a valid host:port selection."
+            print("Could not start Dastard-commander without a valid host:port selection.")
             return
         try:
             client = rpc_client.JSONClient((host, port))
         except socket.error:
-            print "Could not connect to Dastard at %s:%d" % (host, port)
+            print ("Could not connect to Dastard at %s:%d" % (host, port))
             continue
-        print "Dastard is at %s:%d" % (host, port)
+        print ("Dastard is at %s:%d" % (host, port))
 
         dc = MainWindow(client, host, port)
         dc.show()

@@ -92,7 +92,7 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QComboBox" name="dataSource">
-          <property name="currentText">
+          <property name="currentText" stdset="0">
            <string>Triangle wave source</string>
           </property>
           <property name="currentIndex">
@@ -1226,7 +1226,7 @@
      <x>0</x>
      <y>0</y>
      <width>925</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnection">
@@ -1242,6 +1242,7 @@
     </property>
     <addaction name="actionLoad_Projectors_Basis"/>
     <addaction name="actionLoad_Mix"/>
+    <addaction name="actionPop_out_Observe"/>
    </widget>
    <addaction name="menuConnection"/>
    <addaction name="menuExpert"/>
@@ -1265,6 +1266,11 @@
   <action name="actionLoad_Mix">
    <property name="text">
     <string>Load Mix</string>
+   </property>
+  </action>
+  <action name="actionPop_out_Observe">
+   <property name="text">
+    <string>Pop out Observe</string>
    </property>
   </action>
  </widget>

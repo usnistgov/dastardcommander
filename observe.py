@@ -160,7 +160,7 @@ class Observe(QtWidgets.QWidget):
     def resetIntegration(self):
         self.countsSeens = []
         self.crm_grid.setCountRates(np.zeros(len(self.crm_grid.buttons)), 1)
-        self.setArrayCps(0, False)
+        self.setArrayCps(0, False, 0)
 
     def handleAutoScaleClicked(self):
         self.ui.doubleSpinBox_colorScale.setEnabled(not self.ui.pushButton_autoScale.isChecked())
