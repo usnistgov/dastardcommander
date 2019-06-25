@@ -58,8 +58,8 @@ class Observe(QtWidgets.QWidget):
         colorScale = self.getColorScale(countRates)
         if self.crm_grid is not None:
             self.crm_grid.setCountRates(countRates, colorScale)
-        if self.crm_map is not None:
-            if len(self.crm_map.buttons) == 0:
+        if hasattr(self, "pixelMap"):
+            if self.crm_map is None or len(self.crm_map.buttons) == 0:
                 # if we build the crm_map before we know the source and know channel_names
                 # (eg before a dastard source is started) we will need to rebuild it later
                 # so we check here
