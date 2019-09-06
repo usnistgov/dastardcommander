@@ -19,7 +19,7 @@ import sys
 import time
 import os
 from collections import OrderedDict, defaultdict
-
+import numpy as np
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -70,6 +70,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
+        self.ui.actionLoad_Mix.triggered.connect(self.loadMix)
+        self.ui.actionPop_out_Observe.triggered.connect(self.popOutObserve)
         self.ui.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.ui.pushButton_sendMix.clicked.connect(self.sendMix)
         self.ui.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
@@ -89,6 +91,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.writingTab.client = self.client
         self.observeTab = observe.Observe(self.ui.tabObserve, host=host)
         self.observeTab.client = self.client
+        self.observeWindow = observe.Observe(host=host)
+        self.observeWindow.client = self.client
         self.workflowTab = workflow.Workflow(self, parent=self.ui.tabWorkflow)
 
         self.microscopes = []
@@ -97,6 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.channel_prefixes = set()
         self.triggerTab.channel_names = self.channel_names
         self.observeTab.channel_names = self.channel_names
+        self.observeWindow.channel_names = self.channel_names
         self.triggerTab.channel_prefixes = self.channel_prefixes
         self.workflowTab.channel_names = self.channel_names
         self.workflowTab.channel_prefixes = self.channel_prefixes
@@ -150,12 +155,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         elif topic == "TRIGGERRATE":
             self.observeTab.handleTriggerRateMessage(d)
+            self.observeWindow.handleTriggerRateMessage(d)
 
         # All other messages are ignored if they haven't changed
         elif not self.last_messages[topic] == message:
             if topic == "STATUS":
                 self.updateStatusBar(d)
                 self.observeTab.handleStatusUpdate(d)
+                self.observeWindow.handleStatusUpdate(d)
                 self._setGuiRunning(d["Running"], d["SourceName"])
                 self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 self.workflowTab.handleStatusUpdate(d)
@@ -182,6 +189,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "WRITING":
                 self.writingTab.handleWritingMessage(d)
                 self.workflowTab.handleWritingMessage(d)
+                self.observeTab.handleWritingMessage(d)
 
             elif topic == "TRIANGLE":
                 self.ui.triangleNchan.setValue(d["Nchan"])
@@ -242,9 +250,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TESMAP":
                 self.observeTab.handleTESMap(d)
+                self.observeWindow.handleTESMap(d)
 
             elif topic == "TESMAPFILE":
                 self.observeTab.handleTESMapFile(d)
+                self.observeWindow.handleTESMapFile(d)
 
             elif topic == "MIX":
                 # We only permit setting a single, common mix value from DC, so
@@ -258,6 +268,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "EXTERNALTRIGGER":
                 self.observeTab.handleExternalTriggerMessage(d)
+                self.observeWindow.handleExternalTriggerMessage(d)
+
 
             else:
                 print("%s is not a topic we handle yet." % topic)
@@ -344,6 +356,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zmqthread.quit()
         self.zmqthread.wait()
         event.accept()
+        self.observeWindow.hide() # prevents close hanging due to still visible observeWindow
 
     @pyqtSlot()
     def launchMicroscope(self):
@@ -720,13 +733,13 @@ class MainWindow(QtWidgets.QMainWindow):
             config["Rates"].append(rate)
         okay, error = self.client.call("SourceControl.ConfigureRoachSource", config)
         if not okay:
-            print("Could not ConfigureRoachSource")
+            print ("Could not ConfigureRoachSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "ROACHSOURCE")
         if not okay:
-            print("Could not Start ROACH")
+            print ("Could not Start ROACH")
             return False
-        print("Starting ROACH")
+        print ("Starting ROACH")
         return True
 
     def _startAbaco(self):
@@ -780,7 +793,33 @@ class MainWindow(QtWidgets.QMainWindow):
             resultBox.show()
 
     @pyqtSlot()
+    def loadMix(self):
+        options = QFileDialog.Options()
+        if not hasattr(self, "lastdir_mix"):
+            dir = os.path.expanduser("~/.cringe")
+        else:
+            dir = self.lastdir_mix
+        fileName, _ = QFileDialog.getOpenFileName(
+            self, "Find Projectors Basis file", dir,
+            "Mix Files (*.npy);;All Files (*)", options=options)
+        if fileName:
+            self.lastdir_mix = os.path.dirname(fileName)
+            print("opening: {}".format(fileName))
+            mixFractions = np.load(fileName)
+            print("mixFractions.shape = {}".format(mixFractions.shape))
+            config = {"ChannelIndices":  np.arange(1,mixFractions.size*2,2).tolist(),
+                    "MixFractions": mixFractions.flatten().tolist()}
+            okay, error = self.client.call("SourceControl.ConfigureMixFraction", config, verbose=True, throwError=False)
+
+    @pyqtSlot()
+    def popOutObserve(self):
+        self.observeWindow.show()
+
+
+
+    @pyqtSlot()
     def sendEdgeMulti(self):
+        # first send the trigger mesage for all channels
         config = {
             "ChannelIndicies": list(range(len(self.channel_names))),
             "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
@@ -897,7 +936,6 @@ def main():
 
         dc = MainWindow(client, host, port)
         dc.show()
-
         retval = app.exec_()
         disconnectReason = dc.disconnectReason
         if not dc.reconnect:

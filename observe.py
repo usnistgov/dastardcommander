@@ -7,8 +7,63 @@ import numpy as np
 import os
 import json
 from matplotlib import cm
+from PyQt5.QtCore import QObject, pyqtSignal, QSettings, pyqtSlot
+import time
+from string import ascii_uppercase
+import itertools
+
+#from https://stackoverflow.com/questions/29351492/how-to-make-a-continuous-alphabetic-list-python-from-a-z-then-from-aa-ab-ac-e
+def iter_all_strings():
+    size = 1
+    while True:
+        for s in itertools.product(ascii_uppercase, repeat=size):
+            yield "".join(s)
+        size +=1
+
+
 
 Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
+
+class ExperimentStateIncrementer():
+    def __init__(self, newStateButton, ignoreButton, label, parent):
+        self.newStateButton = newStateButton
+        self.ignoreButton = ignoreButton
+        self.label = label
+        self.parent = parent
+        self.newStateButton.clicked.connect(self.handleNewStateButton)
+        self.ignoreButton.clicked.connect(self.handleIgnoreButton)
+        self.resetStateLabels()
+        self.updateLabel("???? unknown state")
+
+    def nextLabel(self):
+        # first call returns "A", succesive calls return "B","C",...,"AA","AB",...,"BA","BB" on so on
+        for s in self._gen:
+            return s
+
+    def updateLabel(self, stateName):
+        self.label.setText("Current State: {} at {}".format(
+            stateName,
+            time.strftime("%-H:%M:%S on %a")
+        ))
+
+    def handleNewStateButton(self):
+        self.sendState(self.nextLabel())
+
+    def sendState(self, stateName):
+        config = {
+            "Label": stateName,
+            "WaitForError": True,
+        }
+        _, err = self.parent.client.call("SourceControl.SetExperimentStateLabel", config)
+        if not err:
+            self.updateLabel(stateName)
+
+    def handleIgnoreButton(self):
+        self.sendState("IGNORE")
+
+    def resetStateLabels(self):
+        self._gen = iter_all_strings()
+        self.updateLabel("START")
 
 
 class Observe(QtWidgets.QWidget):
@@ -30,10 +85,12 @@ class Observe(QtWidgets.QWidget):
         self.countsSeens = []
         self.cols = 0
         self.rows = 0
-        self.channel_names = []
+        self.channel_names = [] # injected from dc.py
         self.auxPerChan = 0
         self.lastTotalRate = 0
         self.mapfile = ""
+        self.ExperimentStateIncrementer = ExperimentStateIncrementer(self.ui.pushButton_experimentStateNew,
+        self.ui.pushButton_experimentStateIGNORE, self.ui.label_experimentState, self)
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
@@ -57,11 +114,24 @@ class Observe(QtWidgets.QWidget):
         colorScale = self.getColorScale(countRates)
         if self.crm_grid is not None:
             self.crm_grid.setCountRates(countRates, colorScale)
-        if self.crm_map is not None:
+        if hasattr(self, "pixelMap"):
+            if self.crm_map is None or len(self.crm_map.buttons) == 0:
+                # if we build the crm_map before we know the source and know channel_names
+                # (eg before a dastard source is started) we will need to rebuild it later
+                # so we check here
+                print("rebuding CRMMap due to len(buttons)==0")
+                self.buildCRMMap()
+                print("now have len(buttons)={}".format(len(self.crm_map.buttons)))
             self.crm_map.setCountRates(countRates, colorScale)
         integrationComplete = len(self.countsSeens) == integrationTime
-        arrayCps = countRates.sum()
-        self.setArrayCps(arrayCps, integrationComplete)
+        arrayCps = 0
+        auxCps = 0
+        for cr, channel_name in zip(countRates, self.channel_names):
+            if channel_name.startswith("chan"):
+                arrayCps+=cr
+            else:
+                auxCps+=cr
+        self.setArrayCps(arrayCps, integrationComplete, auxCps)
 
     def getColorScale(self, countRates):
         if self.ui.pushButton_autoScale.isChecked():
@@ -77,26 +147,16 @@ class Observe(QtWidgets.QWidget):
                 self.ui.doubleSpinBox_colorScale.setValue(maxRate)
         return self.ui.doubleSpinBox_colorScale.value()
 
-    def setArrayCps(self, arrayCps, integrationComplete):
+    def setArrayCps(self, arrayCps, integrationComplete, auxCps):
         s = "{:.2f} cps/array".format(arrayCps)
         self.ui.label_arrayCps.setText(s)
         self.ui.label_arrayCps.setEnabled(integrationComplete)
-
-    def getChannelNames(self):
-        channel_names = self.channel_names
-        rows = self.rows
-        cols = self.cols
-        if channel_names is None or len(channel_names) < cols*rows:
-            channel_names = []
-            for col in range(cols):
-                for row in range(rows):
-                    channel_names.append("chan{}r{}c{}".format(len(channel_names), row, col))
-        assert(len(channel_names) == cols*rows*(1+self.auxPerChan))
-        return channel_names
+        sAux = "{:.2f} aux cps".format(auxCps)
+        self.ui.label_auxCps.setText(sAux)
 
     def buildCRM(self):
         self.deleteCRMGrid()
-        self.crm_grid = CountRateMap(self, self.cols, self.rows, self.getChannelNames())
+        self.crm_grid = CountRateMap(self, self.cols, self.rows, self.channel_names)
         self.ui.GridTab.layout().addWidget(self.crm_grid)
 
     def deleteCRMGrid(self):
@@ -108,8 +168,11 @@ class Observe(QtWidgets.QWidget):
     def buildCRMMap(self):
         self.deleteCRMMap()
         print ("Building CountRateMap with %d cols x %d rows" % (self.cols, self.rows))
-        self.crm_map = CountRateMap(self, self.cols, self.rows, self.getChannelNames(),
+        print("len(channel_names", len(self.channel_names))
+        self.crm_map = CountRateMap(self, self.cols, self.rows, self.channel_names,
                                     xy=self.pixelMap)
+        # if we build the crm_map before we know the source and know channel_names
+        # (eg before a dastard source is started) we will need to rebuild it later
         self.ui.mapContainer.layout().addWidget(self.crm_map)
 
     def deleteCRMMap(self):
@@ -154,7 +217,7 @@ class Observe(QtWidgets.QWidget):
     def resetIntegration(self):
         self.countsSeens = []
         self.crm_grid.setCountRates(np.zeros(len(self.crm_grid.buttons)), 1)
-        self.setArrayCps(0, False)
+        self.setArrayCps(0, False, 0)
 
     def handleAutoScaleClicked(self):
         self.ui.doubleSpinBox_colorScale.setEnabled(not self.ui.pushButton_autoScale.isChecked())
@@ -188,12 +251,17 @@ class Observe(QtWidgets.QWidget):
         print("MinX = ",minx, " MaxY=", maxy)
         self.pixelMap = [((p["X"]-minx)*scale, (maxy-p["Y"])*scale) for p in msg["Pixels"]]
         print("handleTESMap with spacing ", msg["Spacing"], " scale ", scale)
-        print(self.pixelMap)
+        # print(self.pixelMap)
         self.buildCRMMap()
 
     def handleExternalTriggerMessage(self, msg):
         n = msg["NumberObservedInLastSecond"]
         self.ui.label_externalTriggersInLastSecond.setText("{} external triggers in last second".format(n))
+
+    def handleWritingMessage(self, msg):
+        if msg["Active"]:
+            print("Observe got Writing Active=True message, resetting state labels")
+            self.ExperimentStateIncrementer.resetStateLabels()
 
 
 class CountRateMap(QtWidgets.QWidget):
@@ -201,7 +269,7 @@ class CountRateMap(QtWidgets.QWidget):
 
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
-    buttonFont = QtGui.QFont("Times", 10, QtGui.QFont.Bold)
+    buttonFont = QtGui.QFont("Times", 7, QtGui.QFont.Bold)
 
     def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -212,7 +280,7 @@ class CountRateMap(QtWidgets.QWidget):
         if xy is None:
             self.initButtons(scale=25)
         else:
-            self.initButtons(scale=20, xy=xy)
+            self.initButtons(scale=23, xy=xy)
 
     def addButton(self, x, y, xwidth, ywidth, tooltip):
         button = QtWidgets.QPushButton(self)

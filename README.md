@@ -2,7 +2,7 @@
 GUI for operating DASTARD
 
 # install 
-Use on Ubuntu 16
+Use on Ubuntu 16 or 18
  
 ```
 sudo apt-get install roxterm python-pyqt5

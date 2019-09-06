@@ -25,16 +25,22 @@ class JuliaCaller(object):
 
         versiontext = subprocess.check_output(["julia", "-v"],
                                               encoding="UTF-8").split()[2]
+        major = versiontext.split(".")[0]
         majorminor = ".".join(versiontext.split(".")[:2])
-        path = os.path.expanduser("~/.julia/v%s/Pope/scripts" % majorminor)
-        if not os.path.isdir(path):
-            raise OSError("JuliaCaller could not find ~/.julia/v*/Pope/scripts")
+        if major == 0:
+            path = os.path.expanduser("~/.julia/v%s/Pope/scripts" % majorminor)
+            if not os.path.isdir(path):
+                raise OSError("JuliaCaller could not find ~/.julia/v*/Pope/scripts")
+        elif major >= 1:
+            path = os.path.expanduser("~/.pope")
+        else:
+            raise Exception("unrecognized Julia version {}".format(versiontext))
         self.POPE_PATH = path
         print("Found julia version %s" % majorminor)
         print("Found Pope scripts in %s" % path)
 
     def jcall(self, scriptname, args, wait=True):
-        cmd = ["nice","-n","19","julia", os.path.join(self.POPE_PATH, scriptname)]
+        cmd = ["nice","-n","19", os.path.join(self.POPE_PATH, scriptname)]
         cmd.extend(args)
         print("Running '%s'" % " ".join(cmd))
         # we don't use check_call here because Popen prints output in real time, while check_call does not
@@ -53,7 +59,7 @@ class JuliaCaller(object):
         self.jcall("noise_plots.jl", args, wait=False)
 
     def createBasis(self, pulseFile, noiseModel):
-        args = ["--n_basis", "7", "--tsvd_method", "TSVDmass3", pulseFile, noiseModel]
+        args = ["--n_basis", "4", "--tsvd_method", "noisemass3", pulseFile, noiseModel]
         self.jcall("basis_create.jl", args)
 
     def plotBasis(self, outName):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>925</width>
-    <height>712</height>
+    <height>762</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1241,6 +1241,8 @@
      <string>Expert</string>
     </property>
     <addaction name="actionLoad_Projectors_Basis"/>
+    <addaction name="actionLoad_Mix"/>
+    <addaction name="actionPop_out_Observe"/>
    </widget>
    <addaction name="menuConnection"/>
    <addaction name="menuExpert"/>
@@ -1259,6 +1261,16 @@
   <action name="actionLoad_Projectors_Basis">
    <property name="text">
     <string>Load Projectors/Basis</string>
+   </property>
+  </action>
+  <action name="actionLoad_Mix">
+   <property name="text">
+    <string>Load Mix</string>
+   </property>
+  </action>
+  <action name="actionPop_out_Observe">
+   <property name="text">
+    <string>Pop out Observe</string>
    </property>
   </action>
  </widget>
