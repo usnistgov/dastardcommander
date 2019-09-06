@@ -189,6 +189,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "WRITING":
                 self.writingTab.handleWritingMessage(d)
                 self.workflowTab.handleWritingMessage(d)
+                self.observeTab.handleWritingMessage(d)
 
             elif topic == "TRIANGLE":
                 self.ui.triangleNchan.setValue(d["Nchan"])
