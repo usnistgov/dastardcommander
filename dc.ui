@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>925</width>
-    <height>712</height>
+    <height>762</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -92,7 +92,7 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QComboBox" name="dataSource">
-          <property name="currentText" stdset="0">
+          <property name="currentText">
            <string>Triangle wave source</string>
           </property>
           <property name="currentIndex">
@@ -1226,7 +1226,7 @@
      <x>0</x>
      <y>0</y>
      <width>925</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnection">

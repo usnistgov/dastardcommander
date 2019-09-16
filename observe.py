@@ -8,8 +8,62 @@ import os
 import json
 from matplotlib import cm
 from PyQt5.QtCore import QObject, pyqtSignal, QSettings, pyqtSlot
+import time
+from string import ascii_uppercase
+import itertools
+
+#from https://stackoverflow.com/questions/29351492/how-to-make-a-continuous-alphabetic-list-python-from-a-z-then-from-aa-ab-ac-e
+def iter_all_strings():
+    size = 1
+    while True:
+        for s in itertools.product(ascii_uppercase, repeat=size):
+            yield "".join(s)
+        size +=1
+
+
 
 Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
+
+class ExperimentStateIncrementer():
+    def __init__(self, newStateButton, ignoreButton, label, parent):
+        self.newStateButton = newStateButton
+        self.ignoreButton = ignoreButton
+        self.label = label
+        self.parent = parent
+        self.newStateButton.clicked.connect(self.handleNewStateButton)
+        self.ignoreButton.clicked.connect(self.handleIgnoreButton)
+        self.resetStateLabels()
+        self.updateLabel("???? unknown state")
+
+    def nextLabel(self):
+        # first call returns "A", succesive calls return "B","C",...,"AA","AB",...,"BA","BB" on so on
+        for s in self._gen:
+            return s
+
+    def updateLabel(self, stateName):
+        self.label.setText("Current State: {} at {}".format(
+            stateName, 
+            time.strftime("%-H:%M:%S on %a")
+        ))
+
+    def handleNewStateButton(self):
+        self.sendState(self.nextLabel())
+
+    def sendState(self, stateName):
+        config = {
+            "Label": stateName,
+            "WaitForError": True,
+        }
+        _, err = self.parent.client.call("SourceControl.SetExperimentStateLabel", config)        
+        if not err:
+            self.updateLabel(stateName)
+
+    def handleIgnoreButton(self):
+        self.sendState("IGNORE")
+
+    def resetStateLabels(self):
+        self._gen = iter_all_strings()
+        self.updateLabel("START")
 
 
 class Observe(QtWidgets.QWidget):
@@ -35,6 +89,8 @@ class Observe(QtWidgets.QWidget):
         self.auxPerChan = 0
         self.lastTotalRate = 0
         self.mapfile = ""
+        self.ExperimentStateIncrementer = ExperimentStateIncrementer(self.ui.pushButton_experimentStateNew, 
+        self.ui.pushButton_experimentStateIGNORE, self.ui.label_experimentState, self)
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
@@ -201,6 +257,11 @@ class Observe(QtWidgets.QWidget):
     def handleExternalTriggerMessage(self, msg):
         n = msg["NumberObservedInLastSecond"]
         self.ui.label_externalTriggersInLastSecond.setText("{} external triggers in last second".format(n))
+
+    def handleWritingMessage(self, msg):
+        if msg["Active"]: 
+            print("Observe got Writing Active=True message, resetting state labels")
+            self.ExperimentStateIncrementer.resetStateLabels()
 
 
 class CountRateMap(QtWidgets.QWidget):
