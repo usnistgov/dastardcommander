@@ -15,6 +15,11 @@ git clone https://github.com/usnistgov/dastard-commander.git
 sudo apt-get install roxterm  # add this if you want the scripting in roxterms.sh
 ```
 
+For Macs with Mac Ports, replace the `apt-get` line with:
+```
+sudo port install python27 py27-pyqt5
+```
+
 ## Running
 From the top directory of this repository, just do
 ```
