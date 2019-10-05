@@ -8,7 +8,7 @@ The usual platform for microcalorimeter systems is Ubuntu 16 or 18. DC should wo
 
 For Ubuntu, installation should be as simple as:
 ```
-sudo apt-get install python-pyqt5
+sudo apt-get install python-pyqt5 python-numpy python-h5py python-zmq python-matplotlib
 cd  # Replace by cd to wherever you wish to store the repo, if not in your home directory.
 git clone https://github.com/usnistgov/dastard-commander.git
 
@@ -17,7 +17,7 @@ sudo apt-get install roxterm  # add this if you want the scripting in roxterms.s
 
 For Macs with Mac Ports, replace the `apt-get` line with:
 ```
-sudo port install python27 py27-pyqt5
+sudo port install python27 py27-pyqt5 py27-numpy py27-zmq py27-h5py py27-setuptools py27-matplotlib
 ```
 
 ## Running
