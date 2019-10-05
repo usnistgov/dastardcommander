@@ -25,7 +25,7 @@ class JuliaCaller(object):
 
         versiontext = subprocess.check_output(["julia", "-v"],
                                               encoding="UTF-8").split()[2]
-        major = versiontext.split(".")[0]
+        major = int(versiontext.split(".")[0])
         majorminor = ".".join(versiontext.split(".")[:2])
         if major == 0:
             path = os.path.expanduser("~/.julia/v%s/Pope/scripts" % majorminor)
