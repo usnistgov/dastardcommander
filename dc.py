@@ -806,6 +806,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.lastdir_mix = os.path.dirname(fileName)
             print("opening: {}".format(fileName))
             mixFractions = np.load(fileName)
+            mixFractions[np.isnan(mixFractions)] = 0
             print("mixFractions.shape = {}".format(mixFractions.shape))
             config = {"ChannelIndices":  np.arange(1,mixFractions.size*2,2).tolist(),
                     "MixFractions": mixFractions.flatten().tolist()}
@@ -843,10 +844,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def sendMix(self):
+        print("sendMIX***********")
         mixFraction = self.ui.doubleSpinBox_MixFraction.value()
-        if mixFraction == 0.0:
-            return
-
         channels = [i for i in range(1, len(self.channel_names), 2)]  # only odd channels get mix
         mixFractions = [mixFraction for _ in range(len(channels))]
         config = {
