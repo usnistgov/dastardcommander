@@ -94,6 +94,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeWindow = observe.Observe(host=host)
         self.observeWindow.client = self.client
         self.workflowTab = workflow.Workflow(self, parent=self.ui.tabWorkflow)
+        self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
