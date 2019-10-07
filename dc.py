@@ -16,14 +16,13 @@ import json
 import socket
 import subprocess
 import sys
-import time
 import os
 from collections import OrderedDict, defaultdict
 import numpy as np
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal, QSettings, pyqtSlot
+from PyQt5.QtCore import QSettings, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
@@ -66,7 +65,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.reconnect = False
         self.disconnectReason = ""
         self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
-        self.ui.actionDisconnect.triggered.connect(lambda: self.closeReconnect("disconnect menu item"))
+        self.ui.actionDisconnect.triggered.connect(
+            lambda: self.closeReconnect("disconnect menu item"))
         self.ui.startStopButton.clicked.connect(self.startStop)
         self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
         self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
@@ -271,7 +271,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.observeTab.handleExternalTriggerMessage(d)
                 self.observeWindow.handleExternalTriggerMessage(d)
 
-
             else:
                 print("%s is not a topic we handle yet." % topic)
 
@@ -357,7 +356,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zmqthread.quit()
         self.zmqthread.wait()
         event.accept()
-        self.observeWindow.hide() # prevents close hanging due to still visible observeWindow
+        self.observeWindow.hide()  # prevents close hanging due to still visible observeWindow
 
     @pyqtSlot()
     def launchMicroscope(self):
@@ -705,10 +704,12 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         print("START LANCERO CONFIG")
         print(config)
-        okay, error = self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox=True)
+        okay, error = self.client.call(
+            "SourceControl.ConfigureLanceroSource", config, errorBox=True)
         if not okay:
             return False
-        okay, error = self.client.call("SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False)
+        okay, error = self.client.call(
+            "SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False)
         if not okay:
             return False
         self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(True)
@@ -721,7 +722,7 @@ class MainWindow(QtWidgets.QMainWindow):
         config = {
             "HostPort": [],
             "Rates": []
-            }
+        }
         for id in (1, 2):
             if not self.ui.__dict__["roachDeviceCheckBox_%d" % id].isChecked():
                 continue
@@ -783,12 +784,14 @@ class MainWindow(QtWidgets.QMainWindow):
             failures = OrderedDict()
             for channelIndex, config in configs.items():
                 print("sending ProjectorsBasis for {}".format(channelIndex))
-                okay, error = self.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
+                okay, error = self.client.call(
+                    "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
                 if okay:
                     success_chans.append(channelIndex)
                 else:
                     failures[channelIndex] = error
-            result = "success on channelIndicies (not channelName): {}\n".format(sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+            result = "success on channelIndicies (not channelName): {}\n".format(
+                sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
             resultBox = QtWidgets.QMessageBox(self)
             resultBox.setText(result)
             resultBox.show()
@@ -809,15 +812,14 @@ class MainWindow(QtWidgets.QMainWindow):
             mixFractions = np.load(fileName)
             mixFractions[np.isnan(mixFractions)] = 0
             print("mixFractions.shape = {}".format(mixFractions.shape))
-            config = {"ChannelIndices":  np.arange(1,mixFractions.size*2,2).tolist(),
-                    "MixFractions": mixFractions.flatten().tolist()}
-            okay, error = self.client.call("SourceControl.ConfigureMixFraction", config, verbose=True, throwError=False)
+            config = {"ChannelIndices":  np.arange(1, mixFractions.size*2, 2).tolist(),
+                      "MixFractions": mixFractions.flatten().tolist()}
+            okay, error = self.client.call(
+                "SourceControl.ConfigureMixFraction", config, verbose=True, throwError=False)
 
     @pyqtSlot()
     def popOutObserve(self):
         self.observeWindow.show()
-
-
 
     @pyqtSlot()
     def sendEdgeMulti(self):
@@ -840,7 +842,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if not self.ui.checkBox_edgeMultiTriggerOnError.isChecked():
                 config = {"ChannelIndicies": range(0, len(self.channel_names), 2)}
                 self.client.call("SourceControl.ConfigureTriggers", config)
-
 
     @pyqtSlot()
     def sendMix(self):

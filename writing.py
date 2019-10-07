@@ -1,11 +1,11 @@
 # Qt5 imports
 import PyQt5.uic
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal, Qt
+from PyQt5 import QtWidgets
 
 import numpy as np
 
 Ui_Writing, _ = PyQt5.uic.loadUiType("writing.ui")
+
 
 class WritingControl(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
@@ -38,9 +38,9 @@ class WritingControl(QtWidgets.QWidget):
     def handleWritingMessage(self, message):
         print message
         if message["Active"]:
-            if len(message["FilenamePattern"])>0:
+            if len(message["FilenamePattern"]) > 0:
                 # FilenamePattern is a format strings such as /a/b/c/c_run0000_%s.%s
-                exampleFilename = message["FilenamePattern"]%("chan*","ljh")
+                exampleFilename = message["FilenamePattern"] % ("chan*", "ljh")
             else:
                 exampleFilename = ""
             self.startedWriting(exampleFilename)
@@ -65,8 +65,8 @@ class WritingControl(QtWidgets.QWidget):
             self.updatePath(result)
 
     def handleNumberWritten(self, d):
-        self.ui.label_numberWritten.setText("Number Written by Channel: {}\nNumber Written Total: {}".format(d["NumberWritten"],
-                                            np.sum(d["NumberWritten"])))
+        self.ui.label_numberWritten.setText("Number Written Total: {}\nNumber Written by Channel: {}".format(
+            np.sum(d["NumberWritten"]), d["NumberWritten"]))
 
     def start(self):
         if self.writing:
@@ -93,7 +93,6 @@ class WritingControl(QtWidgets.QWidget):
             }
 
         self.client.call("SourceControl.WriteControl", request)
-
 
     def stoppedWriting(self):
         print "STOPPED WRITING"
@@ -136,5 +135,6 @@ class WritingControl(QtWidgets.QWidget):
         else:
             dialog.setTextValue(default)
         dialog.setOption(QtWidgets.QInputDialog.UsePlainTextEditForTextInput)
-        dialog.textValueSelected.connect(lambda x: self.client.call("SourceControl.WriteComment", dialog.textValue()))
+        dialog.textValueSelected.connect(lambda x: self.client.call(
+            "SourceControl.WriteComment", dialog.textValue()))
         dialog.show()
