@@ -78,6 +78,7 @@ class ExperimentStateIncrementer():
     def resetStateLabels(self):
         self._gen = iter_all_strings()
         self.updateLabel("START")
+        self.lastValidState = "START"
 
 
 class Observe(QtWidgets.QWidget):
