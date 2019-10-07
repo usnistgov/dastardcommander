@@ -218,7 +218,8 @@ class Observe(QtWidgets.QWidget):
     @pyqtSlot()
     def resetIntegration(self):
         self.countsSeens = []
-        self.crm_grid.setCountRates(np.zeros(len(self.crm_grid.buttons)), 1)
+        if self.crm_grid is not None:
+            self.crm_grid.setCountRates(np.zeros(len(self.crm_grid.buttons)), 1)
         self.setArrayCps(0, False, 0)
 
     def handleAutoScaleClicked(self):
