@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 A stand-alone subscriber to listen to (and print) all messages published on a
@@ -14,14 +14,14 @@ import zmq
 
 host = "localhost:5501"
 if len(sys.argv) > 1:
-    host =  sys.argv[1]
+    host = sys.argv[1]
 
 # Socket to talk to server
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
 print("Collecting updates from dastard server...")
-socket.connect ("tcp://%s" % host)
+socket.connect("tcp://%s" % host)
 
 # for topicfilter in ("TRIGGER", "STATUS"):
 #     socket.setsockopt(zmq.SUBSCRIBE, topicfilter)

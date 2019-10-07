@@ -1,7 +1,6 @@
 # Qt5 imports
 import PyQt5.uic
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal, Qt, QTimer
+from PyQt5 import QtWidgets
 
 import numpy as np
 import json
@@ -40,7 +39,7 @@ class JuliaCaller(object):
         print("Found Pope scripts in %s" % path)
 
     def jcall(self, scriptname, args, wait=True):
-        cmd = ["nice","-n","19", os.path.join(self.POPE_PATH, scriptname)]
+        cmd = ["nice", "-n", "19", os.path.join(self.POPE_PATH, scriptname)]
         cmd.extend(args)
         print("Running '%s'" % " ".join(cmd))
         # we don't use check_call here because Popen prints output in real time, while check_call does not
@@ -115,7 +114,6 @@ class Workflow(QtWidgets.QWidget):
         self.ui.pushButton_createNoiseModel.setEnabled(True)
         self.ui.pushButton_createProjectors.setEnabled(True)
 
-
     def reset(self):
         self.noiseFilename = None
         self.ui.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
@@ -133,7 +131,6 @@ class Workflow(QtWidgets.QWidget):
         self.ui.pushButton_viewProjectorsPlot.setEnabled(False)
         self.ui.pushButton_loadProjectors.setEnabled(False)
         self.ui.label_loadedProjectors.setText("projectors loaded? no")
-
 
     def handleTakeNoise(self):
         """
@@ -176,9 +173,8 @@ class Workflow(QtWidgets.QWidget):
         # # stop writing files
         self.dc.writingTab.stop()
 
-        #enable next step
+        # Enable next step
         self.ui.pushButton_createNoiseModel.setEnabled(True)
-
 
     def handleTakePulses(self):
         """
@@ -219,7 +215,8 @@ class Workflow(QtWidgets.QWidget):
             # remember filenames
             self.pulseFilename = self.dc.writingTab.ui.fileNameExampleEdit.text()
             self.ui.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
-            progressBar.setLabelText("pulses, {}/{} records".format(self.numberWritten, RECORDS_TOTAL))
+            progressBar.setLabelText(
+                "pulses, {}/{} records".format(self.numberWritten, RECORDS_TOTAL))
             progressBar.setValue(self.numberWritten)
             QtWidgets.QApplication.processEvents()  # process gui events
             if progressBar.wasCanceled():
@@ -227,13 +224,11 @@ class Workflow(QtWidgets.QWidget):
         progressBar.close()
         self.dc.ui.tabWidget.setCurrentWidget(self.dc.ui.tabWorkflow)
 
-
-        # # stop writing files
+        # Stop writing files
         self.dc.writingTab.stop()
 
-        #enable next step
+        # Enable next step
         self.ui.pushButton_createProjectors.setEnabled(True)
-
 
     def handleCreateNoiseModel(self):
         # create output file name (easier than getting it from script output?)
@@ -324,7 +319,6 @@ class Workflow(QtWidgets.QWidget):
         self.ui.pushButton_viewProjectorsPlot.setEnabled(True)
         self.ui.pushButton_loadProjectors.setEnabled(True)
 
-
     def handleViewProjectorsPlot(self):
         self.openPdf(self.projectorsPlotFilename)
 
@@ -344,17 +338,18 @@ class Workflow(QtWidgets.QWidget):
         failures = OrderedDict()
         for channelIndex, config in list(configs.items()):
             print("sending ProjectorsBasis for {}".format(channelIndex))
-            okay, error = self.dc.client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
+            okay, error = self.dc.client.call(
+                "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
             if okay:
                 success_chans.append(channelIndex)
             else:
                 failures[channelIndex] = error
-        result = "success on channelIndicies (not channelName): {}\n".format(sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+        result = "success on channelIndicies (not channelName): {}\n".format(
+            sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
         resultBox = QtWidgets.QMessageBox(self)
         resultBox.setText(result)
         resultBox.show()
         self.ui.label_loadedProjectors.setText("projectors loaded? yes")
-
 
     def handleStatusUpdate(self, d):
         if self.nsamples != d["Nsamples"] or self.npresamples != d["Npresamp"]:
@@ -372,8 +367,6 @@ class Workflow(QtWidgets.QWidget):
 
 
 if __name__ == "__main__":
-    import sys
-
     app = QtWidgets.QApplication(sys.argv)
     bar = QtWidgets.QProgressDialog("taking noise...", None, 0, 30, parent=None)
     # bar.setWindowModality(PyQt5.WindowModal)

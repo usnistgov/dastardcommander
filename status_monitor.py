@@ -1,4 +1,3 @@
-import time
 import zmq
 from PyQt5 import QtCore
 import collections

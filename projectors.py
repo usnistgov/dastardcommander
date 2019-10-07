@@ -1,12 +1,7 @@
-import rpc_client
 import h5py
 import numpy as np
 import base64
-import json
 from collections import OrderedDict
-
-
-
 
 #  0 -  3  Version = 1          (uint32)
 #  4       'G'                  (byte)
@@ -22,6 +17,8 @@ from collections import OrderedDict
 #          [1,0] [1,1] ... [1,ncols-1]
 #          ...
 #          [nrows-1,0] ... [nrows-1,ncols-1]
+
+
 def toMatBase64(array):
     """
     returns s,v
@@ -32,10 +29,11 @@ def toMatBase64(array):
     """
     nrow, ncol = array.shape
     dt = np.dtype([('version', np.uint32), ('magic', np.uint8, (4,)), ("nrow", np.int64),
-               ("ncol",np.int64), ("zeros",np.int64,2), ("data", np.float64,nrow*ncol)])
-    a = np.array([( 1,[ord("G"),ord("F"),ord("A"),0],nrow,ncol,[0,0],array.ravel())],dt)
+                   ("ncol", np.int64), ("zeros", np.int64, 2), ("data", np.float64, nrow*ncol)])
+    a = np.array([(1, [ord("G"), ord("F"), ord("A"), 0], nrow, ncol, [0, 0], array.ravel())], dt)
     s = base64.b64encode(a)
     return s, a[0]
+
 
 def getConfigs(filename, channelNames):
     """
@@ -50,13 +48,13 @@ def getConfigs(filename, channelNames):
     if not h5py.is_hdf5(filename):
         print("{} is not a valid hdf5 file")
         return out
-    h5 = h5py.File(filename,"r")
+    h5 = h5py.File(filename, "r")
     for key in list(h5.keys()):
         nameNumber = int(key)
         channelIndex = nameNumberToIndex[nameNumber]
         projectors = h5[key]["svdbasis"]["projectors"].value
         basis = h5[key]["svdbasis"]["basis"].value
-        rows,cols = projectors.shape
+        rows, cols = projectors.shape
         # projectors has size (n,z) where it is (rows,cols)
         # basis has size (z,n)
         # coefs has size (n,1)
@@ -79,21 +77,23 @@ def getConfigs(filename, channelNames):
                 "ProjectorsBase64": toMatBase64(projectors)[0],
                 "BasisBase64": toMatBase64(basis)[0],
             }
-        out[nameNumber]=config
+        out[nameNumber] = config
     return out
+
 
 # dastard channelNames go from chan1 to chanN and err1 to errN
 # we need to mape from channelName to channelIndex (0-2N-1)
 def getNameNumberToIndex(channelNames):
     nameNumberToIndex = {}
-    for (i,name) in enumerate(channelNames):
+    for (i, name) in enumerate(channelNames):
         if not name.startswith("chan"):
             continue
         nameNumber = int(name[4:])
-        nameNumberToIndex[nameNumber]=i
+        nameNumberToIndex[nameNumber] = i
         # for now since we only use this with lancero sources, error for non-odd index
-        if i%2 != 1:
-            raise Exception("all fb channelIndicies on a lancero source are odd, we shouldn't load projectors for even channelIndicies")
+        if i % 2 != 1:
+            raise Exception(
+                "all fb channelIndicies on a lancero source are odd, we shouldn't load projectors for even channelIndicies")
     return nameNumberToIndex
 #
 # def remapConfigs(configs0, channelNames):

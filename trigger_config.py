@@ -1,7 +1,7 @@
 # Qt5 imports
 import PyQt5.uic
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 
 Ui_Trigger, _ = PyQt5.uic.loadUiType("trigger_config.ui")
 
@@ -84,6 +84,7 @@ class TriggerConfig(QtWidgets.QWidget):
             for channelIndex in d["ChannelIndicies"]:
                 self.trigger_state[channelIndex] = d
         self.updateTriggerGUIElements()
+        self.changedTriggerStateSig.emit()
 
     @pyqtSlot()
     def channelChooserChanged(self):
@@ -133,7 +134,8 @@ class TriggerConfig(QtWidgets.QWidget):
                 continue
             prefix, cnums = line.split(":", 1)
             if prefix not in self.channel_prefixes:
-                print("Channel prefix %s not in known prefixes: %s" % (prefix, self.channel_prefixes))
+                print("Channel prefix %s not in known prefixes: %s" %
+                      (prefix, self.channel_prefixes))
                 continue
             for cnum in cnums.split(","):
                 # Ignore the "" that follows a trailing comma
@@ -274,7 +276,10 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.coupleFBToErrCheckBox.setChecked(fberr)
         self.ui.coupleErrToFBCheckBox.setChecked(errfb)
 
+    changedTriggerStateSig = pyqtSignal()
+
     def changedAllTrigConfig(self):
+        "Update all trigger config GUI elements for new configuration"
         self.changedAutoTrigConfig()
         self.changedEdgeTrigConfig()
         self.changedLevelTrigConfig()
@@ -403,9 +408,9 @@ class TriggerConfig(QtWidgets.QWidget):
     def sendRecordLengthsToServer(self):
         samp = self.ui.recordLengthSpinBox.value()
         presamp = self.ui.pretrigLengthSpinBox.value()
-        if (samp != self.lastRecordLength or
-        presamp != self.lastPretrigLength):
-            # only send a message to server if it is different
+        # Send a message to server only if one is changed
+        if (samp != self.lastRecordLength or presamp != self.lastPretrigLength):
             self.lastRecordLength = samp
             self.lastPretrigLength = presamp
-            self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp})
+            self.client.call("SourceControl.ConfigurePulseLengths",
+                             {"Nsamp": samp, "Npre": presamp})
