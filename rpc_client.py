@@ -7,7 +7,7 @@ from PyQt5 import QtWidgets
 
 class JSONClient(object):
 
-    def __init__(self, addr, codec=json, qtParent = None):
+    def __init__(self, addr, codec=json, qtParent=None):
         self._socket = socket.create_connection(addr)
         self._socket.settimeout(7.0)
         self._id_iter = itertools.count()
@@ -33,7 +33,7 @@ class JSONClient(object):
             # to close a window while editing a QLineEdit (see issue #22).
             # If you skip this test, you get a segfault; this will be graceful.
         if verbose:
-            print("SEND {} {}".format(name,json.dumps(params,indent=4)))
+            print("SEND {} {}".format(name, json.dumps(params, indent=4)))
         request = self._message(name, params)
         reqid = request.get('id')
         msg = self._codec.dumps(request)
@@ -51,17 +51,19 @@ class JSONClient(object):
 
         if response.get('id') != reqid:
             raise ValueError("JSON-RPC expected id=%s, received id=%s: %s" %
-                            (reqid, response.get('id'),
-                             response.get('error')))
+                             (reqid, response.get('id'),
+                              response.get('error')))
 
         if response.get('error') is not None:
-            message = "Request: {}\n\nError: {}".format(request,response.get('error'))
+            message = "Request: {}\n\nError: {}".format(request, response.get('error'))
             if verbose:
                 print message
             if errorBox and self.qtParent is not None:
                 resultBox = QtWidgets.QMessageBox(self.qtParent)
                 resultBox.setText(message)
-                resultBox.setWindowTitle("DASTARD RPC Error") # doesn't work on mac, from qt docs "On macOS, the window title is ignored (as required by the macOS Guidelines)."
+                resultBox.setWindowTitle("DASTARD RPC Error")
+                # The above line doesn't work on mac, from qt docs "On macOS, the window
+                # title is ignored (as required by the macOS Guidelines)."
                 resultBox.show()
             elif throwError:
                 raise Exception(message)
