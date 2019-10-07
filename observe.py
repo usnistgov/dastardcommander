@@ -1,15 +1,15 @@
 import numpy as np
 import os
-import json
 from matplotlib import cm
 import time
 from string import ascii_uppercase
 import itertools
 
 # Qt5 imports
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal, Qt, QSettings, pyqtSlot
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtCore import pyqtSlot
 import PyQt5.uic
+
 
 def iter_all_strings():
     "Iterator that returns A,B,C,...X,Y,Z,AA,AB,...ZX,ZY,ZZ,AAA,AAB,..."
@@ -22,6 +22,7 @@ def iter_all_strings():
 
 
 Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
+
 
 class ExperimentStateIncrementer():
     def __init__(self, newStateButton, ignoreButton, label, parent):
@@ -84,12 +85,13 @@ class Observe(QtWidgets.QWidget):
         self.countsSeens = []
         self.cols = 0
         self.rows = 0
-        self.channel_names = [] # injected from dc.py
+        self.channel_names = []  # injected from dc.py
         self.auxPerChan = 0
         self.lastTotalRate = 0
         self.mapfile = ""
-        self.ExperimentStateIncrementer = ExperimentStateIncrementer(self.ui.pushButton_experimentStateNew,
-        self.ui.pushButton_experimentStateIGNORE, self.ui.label_experimentState, self)
+        self.ExperimentStateIncrementer = ExperimentStateIncrementer(
+            self.ui.pushButton_experimentStateNew,
+            self.ui.pushButton_experimentStateIGNORE, self.ui.label_experimentState, self)
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
@@ -127,9 +129,9 @@ class Observe(QtWidgets.QWidget):
         auxCps = 0
         for cr, channel_name in zip(countRates, self.channel_names):
             if channel_name.startswith("chan"):
-                arrayCps+=cr
+                arrayCps += cr
             else:
-                auxCps+=cr
+                auxCps += cr
         self.setArrayCps(arrayCps, integrationComplete, auxCps)
 
     def getColorScale(self, countRates):
@@ -248,7 +250,7 @@ class Observe(QtWidgets.QWidget):
         scale = 1.0/float(msg["Spacing"])
         minx = np.min([p["X"] for p in msg["Pixels"]])
         maxy = np.max([p["Y"] for p in msg["Pixels"]])
-        print("MinX = ",minx, " MaxY=", maxy)
+        print("MinX = ", minx, " MaxY=", maxy)
         self.pixelMap = [((p["X"]-minx)*scale, (maxy-p["Y"])*scale) for p in msg["Pixels"]]
         print("handleTESMap with spacing ", msg["Spacing"], " scale ", scale)
         # print(self.pixelMap)
@@ -256,7 +258,8 @@ class Observe(QtWidgets.QWidget):
 
     def handleExternalTriggerMessage(self, msg):
         n = msg["NumberObservedInLastSecond"]
-        self.ui.label_externalTriggersInLastSecond.setText("{} external triggers in last second".format(n))
+        self.ui.label_externalTriggersInLastSecond.setText(
+            "{} external triggers in last second".format(n))
 
     def handleWritingMessage(self, msg):
         if msg["Active"]:
@@ -320,13 +323,13 @@ class CountRateMap(QtWidgets.QWidget):
             else:
                 x = scale*xy[i][0]
                 y = scale*xy[i][1]
-            self.addButton(x, y, scale-1, scale-1, "{}, row{}col{} matterchan{}".format(name,row,col,2*(self.rows*col+row)+1))
+            self.addButton(x, y, scale-1, scale-1,
+                           "{}, row{}col{} matterchan{}".format(name, row, col, 2*(self.rows*col+row)+1))
             row += 1
             i += 1
             if row >= self.rows:
                 row = 0
                 col += 1
-
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
