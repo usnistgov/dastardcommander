@@ -84,6 +84,7 @@ class TriggerConfig(QtWidgets.QWidget):
             for channelIndex in d["ChannelIndicies"]:
                 self.trigger_state[channelIndex] = d
         self.updateTriggerGUIElements()
+        self.changedTriggerStateSig.emit()
 
     @pyqtSlot()
     def channelChooserChanged(self):
@@ -274,7 +275,10 @@ class TriggerConfig(QtWidgets.QWidget):
         self.ui.coupleFBToErrCheckBox.setChecked(fberr)
         self.ui.coupleErrToFBCheckBox.setChecked(errfb)
 
+    changedTriggerStateSig = pyqtSignal()
+
     def changedAllTrigConfig(self):
+        "Update all trigger config GUI elements for new configuration"
         self.changedAutoTrigConfig()
         self.changedEdgeTrigConfig()
         self.changedLevelTrigConfig()

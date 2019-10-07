@@ -1,25 +1,24 @@
-# Qt5 imports
-import PyQt5.uic
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QObject, pyqtSignal, Qt
-
 import numpy as np
 import os
 import json
 from matplotlib import cm
-from PyQt5.QtCore import QObject, pyqtSignal, QSettings, pyqtSlot
 import time
 from string import ascii_uppercase
 import itertools
 
-#from https://stackoverflow.com/questions/29351492/how-to-make-a-continuous-alphabetic-list-python-from-a-z-then-from-aa-ab-ac-e
+# Qt5 imports
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QObject, pyqtSignal, Qt, QSettings, pyqtSlot
+import PyQt5.uic
+
 def iter_all_strings():
+    "Iterator that returns A,B,C,...X,Y,Z,AA,AB,...ZX,ZY,ZZ,AAA,AAB,..."
+    # From Stack Overflow. See https://bit.ly/2pJS6kN
     size = 1
     while True:
         for s in itertools.product(ascii_uppercase, repeat=size):
             yield "".join(s)
-        size +=1
-
+        size += 1
 
 
 Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
@@ -42,7 +41,7 @@ class ExperimentStateIncrementer():
 
     def updateLabel(self, stateName):
         self.label.setText("Current State: {} at {}".format(
-            stateName, 
+            stateName,
             time.strftime("%-H:%M:%S on %a")
         ))
 
@@ -54,7 +53,7 @@ class ExperimentStateIncrementer():
             "Label": stateName,
             "WaitForError": True,
         }
-        _, err = self.parent.client.call("SourceControl.SetExperimentStateLabel", config)        
+        _, err = self.parent.client.call("SourceControl.SetExperimentStateLabel", config)
         if not err:
             self.updateLabel(stateName)
 
@@ -89,7 +88,7 @@ class Observe(QtWidgets.QWidget):
         self.auxPerChan = 0
         self.lastTotalRate = 0
         self.mapfile = ""
-        self.ExperimentStateIncrementer = ExperimentStateIncrementer(self.ui.pushButton_experimentStateNew, 
+        self.ExperimentStateIncrementer = ExperimentStateIncrementer(self.ui.pushButton_experimentStateNew,
         self.ui.pushButton_experimentStateIGNORE, self.ui.label_experimentState, self)
 
     def handleTriggerRateMessage(self, d):
@@ -214,6 +213,7 @@ class Observe(QtWidgets.QWidget):
         self.deleteCRMGrid()
         self.deleteCRMMap()
 
+    @pyqtSlot()
     def resetIntegration(self):
         self.countsSeens = []
         self.crm_grid.setCountRates(np.zeros(len(self.crm_grid.buttons)), 1)
@@ -259,7 +259,7 @@ class Observe(QtWidgets.QWidget):
         self.ui.label_externalTriggersInLastSecond.setText("{} external triggers in last second".format(n))
 
     def handleWritingMessage(self, msg):
-        if msg["Active"]: 
+        if msg["Active"]:
             print("Observe got Writing Active=True message, resetting state labels")
             self.ExperimentStateIncrementer.resetStateLabels()
 
