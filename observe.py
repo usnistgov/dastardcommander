@@ -28,6 +28,7 @@ class ExperimentStateIncrementer():
     def __init__(self, newStateButton, ignoreButton, label, parent):
         self.newStateButton = newStateButton
         self.ignoreButton = ignoreButton
+        self.ignoring = False
         self.label = label
         self.parent = parent
         self.newStateButton.clicked.connect(self.handleNewStateButton)
@@ -55,11 +56,24 @@ class ExperimentStateIncrementer():
             "WaitForError": True,
         }
         _, err = self.parent.client.call("SourceControl.SetExperimentStateLabel", config)
-        if not err:
-            self.updateLabel(stateName)
+        if err:
+            return
+        self.updateLabel(stateName)
+        self.ignoring = (stateName == "IGNORE")
+        if self.ignoring:
+            self.ignoreButton.setText('Restart state "%s"' % self.lastValidState)
+        else:
+            self.lastValidState = stateName
+            self.ignoreButton.setText("Set state IGNORE")
 
     def handleIgnoreButton(self):
-        self.sendState("IGNORE")
+        """IGNORE button behavior depends on self.ignoring.
+        If we're in a valid mode (self.ignoring is False), then switch state to IGNORE.
+        Otherwise, switch back to the last valid state."""
+        if self.ignoring:
+            self.sendState(self.lastValidState)
+        else:
+            self.sendState("IGNORE")
 
     def resetStateLabels(self):
         self._gen = iter_all_strings()
