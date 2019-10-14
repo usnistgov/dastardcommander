@@ -61,7 +61,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('dc.png'))
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle("dastard-commander %s    (connected to %s:%d)" % (_VERSION, host, port))
+        self.setWindowTitle("Dastard-Commander %s    (connected to %s:%d)" % (_VERSION, host, port))
         self.reconnect = False
         self.disconnectReason = ""
         self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
@@ -468,6 +468,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Build the check boxes to specify which Abaco cards to use.
         cards is a list of integers: which cards are available on the sever"""
 
+        TEST_CARD_NUMBER = 3
         layout = self.ui.abacoChooserLayout
         # Empty the layout
         while True:
@@ -483,7 +484,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.noAbacoLabel.show()
         else:
             self.ui.noAbacoLabel.hide()
-            layout.addWidget(QtWidgets.QLabel("Card number"), 0, 0)
+            layout.addWidget(QtWidgets.QLabel("Card number:"), 0, 0)
 
         narrow = QtWidgets.QSizePolicy()
         narrow.setHorizontalStretch(2)
@@ -491,7 +492,11 @@ class MainWindow(QtWidgets.QMainWindow):
         wide.setHorizontalStretch(10)
 
         for i, c in enumerate(cards):
-            cb = QtWidgets.QCheckBox("abaco %d" % c)
+            checkText = "abaco %d" % c
+            if c == TEST_CARD_NUMBER:
+                checkText += " (test data)"
+            cb = QtWidgets.QCheckBox(checkText)
+            cb.setToolTip("Ring buffer shm:xdma%d_c2h_0_buffer exists" % c)
             cb.setChecked(True)
             cb.setSizePolicy(wide)
             self.abacoCheckBoxes[c] = cb

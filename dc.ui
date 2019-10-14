@@ -894,7 +894,7 @@
              <item>
               <widget class="QLabel" name="noAbacoLabel">
                <property name="text">
-                <string>No devices found at /var/tmp/abacopipe</string>
+                <string>No Abaco devices found in shared memory</string>
                </property>
               </widget>
              </item>
