@@ -926,7 +926,12 @@ def main():
         d = HostPortDialog(host=host, port=port, disconnectReason=disconnectReason,
                            settings=settings)
         host, port = d.run()
-        if host is None or port is None:
+        # None, None indicates user cancelled the dialog.
+        if host is None and port is None:
+            return
+
+        # One None is an invalid host:port pair
+        if host is None or port is None or host == "" or port == "":
             print("Could not start Dastard-commander without a valid host:port selection.")
             return
         try:
