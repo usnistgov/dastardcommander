@@ -148,7 +148,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 except ValueError:
                     print ("Channel '%s' is not known" % (name))
         self.ui.channelChooserBox.setCurrentIndex(0)
-        print "The chosen channels are ", self.chosenChannels
+        print("The chosen channels are ", self.chosenChannels)
 
     def getstate(self, name):
         "Get the self.trigger_state value named name. If mutiple values, return None"
@@ -272,7 +272,7 @@ class TriggerConfig(QtWidgets.QWidget):
         elif msg == 3:
             errfb = True
         elif msg != 1:
-            print "message: TRIGCOUPLING {}, but expect 1, 2 or 3".format(msg)
+            print("message: TRIGCOUPLING {}, but expect 1, 2 or 3".format(msg))
         self.ui.coupleFBToErrCheckBox.setChecked(fberr)
         self.ui.coupleErrToFBCheckBox.setChecked(errfb)
 

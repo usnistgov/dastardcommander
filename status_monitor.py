@@ -22,7 +22,7 @@ class ZMQListener(QtCore.QObject):
         self.socket.connect(self.address)
         print("Collecting updates from dastard at %s" % self.address)
 
-        self.socket.setsockopt(zmq.SUBSCRIBE, "")
+        self.socket.setsockopt_string(zmq.SUBSCRIBE, u"")
 
         self.messages_seen = collections.Counter()
         self.quit_once = False
@@ -39,6 +39,8 @@ class ZMQListener(QtCore.QObject):
                 continue
 
             [topic, contents] = self.socket.recv_multipart()
+            topic = topic.decode()
+            contents = contents.decode()
             self.messages_seen[topic] += 1
             self.message.emit(topic, contents)
 

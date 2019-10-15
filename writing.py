@@ -36,7 +36,7 @@ class WritingControl(QtWidgets.QWidget):
             cbd.setToolTip("Dialog to choose data writing path disabled for remote clients.")
 
     def handleWritingMessage(self, message):
-        print message
+        print(message)
         if message["Active"]:
             if len(message["FilenamePattern"]) > 0:
                 # FilenamePattern is a format strings such as /a/b/c/c_run0000_%s.%s
@@ -60,7 +60,7 @@ class WritingControl(QtWidgets.QWidget):
             startPath = "/"
         result = QtWidgets.QFileDialog.getExistingDirectory(
             None, "Choose base path", startPath)
-        print "Result was: ", result
+        print("Result was: ", result)
         if len(result) > 0:
             self.updatePath(result)
 
@@ -95,7 +95,7 @@ class WritingControl(QtWidgets.QWidget):
         self.client.call("SourceControl.WriteControl", request)
 
     def stoppedWriting(self):
-        print "STOPPED WRITING"
+        print("STOPPED WRITING")
         self.writing = False
         self.ui.writingStartButton.setText("Start Writing")
         self.ui.previousNameExampleEdit.setText(self.ui.fileNameExampleEdit.text())
@@ -104,7 +104,7 @@ class WritingControl(QtWidgets.QWidget):
         self.ui.writingPauseButton.setEnabled(False)
 
     def startedWriting(self, exampleFilename):
-        print "STARTED WRITING"
+        print("STARTED WRITING")
         self.writing = True
         self.ui.writingStartButton.setText("Stop Writing")
         self.ui.fileNameExampleEdit.setText(exampleFilename)

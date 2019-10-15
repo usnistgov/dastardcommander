@@ -2,13 +2,13 @@
 GUI for operating [DASTARD](https://github.com/usnistgov/dastard), the Data Acquisition System for Triggering And Recording Data, a microcalorimeter DAQ system. Dastard-Commander is a GUI front-end only, and it communicates with a running Dastard system via JSON-RPC calls, as well as by monitoring certain ports for ZMQ messages.
 
 ## Installation
-Requires Python2 with Qt5 (but Python3 conversion is coming soon, as of 4 October 2019).
+Requires Python 3 with Qt5. (See earlier versions of dastard-commander for Python 2).
 
 The usual platform for microcalorimeter systems is Ubuntu 16 or 18. DC should work on Mac OS X or Windows, too, though Mac testing is limited and Windows has not been attempted.
 
 For Ubuntu, installation should be as simple as:
 ```
-sudo apt-get install python-pyqt5 python-numpy python-h5py python-zmq python-matplotlib
+sudo apt-get install python3-pyqt5 python3-numpy python3-h5py python3-zmq python3-matplotlib
 cd  # Replace by cd to wherever you wish to store the repo, if not in your home directory.
 git clone https://github.com/usnistgov/dastard-commander.git
 
@@ -17,7 +17,7 @@ sudo apt-get install roxterm  # add this if you want the scripting in roxterms.s
 
 For Macs with Mac Ports, replace the `apt-get` line with:
 ```
-sudo port install python27 py27-pyqt5 py27-numpy py27-zmq py27-h5py py27-setuptools py27-matplotlib
+sudo port install python37 py37-pyqt5 py37-numpy py37-zmq py37-h5py py37-setuptools py37-matplotlib
 ```
 
 ## Running

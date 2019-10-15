@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 A stand-alone subscriber to listen to (and print) all messages published on a
@@ -20,7 +20,7 @@ if len(sys.argv) > 1:
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
-print "Collecting updates from dastard server..."
+print("Collecting updates from dastard server...")
 socket.connect("tcp://%s" % host)
 
 # for topicfilter in ("TRIGGER", "STATUS"):
@@ -30,4 +30,4 @@ socket.setsockopt(zmq.SUBSCRIBE, "")
 total_value = 0
 while True:
     topic, messagedata = socket.recv_multipart()
-    print topic, messagedata
+    print(topic, messagedata)

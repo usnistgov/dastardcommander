@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 dastard-commander (dc.py)
@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 import os
+
 from collections import OrderedDict, defaultdict
 import numpy as np
 # Qt5 imports
@@ -61,7 +62,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('dc.png'))
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle("dastard-commander %s    (connected to %s:%d)" % (_VERSION, host, port))
+        self.setWindowTitle("Dastard-Commander %s    (connected to %s:%d)" % (_VERSION, host, port))
         self.reconnect = False
         self.disconnectReason = ""
         self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
@@ -211,7 +212,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "LANCERO":
                 self.updateLanceroCardChoices(d["DastardOutput"]["AvailableCards"])
                 mask = d["FiberMask"]
-                for k, v in self.fiberBoxes.items():
+                for k, v in list(self.fiberBoxes.items()):
                     v.setChecked(mask & (1 << k))
                 ns = d["DastardOutput"]["Nsamp"]
                 if ns > 0 and ns <= 16:
@@ -230,7 +231,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
-                print ("New channames: ", self.channel_names)
+                print("New channames: ", self.channel_names)
                 if self.sourceIsTDM:
                     self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
                 else:
@@ -468,6 +469,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Build the check boxes to specify which Abaco cards to use.
         cards is a list of integers: which cards are available on the sever"""
 
+        TEST_CARD_NUMBER = 3
         layout = self.ui.abacoChooserLayout
         # Empty the layout
         while True:
@@ -483,7 +485,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.noAbacoLabel.show()
         else:
             self.ui.noAbacoLabel.hide()
-            layout.addWidget(QtWidgets.QLabel("Card number"), 0, 0)
+            layout.addWidget(QtWidgets.QLabel("Card number:"), 0, 0)
 
         narrow = QtWidgets.QSizePolicy()
         narrow.setHorizontalStretch(2)
@@ -491,7 +493,11 @@ class MainWindow(QtWidgets.QMainWindow):
         wide.setHorizontalStretch(10)
 
         for i, c in enumerate(cards):
-            cb = QtWidgets.QCheckBox("abaco %d" % c)
+            checkText = "abaco %d" % c
+            if c == TEST_CARD_NUMBER:
+                checkText += " (test data)"
+            cb = QtWidgets.QCheckBox(checkText)
+            cb.setToolTip("Ring buffer shm:xdma%d_c2h_0_buffer exists" % c)
             cb.setChecked(True)
             cb.setSizePolicy(wide)
             self.abacoCheckBoxes[c] = cb
@@ -511,7 +517,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.fiberBoxes[i] = box
 
         def setAll(value):
-            for box in self.fiberBoxes.values():
+            for box in list(self.fiberBoxes.values()):
                 box.setChecked(value)
 
         def checkAll():
@@ -677,7 +683,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _startLancero(self):
         mask = 0
-        for k, v in self.fiberBoxes.items():
+        for k, v in list(self.fiberBoxes.items()):
             if v.isChecked():
                 mask |= (1 << k)
         print("Fiber mask: 0x%4.4x" % mask)
@@ -688,7 +694,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         activate = []
         delays = []
-        for k, v in self.lanceroCheckBoxes.items():
+        for k, v in list(self.lanceroCheckBoxes.items()):
             if v.isChecked():
                 activate.append(k)
                 delays.append(self.lanceroDelays[k].value())
@@ -746,7 +752,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _startAbaco(self):
         activate = []
-        for k, v in self.abacoCheckBoxes.items():
+        for k, v in list(self.abacoCheckBoxes.items()):
             if v.isChecked():
                 activate.append(k)
 
@@ -760,9 +766,9 @@ class MainWindow(QtWidgets.QMainWindow):
             return False
         okay, error = self.client.call("SourceControl.Start", "ABACOSOURCE")
         if not okay:
-            print ("Could not Start Abaco")
+            print("Could not Start Abaco")
             return False
-        print ("Starting Abaco")
+        print("Starting Abaco")
         return True
 
     @pyqtSlot()
@@ -782,7 +788,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Sending model for {} chans".format(len(configs)))
             success_chans = []
             failures = OrderedDict()
-            for channelIndex, config in configs.items():
+            for channelIndex, config in list(configs.items()):
                 print("sending ProjectorsBasis for {}".format(channelIndex))
                 okay, error = self.client.call(
                     "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
@@ -825,7 +831,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def sendEdgeMulti(self):
         # first send the trigger mesage for all channels
         config = {
-            "ChannelIndicies": range(len(self.channel_names)),
+            "ChannelIndicies": list(range(len(self.channel_names))),
             "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
             "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),
@@ -837,11 +843,13 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
 
-        if self.sourceIsTDM:
-            # for TDM systems turn off triggering on error channels depending on ui state
-            if not self.ui.checkBox_edgeMultiTriggerOnError.isChecked():
-                config = {"ChannelIndicies": range(0, len(self.channel_names), 2)}
-                self.client.call("SourceControl.ConfigureTriggers", config)
+        # Reset trigger on even-numbered channels if source is TDM and the relevant
+        # check box ("Trigger on Error Channels") isn't checked.
+        omitEvenChannels = (self.sourceIsTDM and not
+                            self.ui.checkBox_edgeMultiTriggerOnError.isChecked)
+        if omitEvenChannels:
+            config = {"ChannelIndicies": list(range(0, len(self.channel_names), 2))}
+            self.client.call("SourceControl.ConfigureTriggers", config)
 
     @pyqtSlot()
     def sendMix(self):
@@ -856,9 +864,9 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.client.call("SourceControl.ConfigureMixFraction", config)
             print("experimental mix config")
-            print (config)
+            print(config)
         except Exception as e:
-            print ("Could not set mix: {}".format(e))
+            print("Could not set mix: {}".format(e))
 
     @pyqtSlot()
     def sendExperimentStateLabel(self):
@@ -911,6 +919,8 @@ class HostPortDialog(QtWidgets.QDialog):
 
 
 def main():
+    if sys.version_info.major <= 2:
+        print("WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***")
     settings = QSettings("NIST Quantum Sensors", "dastard-commander")
 
     app = QtWidgets.QApplication(sys.argv)
@@ -924,15 +934,20 @@ def main():
         d = HostPortDialog(host=host, port=port, disconnectReason=disconnectReason,
                            settings=settings)
         host, port = d.run()
-        if host is None or port is None:
+        # None, None indicates user cancelled the dialog.
+        if host is None and port is None:
+            return
+
+        # One None is an invalid host:port pair
+        if host is None or port is None or host == "" or port == "":
             print("Could not start Dastard-commander without a valid host:port selection.")
             return
         try:
             client = rpc_client.JSONClient((host, port))
         except socket.error:
-            print ("Could not connect to Dastard at %s:%d" % (host, port))
+            print("Could not connect to Dastard at %s:%d" % (host, port))
             continue
-        print ("Dastard is at %s:%d" % (host, port))
+        print("Dastard is at %s:%d" % (host, port))
 
         dc = MainWindow(client, host, port)
         dc.show()

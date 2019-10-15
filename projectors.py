@@ -49,7 +49,7 @@ def getConfigs(filename, channelNames):
         print("{} is not a valid hdf5 file")
         return out
     h5 = h5py.File(filename, "r")
-    for key in h5.keys():
+    for key in list(h5.keys()):
         nameNumber = int(key)
         channelIndex = nameNumberToIndex[nameNumber]
         projectors = h5[key]["svdbasis"]["projectors"].value
