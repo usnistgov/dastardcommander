@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 import os
+
 from collections import OrderedDict, defaultdict
 import numpy as np
 # Qt5 imports
@@ -918,6 +919,8 @@ class HostPortDialog(QtWidgets.QDialog):
 
 
 def main():
+    if sys.version_info.major <= 2:
+        print("WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***")
     settings = QSettings("NIST Quantum Sensors", "dastard-commander")
 
     app = QtWidgets.QApplication(sys.argv)
