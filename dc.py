@@ -612,14 +612,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
         self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
 
-        # Fix the trigger-on-error checkbox. If running nonTDM, it should be checked AND hidden
-        checkbox = self.ui.checkBox_edgeMultiTriggerOnError
-        runningNonTDM = running and not self.sourceIsTDM
-        if runningNonTDM:
-            checkbox.setChecked(True)
-            checkbox.hide()
-        else:
-            checkbox.show()
 
     def _start(self):
         self.sourceIsTDM = False
@@ -846,7 +838,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Reset trigger on even-numbered channels if source is TDM and the relevant
         # check box ("Trigger on Error Channels") isn't checked.
         omitEvenChannels = (self.sourceIsTDM and not
-                            self.ui.checkBox_edgeMultiTriggerOnError.isChecked)
+                            self.ui.checkBox_edgeMultiTriggerOnError.isChecked())
         if omitEvenChannels:
             config = {"ChannelIndicies": list(range(0, len(self.channel_names), 2))}
             self.client.call("SourceControl.ConfigureTriggers", config)
