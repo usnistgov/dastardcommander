@@ -22,11 +22,9 @@ class JuliaCaller(object):
         """Find which version of julia has POPE installed. Assume that the newest
         is the one you want"""
 
-        if sys.version_info.major >= 3:
-            versiontext = subprocess.check_output(["julia", "-v"],
-                                                  encoding="UTF-8").split()[2]
-        else:
-            versiontext = subprocess.check_output(["julia", "-v"]).split()[2]
+        # In Py 3, subprocess.check_output returns a byte array. Must
+        # stringify it with str(...) before you can split() it.
+        versiontext = str(subprocess.check_output(["julia", "-v"])).split()[2]
         major = int(versiontext.split(".")[0])
         majorminor = ".".join(versiontext.split(".")[:2])
         if major == 0:
