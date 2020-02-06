@@ -298,26 +298,26 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def updateStatusBar(self, data):
         run = data["Running"]
-        if run:
-            status = "%s source active, %d channels" % (
-                data["SourceName"], data["Nchannels"])
-            self.streams = data["Nchannels"]
-            self.cols = data.get("Ncol", [])
-            self.rows = data.get("Nrow", [])
-            ndev = min(len(self.cols), len(self.rows))
-            if ndev == 1:
-                status += " (%d rows x %d cols)" % (self.rows[0], self.cols[0])
-            elif ndev > 1:
-                status += " ("
-                for i in range(ndev):
-                    status += "%d x %d" % (self.rows[i], self.cols[i])
-                    if i < ndev-1:
-                        status += ", "
-                status += " rows x cols)"
-
-            self.statusMainLabel.setText(status)
-        else:
+        if not run:
             self.statusMainLabel.setText("Data source stopped")
+            return
+
+        status = ["{} source active, {} channels".format(data["SourceName"], data["Nchannels"])]
+        self.streams = data["Nchannels"]
+        self.cols = data.get("Ncol", [])
+        self.rows = data.get("Nrow", [])
+        ndev = min(len(self.cols), len(self.rows))
+        if ndev == 1:
+            status.append(" ({} rows x {} cols)".format(self.rows[0], self.cols[0]))
+        elif ndev > 1:
+            status.append(" (")
+            for i in range(ndev):
+                status.append("{} x {}".format(self.rows[i], self.cols[i]))
+                if i < ndev-1:
+                    status.append(", ")
+            status.append(" rows x cols)")
+        # status.append(u", {:.2f} μs samples".format(self.samplePeriod))
+        self.statusMainLabel.setText("".join(status))
 
     def heartbeat(self, hb):
         # Keep window open another 5 seconds
