@@ -320,7 +320,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 if i < ndev-1:
                     status.append(", ")
             status.append(" rows x cols)")
-        # status.append(u", {:.2f} μs samples".format(self.samplePeriod))
+        period_us = data["SamplePeriod"] / 1e3  # convert ns to us
+        status.append(u", {:.2f} μs samples".format(period_us))
         self.statusMainLabel.setText("".join(status))
 
     def heartbeat(self, hb):
