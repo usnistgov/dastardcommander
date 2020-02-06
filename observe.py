@@ -6,7 +6,7 @@ from string import ascii_uppercase
 import itertools
 
 # Qt5 imports
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSlot
 import PyQt5.uic
 
@@ -283,12 +283,31 @@ class Observe(QtWidgets.QWidget):
             self.ExperimentStateIncrementer.resetStateLabels()
 
 
+class CountRateColorBar(QtWidgets.QWidget):
+    "Show the event rate color scale as a color bar"
+    def paintEvent(self, event):
+        qp = QtGui.QPainter(self)
+        qp.setPen(QtCore.Qt.NoPen)
+        size = self.size()
+        w = size.width()
+        h = size.height()
+
+        Nboxes = max(50, w//2)
+        for i in range(Nboxes):
+            f = float(i)/Nboxes
+            color = self.cmap(f, bytes=True)
+            qp.setBrush(QtGui.QColor(*color))
+            qp.drawRect(int(f*w+0.5), 0, float(w)/Nboxes+1, h*0.5)
+
+
 class CountRateMap(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
 
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
     buttonFont = QtGui.QFont("Times", 7, QtGui.QFont.Bold)
+    # cmap = cm.get_cmap('YlOrRd')
+    cmap = cm.get_cmap('Wistia')
 
     def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -297,9 +316,17 @@ class CountRateMap(QtWidgets.QWidget):
         self.rows = rows
         self.channel_names = channel_names
         if xy is None:
-            self.initButtons(scale=25)
+            scale=25
+            self.initButtons(scale=scale)
         else:
-            self.initButtons(scale=23, xy=xy)
+            scale=23
+            self.initButtons(scale=scale, xy=xy)
+
+        self.colorbar = CountRateColorBar(self)
+        self.colorbar.move(0, (self.cols+0.5)*scale)
+        w = parent.width()
+        self.colorbar.resize(w, scale)
+        self.colorbar.cmap = self.cmap
 
     def addButton(self, x, y, xwidth, ywidth, tooltip):
         button = QtWidgets.QPushButton(self)
@@ -350,8 +377,6 @@ class CountRateMap(QtWidgets.QWidget):
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
         assert(len(countRates) == len(self.buttons))
-        # cmap = cm.get_cmap('YlOrRd')
-        cmap = cm.get_cmap('Wistia')
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
             if button is None:
@@ -364,7 +389,7 @@ class CountRateMap(QtWidgets.QWidget):
                 buttonText = "{:.0f}".format(cr)
             button.setText(buttonText)
 
-            color = cmap(cr/colorScale, bytes=True)
+            color = self.cmap(cr/colorScale, bytes=True)
             colorString = "rgb({},{},{})".format(color[0], color[1], color[2])
             colorString = 'QPushButton {background-color: %s;}' % colorString
             button.setStyleSheet(colorString)
