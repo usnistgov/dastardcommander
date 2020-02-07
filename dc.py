@@ -136,6 +136,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
         self.fullyConfigured = False
+        self.quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE", "EXTERNALTRIGGER"])
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
@@ -148,9 +149,8 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Error is: %s" % e)
             return
 
-        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE", "EXTERNALTRIGGER"])
-        if topic not in quietTopics or self.nmsg < 15:
-            print("%s %5d: %s" % (topic, self.nmsg, d))
+        if topic not in self.quietTopics or self.nmsg < 20:
+            print("%-15s %5d: %s" % (topic, self.nmsg, d))
 
         if topic == "ALIVE":
             self.heartbeat(d)

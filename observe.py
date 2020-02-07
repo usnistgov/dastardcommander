@@ -174,6 +174,8 @@ class Observe(QtWidgets.QWidget):
         self.deleteCRMGrid()
         self.crm_grid = CountRateMap(self, self.cols, self.rows, self.channel_names)
         self.ui.GridTab.layout().addWidget(self.crm_grid)
+        self.ui.colorbarLayout.insertWidget(0, self.crm_grid.colorbar)
+
 
     def deleteCRMGrid(self):
         if self.crm_grid is not None:
@@ -306,8 +308,8 @@ class CountRateMap(QtWidgets.QWidget):
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
     buttonFont = QtGui.QFont("Times", 7, QtGui.QFont.Bold)
-    # cmap = cm.get_cmap('YlOrRd')
-    cmap = cm.get_cmap('Wistia')
+    cmap = cm.get_cmap('Oranges')
+    # cmap = cm.get_cmap('Wistia')
 
     def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -322,11 +324,13 @@ class CountRateMap(QtWidgets.QWidget):
             scale=23
             self.initButtons(scale=scale, xy=xy)
 
-        self.colorbar = CountRateColorBar(self)
-        self.colorbar.move(0, (self.cols+0.5)*scale)
-        w = parent.width()
-        self.colorbar.resize(w, scale)
+        self.colorbar = CountRateColorBar()
+        width = parent.width()-100
         self.colorbar.cmap = self.cmap
+        self.colorbar.setMinimumWidth(width)
+        self.colorbar.setMinimumHeight(scale)
+        self.maxRateLabel = parent.ui.maxRateLabel
+        print("Colorbar: {}x{}, {}".format(width, scale, self.colorbar.size()))
 
     def addButton(self, x, y, xwidth, ywidth, tooltip):
         button = QtWidgets.QPushButton(self)
@@ -376,6 +380,7 @@ class CountRateMap(QtWidgets.QWidget):
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
+        self.maxRateLabel.setText("{:.2f} cps".format(colorScale))
         assert(len(countRates) == len(self.buttons))
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
