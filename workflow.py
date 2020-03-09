@@ -23,7 +23,9 @@ class ProjectorCaller(object):
 
     def scriptcall(self, scriptname, args, wait=True):
         cmd = ["nice", "-n", "19"]
+        cmd.append(scriptname)
         cmd.extend(args)
+        print(cmd)
         print("Running '%s'" % " ".join(cmd))
         # we don't use check_call here because Popen prints output in real time, while check_call does not
         p = subprocess.Popen(cmd)
@@ -65,17 +67,17 @@ class Workflow(QtWidgets.QWidget):
         self.reset()
 
         self.pcaller = ProjectorCaller()
-        # self.testingInit() # REMOVE
+        self.testingInit() # REMOVE
 
     def testingInit(self):
         """
         pre-populate the output of some steps for faster testing
         to be removed
         """
-        self.noiseFilename = "/tmp/20180709/0001/20180709_run0001_chan*.ljh"
-        self.pulseFilename = "/tmp/20180709/0000/20180709_run0000_chan*.ljh"
+        self.pulseFilename = "/Users/oneilg/mass/mass/regression_test/regress_chan*.ljh"
+        self.noiseFilename = "/Users/oneilg/mass/mass/regression_test/regress_noise_chan*.ljh"
         self.ui.label_noiseFile.setText("current noise file: %s" % self.noiseFilename)
-        self.ui.label_pulseFile.setText("current noise file: %s" % self.pulseFilename)
+        self.ui.label_pulseFile.setText("current pulse file: %s" % self.pulseFilename)
         self.ui.pushButton_createProjectors.setEnabled(True)
 
     def reset(self):
@@ -204,11 +206,17 @@ class Workflow(QtWidgets.QWidget):
         # call pope script
         outName = self.pulseFilename[:-9]+"model.hdf5"
         plotName = self.pulseFilename[:-9]+"model_plots.pdf"
-        pulseFile = glob.glob(self.pulseFilename)[0]
-        noiseFile = glob.glob(self.noiseFilename)[0]
+        g = glob.glob(self.pulseFilename)
+        if len(g) == 0:
+            raise Exception("could not find any files matching {}".format(self.pulseFilename))
+        pulseFile = g[0]
+        gn = glob.glob(self.noiseFilename)
+        if len(g) == 0:
+            raise Exception("could not find any files matching {}".format(self.noiseFilename))        
+        noiseFile = gn[0]
         print(outName, pulseFile, noiseFile)
         if os.path.isfile(outName):
-            print("{} exists, skipping create_basis.jl".format(outName))
+            print("{} exists, skipping make_projectors".format(outName))
         else:
             try:
                 self.pcaller.createBasis(pulseFile, noiseFile)
