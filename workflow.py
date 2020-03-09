@@ -67,7 +67,7 @@ class Workflow(QtWidgets.QWidget):
         self.reset()
 
         self.pcaller = ProjectorCaller()
-        self.testingInit() # REMOVE
+        # self.testingInit() # REMOVE
 
     def testingInit(self):
         """
