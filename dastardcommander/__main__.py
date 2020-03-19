@@ -1,2 +1,2 @@
-import dastard_commander
-dastard_commander.dc.main()
+import dastardcommander
+dastardcommander.dc.main()

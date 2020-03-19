@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-dastard_commander (dc.py)
+dastardcommander (dc.py)
 
 A GUI client to operate and monitor the DASTARD server (Data Acquisition
 System for Triggering, Analyzing, and Recording Data).
@@ -58,7 +58,7 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
-        self.setWindowTitle("dastard_commander %s    (connected to %s:%d)" % (__version__, host, port))
+        self.setWindowTitle("dastardcommander %s    (connected to %s:%d)" % (__version__, host, port))
         self.reconnect = False
         self.disconnectReason = ""
         self.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
@@ -907,7 +907,7 @@ class HostPortDialog(QtWidgets.QDialog):
 def main():
     if sys.version_info.major <= 2:
         print("WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***")
-    settings = QSettings("NIST Quantum Sensors", "dastard_commander")
+    settings = QSettings("NIST Quantum Sensors", "dastardcommander")
 
     app = QtWidgets.QApplication(sys.argv)
     host = settings.value("host", "localhost", type=str)
@@ -926,7 +926,7 @@ def main():
 
         # One None is an invalid host:port pair
         if host is None or port is None or host == "" or port == "":
-            print("Could not start dastard_commander without a valid host:port selection.")
+            print("Could not start dastardcommander without a valid host:port selection.")
             return
         try:
             client = rpc_client.JSONClient((host, port))

@@ -12,7 +12,7 @@ import sys
 from collections import OrderedDict
 
 # usercode imports
-import dastard_commander.projectors as projectors
+import dastardcommander.projectors as projectors
 
 class ProjectorCaller(object):
     "A class that can make projectors."
