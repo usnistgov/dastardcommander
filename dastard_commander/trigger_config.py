@@ -3,9 +3,6 @@ import PyQt5.uic
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 
-Ui_Trigger, _ = PyQt5.uic.loadUiType("trigger_config.ui")
-
-
 class TriggerConfig(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
 
@@ -14,8 +11,7 @@ class TriggerConfig(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_Trigger()
-        self.ui.setupUi(self)
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/trigger_config.ui"), self)
         self.ui.recordLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.ui.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)

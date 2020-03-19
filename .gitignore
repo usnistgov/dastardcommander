@@ -3,11 +3,13 @@
 *_ui.py
 *.bak
 
-dastard-commander.config
-dastard-commander.creator
-dastard-commander.creator.*
-dastard-commander.files
-dastard-commander.includes
+dastard_commander.config
+dastard_commander.creator
+dastard_commander.creator.*
+dastard_commander.files
+dastard_commander.includes
 noise_ana_autocorr_input_simpulses
 noise_analysis_autocorr_input
 XDG_CACHE_HOME
+
+*egg-info*

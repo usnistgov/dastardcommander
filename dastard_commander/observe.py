@@ -21,9 +21,6 @@ def iter_all_strings():
         size += 1
 
 
-Ui_Observe, _ = PyQt5.uic.loadUiType("observe.ui")
-
-
 class ExperimentStateIncrementer():
     def __init__(self, newStateButton, ignoreButton, label, parent):
         self.newStateButton = newStateButton
@@ -90,8 +87,7 @@ class Observe(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self, parent)
         self.host = host
         self.client = None
-        self.ui = Ui_Observe()
-        self.ui.setupUi(self)
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/observe.ui"), self)
         self.ui.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
         self.ui.pushButton_autoScale.clicked.connect(self.handleAutoScaleClicked)
         self.ui.mapLoadButton.clicked.connect(self.handleLoadMap)

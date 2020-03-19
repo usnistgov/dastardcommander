@@ -4,8 +4,6 @@ from PyQt5 import QtWidgets
 
 import numpy as np
 
-Ui_Writing, _ = PyQt5.uic.loadUiType("writing.ui")
-
 
 class WritingControl(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
@@ -15,8 +13,7 @@ class WritingControl(QtWidgets.QWidget):
 
     def __init__(self, parent=None, host=""):
         QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_Writing()
-        self.ui.setupUi(self)
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/writing.ui"), self)
         self.host = host
         self.writing = False
         self.ui.writingStartButton.setChecked(False)

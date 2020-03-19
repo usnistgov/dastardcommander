@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-dastard-commander (dc.py)
+dastard_commander (dc.py)
 
 A GUI client to operate and monitor the DASTARD server (Data Acquisition
 System for Triggering, Analyzing, and Recording Data).
@@ -27,15 +27,13 @@ from PyQt5.QtCore import QSettings, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
-import rpc_client
-import status_monitor
-import trigger_config
-import writing
-import projectors
-import observe
-import workflow
-
-_VERSION = "0.2.0"
+import dastard_commander.rpc_client
+import dastard_commander.status_monitor
+import dastard_commander.trigger_config
+import dastard_commander.writing
+import dastard_commander.projectors
+import dastard_commander.observe
+import dastard_commander.workflow
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -46,9 +44,7 @@ _VERSION = "0.2.0"
 #     Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
 #
 # TODO: don't process ui files at run-time, but compile them.
-
-Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
-Ui_HostPortDialog, _ = PyQt5.uic.loadUiType("host_port.ui")
+# note we now use PyQt5.uic.loadUi, but the principle remains that compiling these would speed startup
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -60,9 +56,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.setWindowTitle("Dastard-Commander %s    (connected to %s:%d)" % (_VERSION, host, port))
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
+        self.setWindowTitle("dastard_commander %s    (connected to %s:%d)" % (_VERSION, host, port))
         self.reconnect = False
         self.disconnectReason = ""
         self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
@@ -886,8 +881,7 @@ class HostPortDialog(QtWidgets.QDialog):
     def __init__(self, host, port, disconnectReason, settings, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
-        self.ui = Ui_HostPortDialog()
-        self.ui.setupUi(self)
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/host_port.ui"), self)
         self.ui.hostName.setText(host)
         self.ui.basePortSpin.setValue(port)
         self.settings = settings
@@ -910,10 +904,14 @@ class HostPortDialog(QtWidgets.QDialog):
         return (host, port)
 
 
+def main2():
+    print("YO ADRIAN")
+
 def main():
+    print("YOOOOOOOYOYOYOYOYYOY")
     if sys.version_info.major <= 2:
         print("WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***")
-    settings = QSettings("NIST Quantum Sensors", "dastard-commander")
+    settings = QSettings("NIST Quantum Sensors", "dastard_commander")
 
     app = QtWidgets.QApplication(sys.argv)
     host = settings.value("host", "localhost", type=str)
@@ -932,7 +930,7 @@ def main():
 
         # One None is an invalid host:port pair
         if host is None or port is None or host == "" or port == "":
-            print("Could not start Dastard-commander without a valid host:port selection.")
+            print("Could not start dastard_commander without a valid host:port selection.")
             return
         try:
             client = rpc_client.JSONClient((host, port))

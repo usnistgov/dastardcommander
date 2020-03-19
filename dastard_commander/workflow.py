@@ -9,11 +9,10 @@ import subprocess
 import os
 import glob
 import sys
-import projectors
 from collections import OrderedDict
 
-Ui_Workflow, _ = PyQt5.uic.loadUiType("workflow.ui")
-
+# usercode imports
+import dastard_commander.projectors
 
 class ProjectorCaller(object):
     "A class that can make projectors."
@@ -49,8 +48,7 @@ class Workflow(QtWidgets.QWidget):
 
     def __init__(self, dc, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
-        self.ui = Ui_Workflow()
-        self.ui.setupUi(self)
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/workflow.ui"), self)
         self.ui.pushButton_takeNoise.clicked.connect(self.handleTakeNoise)
         self.ui.pushButton_takePulses.clicked.connect(self.handleTakePulses)
         self.ui.pushButton_createProjectors.clicked.connect(self.handleCreateProjectors)
