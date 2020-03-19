@@ -12,7 +12,7 @@ import sys
 from collections import OrderedDict
 
 # usercode imports
-import dastard_commander.projectors
+import dastard_commander.projectors as projectors
 
 class ProjectorCaller(object):
     "A class that can make projectors."
@@ -49,11 +49,11 @@ class Workflow(QtWidgets.QWidget):
     def __init__(self, dc, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/workflow.ui"), self)
-        self.ui.pushButton_takeNoise.clicked.connect(self.handleTakeNoise)
-        self.ui.pushButton_takePulses.clicked.connect(self.handleTakePulses)
-        self.ui.pushButton_createProjectors.clicked.connect(self.handleCreateProjectors)
-        self.ui.pushButton_loadProjectors.clicked.connect(self.handleLoadProjectors)
-        self.ui.pushButton_viewProjectorsPlot.clicked.connect(self.handleViewProjectorsPlot)
+        self.pushButton_takeNoise.clicked.connect(self.handleTakeNoise)
+        self.pushButton_takePulses.clicked.connect(self.handleTakePulses)
+        self.pushButton_createProjectors.clicked.connect(self.handleCreateProjectors)
+        self.pushButton_loadProjectors.clicked.connect(self.handleLoadProjectors)
+        self.pushButton_viewProjectorsPlot.clicked.connect(self.handleViewProjectorsPlot)
         self.dc = dc
         self.channel_names = None  # to be overwritten by dc.py
         self.channel_prefixes = None  # to be overwritten by dc.py
@@ -74,22 +74,22 @@ class Workflow(QtWidgets.QWidget):
         """
         self.pulseFilename = "/Users/oneilg/mass/mass/regression_test/regress_chan*.ljh"
         self.noiseFilename = "/Users/oneilg/mass/mass/regression_test/regress_noise_chan*.ljh"
-        self.ui.label_noiseFile.setText("current noise file: %s" % self.noiseFilename)
-        self.ui.label_pulseFile.setText("current pulse file: %s" % self.pulseFilename)
-        self.ui.pushButton_createProjectors.setEnabled(True)
+        self.label_noiseFile.setText("current noise file: %s" % self.noiseFilename)
+        self.label_pulseFile.setText("current pulse file: %s" % self.pulseFilename)
+        self.pushButton_createProjectors.setEnabled(True)
 
     def reset(self):
         self.noiseFilename = None
-        self.ui.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
+        self.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
         self.pulseFilename = None
-        self.ui.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
+        self.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
         self.projectorsFilename = None
-        self.ui.pushButton_createProjectors.setEnabled(False)
-        self.ui.label_projectors.setText("projectors file: %s" % self.projectorsFilename)
+        self.pushButton_createProjectors.setEnabled(False)
+        self.label_projectors.setText("projectors file: %s" % self.projectorsFilename)
         self.projectorsPlotFilename = None
-        self.ui.pushButton_viewProjectorsPlot.setEnabled(False)
-        self.ui.pushButton_loadProjectors.setEnabled(False)
-        self.ui.label_loadedProjectors.setText("projectors loaded? no")
+        self.pushButton_viewProjectorsPlot.setEnabled(False)
+        self.pushButton_loadProjectors.setEnabled(False)
+        self.label_loadedProjectors.setText("projectors loaded? no")
 
     def handleTakeNoise(self):
         """
@@ -120,8 +120,8 @@ class Workflow(QtWidgets.QWidget):
         for i in range(TIME_UNITS_TO_WAIT):
             time.sleep(0.1)
             # remember filenames
-            self.noiseFilename = self.dc.writingTab.ui.fileNameExampleEdit.text()
-            self.ui.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
+            self.noiseFilename = self.dc.writingTab.fileNameExampleEdit.text()
+            self.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
             progressBar.setLabelText("noise, {} records".format(self.numberWritten))
             progressBar.setValue(i)
             QtWidgets.QApplication.processEvents()  # process gui events
@@ -133,7 +133,7 @@ class Workflow(QtWidgets.QWidget):
         self.dc.writingTab.stop()
 
         # Enable next step
-        self.ui.pushButton_createNoiseModel.setEnabled(True)
+        self.pushButton_createNoiseModel.setEnabled(True)
 
     def handleTakePulses(self):
         """
@@ -144,7 +144,7 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        if self.ui.checkBox_useEdgeMultiForTakePulses.isChecked():
+        if self.checkBox_useEdgeMultiForTakePulses.isChecked():
             self.dc.sendEdgeMulti()
         else:
             self.dc.triggerTab.goPulseMode()
@@ -163,13 +163,13 @@ class Workflow(QtWidgets.QWidget):
                                                 0, RECORDS_TOTAL, parent=self)
         progressBar.setModal(True)  # prevent users from clicking elsewhere in gui
         progressBar.show()
-        self.dc.ui.tabWidget.setCurrentWidget(self.dc.ui.tabObserve)
+        self.dc.tabWidget.setCurrentWidget(self.dc.tabObserve)
         self.numberWritten = 0
         while self.numberWritten < RECORDS_TOTAL:
             time.sleep(0.1)
             # remember filenames
-            self.pulseFilename = self.dc.writingTab.ui.fileNameExampleEdit.text()
-            self.ui.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
+            self.pulseFilename = self.dc.writingTab.fileNameExampleEdit.text()
+            self.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
             progressBar.setLabelText(
                 "pulses, {}/{} records".format(self.numberWritten, RECORDS_TOTAL))
             progressBar.setValue(self.numberWritten)
@@ -177,13 +177,13 @@ class Workflow(QtWidgets.QWidget):
             if progressBar.wasCanceled():
                 break  # should I do anything else here, like invalidate the data?
         progressBar.close()
-        self.dc.ui.tabWidget.setCurrentWidget(self.dc.ui.tabWorkflow)
+        self.dc.tabWidget.setCurrentWidget(self.dc.tabWorkflow)
 
         # Stop writing files
         self.dc.writingTab.stop()
 
         # Enable next step
-        self.ui.pushButton_createProjectors.setEnabled(True)
+        self.pushButton_createProjectors.setEnabled(True)
 
     def openPdf(self, path):
         if not path.endswith(".pdf"):
@@ -225,11 +225,11 @@ class Workflow(QtWidgets.QWidget):
                 return
 
         self.projectorsFilename = outName
-        self.ui.label_projectors.setText("projectors: %s" % self.projectorsFilename)
+        self.label_projectors.setText("projectors: %s" % self.projectorsFilename)
 
         self.projectorsPlotFilename = plotName
-        self.ui.pushButton_viewProjectorsPlot.setEnabled(True)
-        self.ui.pushButton_loadProjectors.setEnabled(True)
+        self.pushButton_viewProjectorsPlot.setEnabled(True)
+        self.pushButton_loadProjectors.setEnabled(True)
 
     def handleViewProjectorsPlot(self):
         self.openPdf(self.projectorsPlotFilename)
@@ -261,7 +261,7 @@ class Workflow(QtWidgets.QWidget):
         resultBox = QtWidgets.QMessageBox(self)
         resultBox.setText(result)
         resultBox.show()
-        self.ui.label_loadedProjectors.setText("projectors loaded? yes")
+        self.label_loadedProjectors.setText("projectors loaded? yes")
 
     def handleStatusUpdate(self, d):
         if self.nsamples != d["Nsamples"] or self.npresamples != d["Npresamp"]:

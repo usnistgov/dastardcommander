@@ -88,9 +88,9 @@ class Observe(QtWidgets.QWidget):
         self.host = host
         self.client = None
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/observe.ui"), self)
-        self.ui.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
-        self.ui.pushButton_autoScale.clicked.connect(self.handleAutoScaleClicked)
-        self.ui.mapLoadButton.clicked.connect(self.handleLoadMap)
+        self.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
+        self.pushButton_autoScale.clicked.connect(self.handleAutoScaleClicked)
+        self.mapLoadButton.clicked.connect(self.handleLoadMap)
         self.crm_grid = None
         self.crm_map = None
         self.countsSeens = []
@@ -101,8 +101,8 @@ class Observe(QtWidgets.QWidget):
         self.lastTotalRate = 0
         self.mapfile = ""
         self.ExperimentStateIncrementer = ExperimentStateIncrementer(
-            self.ui.pushButton_experimentStateNew,
-            self.ui.pushButton_experimentStateIGNORE, self.ui.label_experimentState, self)
+            self.pushButton_experimentStateNew,
+            self.pushButton_experimentStateIGNORE, self.label_experimentState, self)
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
@@ -115,7 +115,7 @@ class Observe(QtWidgets.QWidget):
             self.buildCRM()
 
         countsSeen = np.array(d["CountsSeen"])
-        integrationTime = self.ui.spinBox_integrationTime.value()
+        integrationTime = self.spinBox_integrationTime.value()
         self.countsSeens.append(countsSeen)
         n = min(len(self.countsSeens), integrationTime)
         self.countsSeens = self.countsSeens[-n:]
@@ -146,7 +146,7 @@ class Observe(QtWidgets.QWidget):
         self.setArrayCps(arrayCps, integrationComplete, auxCps)
 
     def getColorScale(self, countRates):
-        if self.ui.pushButton_autoScale.isChecked():
+        if self.pushButton_autoScale.isChecked():
             totalRate = countRates.sum()
             # Be careful not to have divide-by-zero error here.
             fracDiff = 0.0
@@ -156,20 +156,20 @@ class Observe(QtWidgets.QWidget):
             self.lastTotalRate = totalRate
             if fracDiff > 0.2:
                 maxRate = np.amax(countRates)
-                self.ui.doubleSpinBox_colorScale.setValue(maxRate)
-        return self.ui.doubleSpinBox_colorScale.value()
+                self.doubleSpinBox_colorScale.setValue(maxRate)
+        return self.doubleSpinBox_colorScale.value()
 
     def setArrayCps(self, arrayCps, integrationComplete, auxCps):
         s = "{:.2f} cps/array".format(arrayCps)
-        self.ui.label_arrayCps.setText(s)
-        self.ui.label_arrayCps.setEnabled(integrationComplete)
+        self.label_arrayCps.setText(s)
+        self.label_arrayCps.setEnabled(integrationComplete)
         sAux = "{:.2f} aux cps".format(auxCps)
-        self.ui.label_auxCps.setText(sAux)
+        self.label_auxCps.setText(sAux)
 
     def buildCRM(self):
         self.deleteCRMGrid()
         self.crm_grid = CountRateMap(self, self.cols, self.rows, self.channel_names)
-        self.ui.GridTab.layout().addWidget(self.crm_grid)
+        self.GridTab.layout().addWidget(self.crm_grid)
 
     def deleteCRMGrid(self):
         if self.crm_grid is not None:
@@ -185,7 +185,7 @@ class Observe(QtWidgets.QWidget):
                                     xy=self.pixelMap)
         # if we build the crm_map before we know the source and know channel_names
         # (eg before a dastard source is started) we will need to rebuild it later
-        self.ui.mapContainer.layout().addWidget(self.crm_map)
+        self.mapContainer.layout().addWidget(self.crm_map)
 
     def deleteCRMMap(self):
         if self.crm_map is not None:
@@ -234,7 +234,7 @@ class Observe(QtWidgets.QWidget):
         self.setArrayCps(0, False, 0)
 
     def handleAutoScaleClicked(self):
-        self.ui.doubleSpinBox_colorScale.setEnabled(not self.ui.pushButton_autoScale.isChecked())
+        self.doubleSpinBox_colorScale.setEnabled(not self.pushButton_autoScale.isChecked())
         self.lastTotalRate = 0  # make sure auto scale actually happens
 
     def handleLoadMap(self):
@@ -256,7 +256,7 @@ class Observe(QtWidgets.QWidget):
     def handleTESMapFile(self, filename):
         self.mapfile = filename
         head, tail = os.path.split(filename)
-        self.ui.mapFileLabel.setText("Map File: %s" % tail)
+        self.mapFileLabel.setText("Map File: %s" % tail)
 
     def handleTESMap(self, msg):
         scale = 1.0/float(msg["Spacing"])
@@ -270,7 +270,7 @@ class Observe(QtWidgets.QWidget):
 
     def handleExternalTriggerMessage(self, msg):
         n = msg["NumberObservedInLastSecond"]
-        self.ui.label_externalTriggersInLastSecond.setText(
+        self.label_externalTriggersInLastSecond.setText(
             "{} external triggers in last second".format(n))
 
     def handleWritingMessage(self, msg):

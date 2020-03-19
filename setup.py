@@ -18,12 +18,10 @@ setup(
     packages=["dastard_commander"],
     test_suite='tests',
     url='https://github.com/usnistgov/dastard_commander',
-    version='0.1.0',
+    version='0.2.0',
     zip_safe=False,
     package_data={'dastard_commander': ['ui/*.ui','ui/*.png']},
     entry_points = {
-        'console_scripts': ['dc=dastard_commander.dc:main',
-        "dc2=dastard_commander.dc:main2"],
+        'console_scripts': ['dcom=dastard_commander.dc:main'],
     },
-    scripts = ["dastard_commander/dc.py"],
 )

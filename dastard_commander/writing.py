@@ -2,7 +2,9 @@
 import PyQt5.uic
 from PyQt5 import QtWidgets
 
+# other non  user imports
 import numpy as np
+import os
 
 
 class WritingControl(QtWidgets.QWidget):
@@ -16,15 +18,15 @@ class WritingControl(QtWidgets.QWidget):
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/writing.ui"), self)
         self.host = host
         self.writing = False
-        self.ui.writingStartButton.setChecked(False)
-        self.ui.writingCommentsButton.setEnabled(False)
-        self.ui.writingPauseButton.setEnabled(False)
+        self.writingStartButton.setChecked(False)
+        self.writingCommentsButton.setEnabled(False)
+        self.writingPauseButton.setEnabled(False)
 
         # Signals/slots
-        self.ui.writingStartButton.pressed.connect(self.startstop)
-        self.ui.writingCommentsButton.pressed.connect(self.comment)
-        self.ui.writingPauseButton.clicked.connect(self.pause)
-        cbd = self.ui.changeBaseDirectoryButton
+        self.writingStartButton.pressed.connect(self.startstop)
+        self.writingCommentsButton.pressed.connect(self.comment)
+        self.writingPauseButton.clicked.connect(self.pause)
+        cbd = self.changeBaseDirectoryButton
         if host == "localhost" or host == "127.0.0.1":
             cbd.pressed.connect(self.pathSelect)
             cbd.setToolTip("Launch dialog to choose data writing path")
@@ -44,15 +46,15 @@ class WritingControl(QtWidgets.QWidget):
         else:
             self.stoppedWriting()
         self.updatePath(message["BasePath"])
-        self.ui.writingPauseButton.setChecked(message["Paused"])
+        self.writingPauseButton.setChecked(message["Paused"])
 
     def updatePath(self, path):
         if len(path) > 0:
-            self.ui.baseDirectoryEdit.setText(path)
+            self.baseDirectoryEdit.setText(path)
 
     def pathSelect(self):
         """The GUI to select a path"""
-        startPath = self.ui.baseDirectoryEdit.text()
+        startPath = self.baseDirectoryEdit.text()
         if len(startPath) == 0:
             startPath = "/"
         result = QtWidgets.QFileDialog.getExistingDirectory(
@@ -62,7 +64,7 @@ class WritingControl(QtWidgets.QWidget):
             self.updatePath(result)
 
     def handleNumberWritten(self, d):
-        self.ui.label_numberWritten.setText("Number Written Total: {}\nNumber Written by Channel: {}".format(
+        self.label_numberWritten.setText("Number Written Total: {}\nNumber Written by Channel: {}".format(
             np.sum(d["NumberWritten"]), d["NumberWritten"]))
 
     def start(self):
@@ -83,10 +85,10 @@ class WritingControl(QtWidgets.QWidget):
         else:
             request = {
                 "Request": "Start",
-                "Path": self.ui.baseDirectoryEdit.text(),
-                "WriteLJH22": self.ui.checkBox_LJH22.isChecked(),
-                "WriteLJH3": self.ui.checkBox_LJH3.isChecked(),
-                "WriteOFF": self.ui.checkBox_OFF.isChecked()
+                "Path": self.baseDirectoryEdit.text(),
+                "WriteLJH22": self.checkBox_LJH22.isChecked(),
+                "WriteLJH3": self.checkBox_LJH3.isChecked(),
+                "WriteOFF": self.checkBox_OFF.isChecked()
             }
 
         self.client.call("SourceControl.WriteControl", request)
@@ -94,19 +96,19 @@ class WritingControl(QtWidgets.QWidget):
     def stoppedWriting(self):
         print("STOPPED WRITING")
         self.writing = False
-        self.ui.writingStartButton.setText("Start Writing")
-        self.ui.previousNameExampleEdit.setText(self.ui.fileNameExampleEdit.text())
-        self.ui.fileNameExampleEdit.setText("-")
-        self.ui.writingCommentsButton.setEnabled(False)
-        self.ui.writingPauseButton.setEnabled(False)
+        self.writingStartButton.setText("Start Writing")
+        self.previousNameExampleEdit.setText(self.fileNameExampleEdit.text())
+        self.fileNameExampleEdit.setText("-")
+        self.writingCommentsButton.setEnabled(False)
+        self.writingPauseButton.setEnabled(False)
 
     def startedWriting(self, exampleFilename):
         print("STARTED WRITING")
         self.writing = True
-        self.ui.writingStartButton.setText("Stop Writing")
-        self.ui.fileNameExampleEdit.setText(exampleFilename)
-        self.ui.writingCommentsButton.setEnabled(True)
-        self.ui.writingPauseButton.setEnabled(True)
+        self.writingStartButton.setText("Stop Writing")
+        self.fileNameExampleEdit.setText(exampleFilename)
+        self.writingCommentsButton.setEnabled(True)
+        self.writingPauseButton.setEnabled(True)
 
     def pause(self, paused):
         request = "Pause"
