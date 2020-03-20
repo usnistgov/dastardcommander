@@ -34,7 +34,7 @@ from . import writing
 from . import projectors
 from . import observe
 from . import workflow
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -58,7 +58,7 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
-        self.setWindowTitle("dastardcommander %s    (connected to %s:%d)" % (__version__, host, port))
+        self.setWindowTitle("Dastard Commander %s    (connected to %s:%d)" % (__version__, host, port))
         self.reconnect = False
         self.disconnectReason = ""
         self.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
@@ -926,7 +926,7 @@ def main():
 
         # One None is an invalid host:port pair
         if host is None or port is None or host == "" or port == "":
-            print("Could not start dastardcommander without a valid host:port selection.")
+            print("Could not start dcom (Dastard Commander) without a valid host:port selection.")
             return
         try:
             client = rpc_client.JSONClient((host, port))
