@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-dastard-commander (dc.py)
+dastardcommander (dc.py)
 
 A GUI client to operate and monitor the DASTARD server (Data Acquisition
 System for Triggering, Analyzing, and Recording Data).
@@ -27,15 +27,14 @@ from PyQt5.QtCore import QSettings, pyqtSlot
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
-import rpc_client
-import status_monitor
-import trigger_config
-import writing
-import projectors
-import observe
-import workflow
-
-_VERSION = "0.2.0"
+from . import rpc_client
+from . import status_monitor
+from . import trigger_config
+from . import writing
+from . import projectors
+from . import observe
+from . import workflow
+__version__ = '0.2.1'
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -46,9 +45,7 @@ _VERSION = "0.2.0"
 #     Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
 #
 # TODO: don't process ui files at run-time, but compile them.
-
-Ui_MainWindow, _ = PyQt5.uic.loadUiType("dc.ui")
-Ui_HostPortDialog, _ = PyQt5.uic.loadUiType("host_port.ui")
+# note we now use PyQt5.uic.loadUi, but the principle remains that compiling these would speed startup
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -60,24 +57,23 @@ class MainWindow(QtWidgets.QMainWindow):
 
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.setWindowTitle("Dastard-Commander %s    (connected to %s:%d)" % (_VERSION, host, port))
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
+        self.setWindowTitle("Dastard Commander %s    (connected to %s:%d)" % (__version__, host, port))
         self.reconnect = False
         self.disconnectReason = ""
-        self.ui.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
-        self.ui.actionDisconnect.triggered.connect(
+        self.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
+        self.actionDisconnect.triggered.connect(
             lambda: self.closeReconnect("disconnect menu item"))
-        self.ui.startStopButton.clicked.connect(self.startStop)
-        self.ui.dataSourcesStackedWidget.setCurrentIndex(self.ui.dataSource.currentIndex())
-        self.ui.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
-        self.ui.actionLoad_Mix.triggered.connect(self.loadMix)
-        self.ui.actionPop_out_Observe.triggered.connect(self.popOutObserve)
-        self.ui.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
-        self.ui.pushButton_sendMix.clicked.connect(self.sendMix)
-        self.ui.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
-        self.ui.pushButton_pauseExperimental.clicked.connect(self.handlePauseExperimental)
-        self.ui.pushButton_unpauseExperimental.clicked.connect(self.handleUnpauseExperimental)
+        self.startStopButton.clicked.connect(self.startStop)
+        self.dataSourcesStackedWidget.setCurrentIndex(self.dataSource.currentIndex())
+        self.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
+        self.actionLoad_Mix.triggered.connect(self.loadMix)
+        self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
+        self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
+        self.pushButton_sendMix.clicked.connect(self.sendMix)
+        self.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
+        self.pushButton_pauseExperimental.clicked.connect(self.handlePauseExperimental)
+        self.pushButton_unpauseExperimental.clicked.connect(self.handleUnpauseExperimental)
         self.running = False
         self.sourceIsTDM = False
         self.cols = 0
@@ -86,15 +82,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
-        self.triggerTab = trigger_config.TriggerConfig(self.ui.tabTriggering)
+        self.triggerTab = trigger_config.TriggerConfig(self.tabTriggering)
         self.triggerTab.client = self.client
-        self.writingTab = writing.WritingControl(self.ui.tabWriting, host)
+        self.writingTab = writing.WritingControl(self.tabWriting, host)
         self.writingTab.client = self.client
-        self.observeTab = observe.Observe(self.ui.tabObserve, host=host)
+        self.observeTab = observe.Observe(self.tabObserve, host=host)
         self.observeTab.client = self.client
         self.observeWindow = observe.Observe(host=host)
         self.observeWindow.client = self.client
-        self.workflowTab = workflow.Workflow(self, parent=self.ui.tabWorkflow)
+        self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
         self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
 
         self.microscopes = []
@@ -107,9 +103,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTab.channel_prefixes = self.channel_prefixes
         self.workflowTab.channel_names = self.channel_names
         self.workflowTab.channel_prefixes = self.channel_prefixes
-        self.ui.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
-        self.ui.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
-        self.ui.tabWidget.setEnabled(False)
+        self.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
+        self.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
+        self.tabWidget.setEnabled(False)
         self.buildStatusBar()
 
         # The ZMQ update monitor. Must run in its own QThread.
@@ -173,17 +169,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 nchan = d["Nchannels"]
                 self.sourceIsTDM = (source == "Lancero")
                 if source == "Triangles":
-                    self.ui.dataSource.setCurrentIndex(0)
-                    self.ui.triangleNchan.setValue(nchan)
+                    self.dataSource.setCurrentIndex(0)
+                    self.triangleNchan.setValue(nchan)
                 elif source == "SimPulses":
-                    self.ui.dataSource.setCurrentIndex(1)
-                    self.ui.simPulseNchan.setValue(nchan)
+                    self.dataSource.setCurrentIndex(1)
+                    self.simPulseNchan.setValue(nchan)
                 elif source == "Lancero":
-                    self.ui.dataSource.setCurrentIndex(2)
+                    self.dataSource.setCurrentIndex(2)
                 elif source == "Roach":
-                    self.ui.dataSource.setCurrentIndex(3)
+                    self.dataSource.setCurrentIndex(3)
                 elif source == "Abaco":
-                    self.ui.dataSource.setCurrentIndex(4)
+                    self.dataSource.setCurrentIndex(4)
 
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
@@ -194,20 +190,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.observeTab.handleWritingMessage(d)
 
             elif topic == "TRIANGLE":
-                self.ui.triangleNchan.setValue(d["Nchan"])
-                self.ui.triangleSampleRate.setValue(d["SampleRate"])
-                self.ui.triangleMinimum.setValue(d["Min"])
-                self.ui.triangleMaximum.setValue(d["Max"])
+                self.triangleNchan.setValue(d["Nchan"])
+                self.triangleSampleRate.setValue(d["SampleRate"])
+                self.triangleMinimum.setValue(d["Min"])
+                self.triangleMaximum.setValue(d["Max"])
 
             elif topic == "SIMPULSE":
-                self.ui.simPulseNchan.setValue(d["Nchan"])
-                self.ui.simPulseBaseline.setValue(d["Pedestal"])
-                self.ui.simPulseSampleRate.setValue(d["SampleRate"])
-                self.ui.simPulseSamplesPerPulse.setValue(d["Nsamp"])
+                self.simPulseNchan.setValue(d["Nchan"])
+                self.simPulseBaseline.setValue(d["Pedestal"])
+                self.simPulseSampleRate.setValue(d["SampleRate"])
+                self.simPulseSamplesPerPulse.setValue(d["Nsamp"])
                 a = d["Amplitudes"]
                 if a is None or len(a) == 0:
                     a = [10000.0]
-                self.ui.simPulseAmplitude.setValue(a[0])
+                self.simPulseAmplitude.setValue(a[0])
 
             elif topic == "LANCERO":
                 self.updateLanceroCardChoices(d["DastardOutput"]["AvailableCards"])
@@ -216,7 +212,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     v.setChecked(mask & (1 << k))
                 ns = d["DastardOutput"]["Nsamp"]
                 if ns > 0 and ns <= 16:
-                    self.ui.nsampSpinBox.setValue(ns)
+                    self.nsampSpinBox.setValue(ns)
 
             elif topic == "ROACH":
                 self.updateRoachSettings(d)
@@ -233,9 +229,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.channel_prefixes.add(prefix)
                 print("New channames: ", self.channel_names)
                 if self.sourceIsTDM:
-                    self.triggerTab.ui.channelChooserBox.setCurrentIndex(2)
+                    self.triggerTab.channelChooserBox.setCurrentIndex(2)
                 else:
-                    self.triggerTab.ui.channelChooserBox.setCurrentIndex(1)
+                    self.triggerTab.channelChooserBox.setCurrentIndex(1)
                 self.triggerTab.channelChooserChanged()
 
             elif topic == "TRIGCOUPLING":
@@ -263,10 +259,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 # we have to convert a variety of mixes to a single representative value.
                 try:
                     mix = d[1]
-                    self.ui.doubleSpinBox_MixFraction.setValue(mix)
+                    self.doubleSpinBox_MixFraction.setValue(mix)
                 except Exception as e:
                     print("Could not set mix; selecting 0")
-                    self.ui.doubleSpinBox_MixFraction.setValue(0.0)
+                    self.doubleSpinBox_MixFraction.setValue(0.0)
 
             elif topic == "EXTERNALTRIGGER":
                 self.observeTab.handleExternalTriggerMessage(d)
@@ -287,7 +283,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 break
         if allseen:
             self.fullyConfigured = True
-            self.ui.tabWidget.setEnabled(True)
+            self.tabWidget.setEnabled(True)
 
     def buildStatusBar(self):
         self.statusMainLabel = QtWidgets.QLabel("Server not running. ")
@@ -394,15 +390,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def updateRoachSettings(self, settings):
         rates = settings["Rates"]
         if rates is not None:
-            rateguis = (self.ui.roachFrameRateDoubleSpinBox_1,
-                        self.ui.roachFrameRateDoubleSpinBox_2)
+            rateguis = (self.roachFrameRateDoubleSpinBox_1,
+                        self.roachFrameRateDoubleSpinBox_2)
             for r, rategui in zip(rates, rateguis):
                 rategui.setValue(r)
 
         hosts = settings["HostPort"]
         if hosts is not None:
-            ips = (self.ui.roachIPLineEdit_1, self.ui.roachIPLineEdit_2)
-            ports = (self.ui.roachPortSpinBox_1, self.ui.roachPortSpinBox_2)
+            ips = (self.roachIPLineEdit_1, self.roachIPLineEdit_2)
+            ports = (self.roachPortSpinBox_1, self.roachPortSpinBox_2)
             for hostport, ipgui, portgui in zip(hosts, ips, ports):
                 parts = hostport.split(":")
                 if len(parts) == 2:
@@ -413,20 +409,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def toggledRoachDeviceActive(self):
-        a1 = self.ui.roachDeviceCheckBox_1.isChecked()
-        a2 = self.ui.roachDeviceCheckBox_2.isChecked()
-        self.ui.roachIPLineEdit_1.setEnabled(a1)
-        self.ui.roachPortSpinBox_1.setEnabled(a1)
-        self.ui.roachFrameRateDoubleSpinBox_1.setEnabled(a1)
-        self.ui.roachIPLineEdit_2.setEnabled(a2)
-        self.ui.roachPortSpinBox_2.setEnabled(a2)
-        self.ui.roachFrameRateDoubleSpinBox_2.setEnabled(a2)
+        a1 = self.roachDeviceCheckBox_1.isChecked()
+        a2 = self.roachDeviceCheckBox_2.isChecked()
+        self.roachIPLineEdit_1.setEnabled(a1)
+        self.roachPortSpinBox_1.setEnabled(a1)
+        self.roachFrameRateDoubleSpinBox_1.setEnabled(a1)
+        self.roachIPLineEdit_2.setEnabled(a2)
+        self.roachPortSpinBox_2.setEnabled(a2)
+        self.roachFrameRateDoubleSpinBox_2.setEnabled(a2)
 
     def updateLanceroCardChoices(self, cards=None):
         """Build the check boxes to specify which Lancero cards to use.
         cards is a list of integers: which cards are available on the sever"""
 
-        layout = self.ui.lanceroChooserLayout
+        layout = self.lanceroChooserLayout
         # Empty the layout
         while True:
             item = layout.takeAt(0)
@@ -439,9 +435,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if cards is None:
             cards = []
         if len(cards) == 0:
-            self.ui.noLanceroLabel.show()
+            self.noLanceroLabel.show()
         else:
-            self.ui.noLanceroLabel.hide()
+            self.noLanceroLabel.hide()
             layout.addWidget(QtWidgets.QLabel("Card number"), 0, 0)
             layout.addWidget(QtWidgets.QLabel("Card delay"), 0, 1)
 
@@ -470,7 +466,7 @@ class MainWindow(QtWidgets.QMainWindow):
         cards is a list of integers: which cards are available on the sever"""
 
         TEST_CARD_NUMBER = 3
-        layout = self.ui.abacoChooserLayout
+        layout = self.abacoChooserLayout
         # Empty the layout
         while True:
             item = layout.takeAt(0)
@@ -482,9 +478,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if cards is None:
             cards = []
         if len(cards) == 0:
-            self.ui.noAbacoLabel.show()
+            self.noAbacoLabel.show()
         else:
-            self.ui.noAbacoLabel.hide()
+            self.noAbacoLabel.hide()
             layout.addWidget(QtWidgets.QLabel("Card number:"), 0, 0)
 
         narrow = QtWidgets.QSizePolicy()
@@ -505,7 +501,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def buildLanceroFiberBoxes(self, nfibers):
         """Build the check boxes to specify which fibers to use."""
-        layout = self.ui.lanceroFiberLayout
+        layout = self.lanceroFiberLayout
         self.fiberBoxes = {}
         for i in range(nfibers):
             box = QtWidgets.QCheckBox("%d" % (i+nfibers))
@@ -526,13 +522,13 @@ class MainWindow(QtWidgets.QMainWindow):
         def clearAll():
             setAll(False)
 
-        self.ui.allFibersButton.clicked.connect(checkAll)
-        self.ui.noFibersButton.clicked.connect(clearAll)
-        self.ui.roachDeviceCheckBox_1.toggled.connect(self.toggledRoachDeviceActive)
-        self.ui.roachDeviceCheckBox_2.toggled.connect(self.toggledRoachDeviceActive)
+        self.allFibersButton.clicked.connect(checkAll)
+        self.noFibersButton.clicked.connect(clearAll)
+        self.roachDeviceCheckBox_1.toggled.connect(self.toggledRoachDeviceActive)
+        self.roachDeviceCheckBox_2.toggled.connect(self.toggledRoachDeviceActive)
 
-        self.toggleParallelStreaming(self.ui.parallelStreaming.isChecked())
-        self.ui.parallelStreaming.toggled.connect(self.toggleParallelStreaming)
+        self.toggleParallelStreaming(self.parallelStreaming.isChecked())
+        self.parallelStreaming.toggled.connect(self.toggleParallelStreaming)
 
     @pyqtSlot(bool)
     def toggleParallelStreaming(self, parallelStream):
@@ -598,24 +594,24 @@ class MainWindow(QtWidgets.QMainWindow):
         if running:
             label = "Stop Data"
             self.triggerTab.isTDM(self.sourceIsTDM)
-        self.ui.startStopButton.setText(label)
-        self.ui.dataSource.setEnabled(not running)
-        self.ui.dataSourcesStackedWidget.setEnabled(not running)
-        self.ui.tabTriggering.setEnabled(running)
-        self.ui.launchMicroscopeButton.setEnabled(running)
+        self.startStopButton.setText(label)
+        self.dataSource.setEnabled(not running)
+        self.dataSourcesStackedWidget.setEnabled(not running)
+        self.tabTriggering.setEnabled(running)
+        self.launchMicroscopeButton.setEnabled(running)
         if running:
-            self.ui.tabWidget.setCurrentWidget(self.ui.tabTriggering)
+            self.tabWidget.setCurrentWidget(self.tabTriggering)
 
         runningTDM = running and self.sourceIsTDM
-        self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(runningTDM)
-        self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(runningTDM)
-        self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
-        self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
+        self.triggerTab.coupleFBToErrCheckBox.setEnabled(runningTDM)
+        self.triggerTab.coupleErrToFBCheckBox.setEnabled(runningTDM)
+        self.triggerTab.coupleFBToErrCheckBox.setChecked(False)
+        self.triggerTab.coupleErrToFBCheckBox.setChecked(False)
 
 
     def _start(self):
         self.sourceIsTDM = False
-        sourceID = self.ui.dataSource.currentIndex()
+        sourceID = self.dataSource.currentIndex()
         if sourceID == 0:
             return self._startTriangle()
         elif sourceID == 1:
@@ -636,10 +632,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _startTriangle(self):
         config = {
-            "Nchan": self.ui.triangleNchan.value(),
-            "SampleRate": self.ui.triangleSampleRate.value(),
-            "Max": self.ui.triangleMaximum.value(),
-            "Min": self.ui.triangleMinimum.value(),
+            "Nchan": self.triangleNchan.value(),
+            "SampleRate": self.triangleSampleRate.value(),
+            "Max": self.triangleMaximum.value(),
+            "Min": self.triangleMinimum.value(),
         }
         okay, error = self.client.call("SourceControl.ConfigureTriangleSource", config)
         if not okay:
@@ -653,14 +649,14 @@ class MainWindow(QtWidgets.QMainWindow):
         return True
 
     def _startSimPulse(self):
-        a0 = self.ui.simPulseAmplitude.value()
+        a0 = self.simPulseAmplitude.value()
         amps = [a0, a0*0.8, a0*0.6]
         config = {
-            "Nchan": self.ui.simPulseNchan.value(),
-            "SampleRate": self.ui.simPulseSampleRate.value(),
+            "Nchan": self.simPulseNchan.value(),
+            "SampleRate": self.simPulseSampleRate.value(),
             "Amplitudes": amps,
-            "Pedestal": self.ui.simPulseBaseline.value(),
-            "Nsamp": self.ui.simPulseSamplesPerPulse.value(),
+            "Pedestal": self.simPulseBaseline.value(),
+            "Nsamp": self.simPulseSamplesPerPulse.value(),
         }
         okay, error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
         if not okay:
@@ -680,9 +676,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 mask |= (1 << k)
         print("Fiber mask: 0x%4.4x" % mask)
         clock = 125
-        if self.ui.lanceroClock50Button.isChecked():
+        if self.lanceroClock50Button.isChecked():
             clock = 50
-        nsamp = self.ui.nsampSpinBox.value()
+        nsamp = self.nsampSpinBox.value()
 
         activate = []
         delays = []
@@ -698,7 +694,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "Nsamp": nsamp,
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
-            "AutoRestart": self.ui.checkBox_lanceroAutoRestart.isChecked()
+            "AutoRestart": self.checkBox_lanceroAutoRestart.isChecked()
         }
         print("START LANCERO CONFIG")
         print(config)
@@ -710,10 +706,10 @@ class MainWindow(QtWidgets.QMainWindow):
             "SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False)
         if not okay:
             return False
-        self.triggerTab.ui.coupleFBToErrCheckBox.setEnabled(True)
-        self.triggerTab.ui.coupleErrToFBCheckBox.setEnabled(True)
-        self.triggerTab.ui.coupleFBToErrCheckBox.setChecked(False)
-        self.triggerTab.ui.coupleErrToFBCheckBox.setChecked(False)
+        self.triggerTab.coupleFBToErrCheckBox.setEnabled(True)
+        self.triggerTab.coupleErrToFBCheckBox.setEnabled(True)
+        self.triggerTab.coupleFBToErrCheckBox.setChecked(False)
+        self.triggerTab.coupleErrToFBCheckBox.setChecked(False)
         return True
 
     def _startRoach(self):
@@ -722,11 +718,11 @@ class MainWindow(QtWidgets.QMainWindow):
             "Rates": []
         }
         for id in (1, 2):
-            if not self.ui.__dict__["roachDeviceCheckBox_%d" % id].isChecked():
+            if not self.__dict__["roachDeviceCheckBox_%d" % id].isChecked():
                 continue
-            ipwidget = self.ui.__dict__["roachIPLineEdit_%d" % id]
-            portwidget = self.ui.__dict__["roachPortSpinBox_%d" % id]
-            ratewidget = self.ui.__dict__["roachFrameRateDoubleSpinBox_%d" % id]
+            ipwidget = self.__dict__["roachIPLineEdit_%d" % id]
+            portwidget = self.__dict__["roachPortSpinBox_%d" % id]
+            ratewidget = self.__dict__["roachFrameRateDoubleSpinBox_%d" % id]
             hostport = "%s:%d" % (ipwidget.text(), portwidget.value())
             rate = ratewidget.value()
             config["HostPort"].append(hostport)
@@ -824,21 +820,21 @@ class MainWindow(QtWidgets.QMainWindow):
         # first send the trigger mesage for all channels
         config = {
             "ChannelIndicies": list(range(len(self.channel_names))),
-            "EdgeMulti": self.ui.checkBox_EdgeMulti.isChecked(),
-            "EdgeRising": self.ui.checkBox_EdgeMulti.isChecked(),
-            "EdgeTrigger": self.ui.checkBox_EdgeMulti.isChecked(),
-            "EdgeMultiNoise": self.ui.checkBox_EdgeMultiNoise.isChecked(),
-            "EdgeMultiMakeShortRecords": self.ui.checkBox_EdgeMultiMakeShortRecords.isChecked(),
-            "EdgeMultiMakeContaminatedRecords": self.ui.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
-            "EdgeMultiVerifyNMonotone": self.ui.spinBox_EdgeMultiVerifyNMonotone.value(),
-            "EdgeLevel": self.ui.spinBox_EdgeLevel.value()
+            "EdgeMulti": self.checkBox_EdgeMulti.isChecked(),
+            "EdgeRising": self.checkBox_EdgeMulti.isChecked(),
+            "EdgeTrigger": self.checkBox_EdgeMulti.isChecked(),
+            "EdgeMultiNoise": self.checkBox_EdgeMultiNoise.isChecked(),
+            "EdgeMultiMakeShortRecords": self.checkBox_EdgeMultiMakeShortRecords.isChecked(),
+            "EdgeMultiMakeContaminatedRecords": self.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
+            "EdgeMultiVerifyNMonotone": self.spinBox_EdgeMultiVerifyNMonotone.value(),
+            "EdgeLevel": self.spinBox_EdgeLevel.value()
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
 
         # Reset trigger on even-numbered channels if source is TDM and the relevant
         # check box ("Trigger on Error Channels") isn't checked.
         omitEvenChannels = (self.sourceIsTDM and not
-                            self.ui.checkBox_edgeMultiTriggerOnError.isChecked())
+                            self.checkBox_edgeMultiTriggerOnError.isChecked())
         if omitEvenChannels:
             config = {"ChannelIndicies": list(range(0, len(self.channel_names), 2))}
             self.client.call("SourceControl.ConfigureTriggers", config)
@@ -846,7 +842,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def sendMix(self):
         print("sendMIX***********")
-        mixFraction = self.ui.doubleSpinBox_MixFraction.value()
+        mixFraction = self.doubleSpinBox_MixFraction.value()
         channels = [i for i in range(1, len(self.channel_names), 2)]  # only odd channels get mix
         mixFractions = [mixFraction for _ in range(len(channels))]
         config = {
@@ -863,7 +859,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def sendExperimentStateLabel(self):
         config = {
-            "Label": self.ui.lineEdit_experimentStateLabel.text(),
+            "Label": self.lineEdit_experimentStateLabel.text(),
         }
         self.client.call("SourceControl.SetExperimentStateLabel", config)
 
@@ -877,7 +873,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def handleUnpauseExperimental(self):
         config = {
-            "Request": "Unpause "+self.ui.lineEdit_unpauseExperimentalLabel.text()
+            "Request": "Unpause "+self.lineEdit_unpauseExperimentalLabel.text()
         }
         self.client.call("SourceControl.WriteControl", config)
 
@@ -886,10 +882,9 @@ class HostPortDialog(QtWidgets.QDialog):
     def __init__(self, host, port, disconnectReason, settings, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
-        self.ui = Ui_HostPortDialog()
-        self.ui.setupUi(self)
-        self.ui.hostName.setText(host)
-        self.ui.basePortSpin.setValue(port)
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/host_port.ui"), self)
+        self.hostName.setText(host)
+        self.basePortSpin.setValue(port)
         self.settings = settings
 
         if disconnectReason and disconnectReason != "disconnect button":
@@ -903,17 +898,16 @@ class HostPortDialog(QtWidgets.QDialog):
         if retval != QtWidgets.QDialog.Accepted:
             return (None, None)
 
-        host = self.ui.hostName.text()
-        port = self.ui.basePortSpin.value()
+        host = self.hostName.text()
+        port = self.basePortSpin.value()
         self.settings.setValue("host", host)
         self.settings.setValue("port", int(port))
         return (host, port)
 
-
 def main():
     if sys.version_info.major <= 2:
         print("WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***")
-    settings = QSettings("NIST Quantum Sensors", "dastard-commander")
+    settings = QSettings("NIST Quantum Sensors", "dastardcommander")
 
     app = QtWidgets.QApplication(sys.argv)
     host = settings.value("host", "localhost", type=str)
@@ -932,7 +926,7 @@ def main():
 
         # One None is an invalid host:port pair
         if host is None or port is None or host == "" or port == "":
-            print("Could not start Dastard-commander without a valid host:port selection.")
+            print("Could not start dcom (Dastard Commander) without a valid host:port selection.")
             return
         try:
             client = rpc_client.JSONClient((host, port))

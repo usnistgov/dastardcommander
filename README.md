@@ -1,48 +1,29 @@
-# Dastard-Commander
-GUI for operating [DASTARD](https://github.com/usnistgov/dastard), the Data Acquisition System for Triggering And Recording Data, a microcalorimeter DAQ system. Dastard-Commander is a GUI front-end only, and it communicates with a running Dastard system via JSON-RPC calls, as well as by monitoring certain ports for ZMQ messages.
+# Dastard Commander
+Dastard Commander is a GUI for operating [DASTARD](https://github.com/usnistgov/dastard) (the Data Acquisition System for Triggering And Recording Data), a microcalorimeter DAQ system. Dastard Commander is a GUI front-end only, and it communicates with a running Dastard system via JSON-RPC calls, as well as by monitoring certain ports for ZMQ messages.
 
 ## Installation
-Requires Python 3 with Qt5. (See earlier versions of dastard-commander for Python 2).
 
-The usual platform for microcalorimeter systems is Ubuntu 16 or 18. DC should work on Mac OS X or Windows, too, though Mac testing is limited and Windows has not been attempted.
+### Pip
+It is suggested you use virtualenv and upgrade pip before installing.
 
-For Ubuntu, installation should be as simple as:
+Joe doesn't understand the former. You can do the latter with:
 ```
-sudo apt-get install python3-pyqt5 python3-numpy python3-h5py python3-zmq python3-matplotlib
-cd  # Replace by cd to wherever you wish to store the repo, if not in your home directory.
-git clone https://github.com/usnistgov/dastard-commander.git
-
-sudo apt-get install roxterm  # add this if you want the scripting in roxterms.sh
+pip install --upgrade pip
 ```
 
-For Macs with Mac Ports, replace the `apt-get` line with:
+### Installation of Dastard Commander
 ```
-sudo port install python37 py37-pyqt5 py37-numpy py37-zmq py37-h5py py37-setuptools py37-matplotlib
-```
-
-## Running
-From the top directory of this repository, just do
-```
-python dc.py
+pip install -e git+https://github.com/usnistgov/dastardcommander#egg=dastardcommander
 ```
 
-or equivalently, `./dc.py` should work, too. Dastard-Commander will then need to connect to a running Dastard. Give its host name (or IP) and port number. (Defaults are localhost:5000).
+Requires Python 3 with Qt5.  The `-e` or `--editable` argument is not _required_ for installation, but it will make debugging and development easier: it makes a git repository clone in `src/dastardcommander` relative to your current working directory. If you are a 100% user with no aspirations to develop, then omit the `-e`.
 
-### Running multiple tabs for TDM operation within RoxTerm
-The following is a quick way to get the necessary tabs and directories pre-configured.
-```
-cd ~/dastard-commander
-roxterm
-# from within roxterm:
-bash roxterms.sh
-# (close unused roxterm)
+If you need a specific branch, the syntax is `pip install -e git+https://github.com/usnistgov/dastardcommander@branch#egg=dastardcommander`.
 
-# in dastard tab:
-go run cmd/dastard/dastard.go
+Keep an eye out for the WARNING you might see if the installation directory is not in your PATH. If that happens, you should add to your path the directory it points out by editing your `~/.bash_profile` or `~/.bashrc` as needed (and remember that editing the file does not take immediate effect). On a Mac OS X, that installation directory was `~/Library/Python/3.8/bin`. Other OS would probably have a different location.
 
-# in dc tab:
-python dc.py
 
-# in cringe tab:
-python cringe.py -L
-```
+## Running Dastard Commander
+From anywhere you should be able to run with `dcom` or `python -m dastardcommander`. Dastard Commander will then need to connect to a running instance of Dastard. Give its host name (or IP) and port number. (Defaults are `localhost:5000`). Although remote operation is possible, beware that firewall rules on either computer might be blocking the necessary traffic on ports 5000-5004.
+
+If you have installed with the editable option, then this command will load your local and _potentially edited_ version of the package. That's probably what you want.
