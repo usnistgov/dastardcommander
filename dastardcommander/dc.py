@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 import os
+import zmq
 
 from collections import OrderedDict, defaultdict
 import numpy as np
@@ -107,6 +108,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
         self.tabWidget.setEnabled(False)
         self.buildStatusBar()
+
+        self.pushButton_initializeCrate.clicked.connect(self.crateInitialize)
+        self.pushButton_startAndAutotune.clicked.connect(self.crateStartAndAutotune)
 
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
@@ -694,7 +698,6 @@ class MainWindow(QtWidgets.QMainWindow):
             "Nsamp": nsamp,
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
-            "AutoRestart": self.checkBox_lanceroAutoRestart.isChecked()
         }
         print("START LANCERO CONFIG")
         print(config)
@@ -876,6 +879,47 @@ class MainWindow(QtWidgets.QMainWindow):
             "Request": "Unpause "+self.lineEdit_unpauseExperimentalLabel.text()
         }
         self.client.call("SourceControl.WriteControl", config)
+
+
+    def _cringeCommand(self, command):
+        cringe_address = "localhost"
+        cringe_port = 5509
+        ctx = zmq.Context() # just create a new context each time so we dont need to keep track of it
+        cringe = ctx.socket(zmq.REQ)
+        cringe.LINGER = 0 # ms
+        cringe.RCVTIMEO = 10*1000 # ms
+        cringe_addr = f"tcp://{cringe_address}:{cringe_port}"
+        cringe.connect(cringe_addr)
+        print(f"connect to cringe at {cringe_addr}")   
+        cringe.send_string(command)
+        print(f"sent `{command}` to cringe")
+        try:
+            reply = cringe.recv().decode() # this blocks until cringe replies, or until RCVTIMEO
+            print(f"reply `{reply}` from cringe")
+            message = f"reply={reply}"
+        except zmq.Again:
+            message = f"Socket timeout, timeout = {cringe.RCVTIMEO/1000} s" 
+            print(message)
+        if not reply.startswith("ok"):
+            resultBox = QtWidgets.QMessageBox(self)
+            resultBox.setText(f"Cringe Control Error\ncommand={command}\n{message}")
+            resultBox.setWindowTitle("Cringe Control Error")
+            # The above line doesn't work on mac, from qt docs "On macOS, the window
+            # title is ignored (as required by the macOS Guidelines)."
+            resultBox.show()
+
+    def crateInitialize(self):
+        self._cringeCommand("SETUP_CRATE")
+
+    def crateStartAndAutotune(self):
+        print("crateStartAndAutotune")
+        if self.startStopButton.text == "Start data":
+            print("starting lancero")
+            self._start() # _startLancero wont set self.sourceIsTDM
+        else:
+            print("lancero already started, not starting")
+        # pause?
+        self._cringeCommand("FULL_TUNE")
 
 
 class HostPortDialog(QtWidgets.QDialog):

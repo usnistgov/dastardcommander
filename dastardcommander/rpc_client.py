@@ -60,7 +60,7 @@ class JSONClient(object):
                 print(message)
             if errorBox and self.qtParent is not None:
                 resultBox = QtWidgets.QMessageBox(self.qtParent)
-                resultBox.setText(message)
+                resultBox.setText("DASTARD RPC Error\n"+message)
                 resultBox.setWindowTitle("DASTARD RPC Error")
                 # The above line doesn't work on mac, from qt docs "On macOS, the window
                 # title is ignored (as required by the macOS Guidelines)."
