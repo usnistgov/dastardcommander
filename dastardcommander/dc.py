@@ -916,10 +916,12 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.startStopButton.text == "Start data":
             print("starting lancero")
             self._start() # _startLancero wont set self.sourceIsTDM
+            wait_ms = 2000
         else:
             print("lancero already started, not starting")
-        # pause?
-        self._cringeCommand("FULL_TUNE")
+            wait_ms = 0
+        # wait a bit for dastard to get the lancero souce setup, then run full tune
+        QtCore.QTimer.singleShot(wait_ms, lambda: self._cringeCommand("FULL_TUNE"))
 
 
 class HostPortDialog(QtWidgets.QDialog):
