@@ -75,7 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
         self.pushButton_pauseExperimental.clicked.connect(self.handlePauseExperimental)
         self.pushButton_unpauseExperimental.clicked.connect(self.handleUnpauseExperimental)
-        self.running = False
+        self.sourceIsRunning = False
         self.sourceIsTDM = False
         self.cols = 0
         self.rows = 0
@@ -334,7 +334,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if mb <= 0:
             # No data is okay...unless server says it's running!
-            if self.running:
+            if self.sourceIsRunning:
                 self.statusFreshLabel.setText("no fresh data")
                 color("white", bg="red")
             else:
@@ -575,7 +575,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def startStop(self):
         """Slot to handle pressing the Start/Stop data button."""
-        if self.running:
+        if self.sourceIsRunning:
             okay = self._stop()
             self._setGuiRunning(False)
             # I think we want to do this even if stop failed, because it's usually due to an already stopped source?
@@ -592,8 +592,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Stopping Data")
         return True
 
-    def _setGuiRunning(self, running, sourceName=""):
-        self.running = running
+    def _setGuiRunning(self, running):
+        self.sourceIsRunning = running
         label = "Start Data"
         if running:
             label = "Stop Data"
@@ -913,10 +913,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def crateStartAndAutotune(self):
         print("crateStartAndAutotune")
-        if self.startStopButton.text == "Start data":
+        if self.sourceIsRunning:
             print("starting lancero")
             self._start() # _startLancero wont set self.sourceIsTDM
-            wait_ms = 2000
+            wait_ms = 500
         else:
             print("lancero already started, not starting")
             wait_ms = 0
