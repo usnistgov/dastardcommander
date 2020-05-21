@@ -915,7 +915,10 @@ class MainWindow(QtWidgets.QMainWindow):
         print("crateStartAndAutotune")
         if not self.sourceIsRunning:
             print("starting lancero")
-            self._start() # _startLancero wont set self.sourceIsTDM
+            success = self._start() # _startLancero wont set self.sourceIsTDM
+            if not success:
+                print("failed to start lancero, return early from crateStartAndAutotune")
+                return
             wait_ms = 500
         else:
             print("lancero already started, not starting")
