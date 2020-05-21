@@ -165,7 +165,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.updateStatusBar(d)
                 self.observeTab.handleStatusUpdate(d)
                 self.observeWindow.handleStatusUpdate(d)
-                self._setGuiRunning(d["Running"], d["SourceName"])
+                self._setGuiRunning(d["Running"])
                 self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 self.workflowTab.handleStatusUpdate(d)
 
