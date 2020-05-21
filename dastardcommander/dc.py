@@ -913,7 +913,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def crateStartAndAutotune(self):
         print("crateStartAndAutotune")
-        if self.sourceIsRunning:
+        if not self.sourceIsRunning:
             print("starting lancero")
             self._start() # _startLancero wont set self.sourceIsTDM
             wait_ms = 500
