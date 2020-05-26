@@ -70,6 +70,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
         self.actionLoad_Mix.triggered.connect(self.loadMix)
         self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
+        self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
@@ -887,7 +888,7 @@ class MainWindow(QtWidgets.QMainWindow):
         ctx = zmq.Context() # just create a new context each time so we dont need to keep track of it
         cringe = ctx.socket(zmq.REQ)
         cringe.LINGER = 0 # ms
-        cringe.RCVTIMEO = 10*1000 # ms
+        cringe.RCVTIMEO = 30*1000 # ms
         cringe_addr = f"tcp://{cringe_address}:{cringe_port}"
         cringe.connect(cringe_addr)
         print(f"connect to cringe at {cringe_addr}")   

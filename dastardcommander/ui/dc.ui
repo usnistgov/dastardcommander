@@ -1262,6 +1262,7 @@
     <addaction name="actionLoad_Projectors_Basis"/>
     <addaction name="actionLoad_Mix"/>
     <addaction name="actionPop_out_Observe"/>
+    <addaction name="actionTDM_Autotune"/>
    </widget>
    <addaction name="menuConnection"/>
    <addaction name="menuExpert"/>
@@ -1290,6 +1291,11 @@
   <action name="actionPop_out_Observe">
    <property name="text">
     <string>Pop out Observe</string>
+   </property>
+  </action>
+  <action name="actionTDM_Autotune">
+   <property name="text">
+    <string>TDM Autotune</string>
    </property>
   </action>
  </widget>
