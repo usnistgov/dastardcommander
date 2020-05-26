@@ -898,10 +898,12 @@ class MainWindow(QtWidgets.QMainWindow):
             reply = cringe.recv().decode() # this blocks until cringe replies, or until RCVTIMEO
             print(f"reply `{reply}` from cringe")
             message = f"reply={reply}"
+            success = True
         except zmq.Again:
             message = f"Socket timeout, timeout = {cringe.RCVTIMEO/1000} s" 
             print(message)
-        if not message.startswith("ok"):
+            success = False
+        if not success:
             resultBox = QtWidgets.QMessageBox(self)
             resultBox.setText(f"Cringe Control Error\ncommand={command}\n{message}")
             resultBox.setWindowTitle("Cringe Control Error")
