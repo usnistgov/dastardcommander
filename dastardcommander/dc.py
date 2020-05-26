@@ -900,7 +900,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except zmq.Again:
             message = f"Socket timeout, timeout = {cringe.RCVTIMEO/1000} s" 
             print(message)
-        if not reply.startswith("ok"):
+        if not message.startswith("ok"):
             resultBox = QtWidgets.QMessageBox(self)
             resultBox.setText(f"Cringe Control Error\ncommand={command}\n{message}")
             resultBox.setWindowTitle("Cringe Control Error")
