@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 import os
+import zmq
 
 from collections import OrderedDict, defaultdict
 import numpy as np
@@ -69,12 +70,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
         self.actionLoad_Mix.triggered.connect(self.loadMix)
         self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
+        self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
         self.pushButton_pauseExperimental.clicked.connect(self.handlePauseExperimental)
         self.pushButton_unpauseExperimental.clicked.connect(self.handleUnpauseExperimental)
-        self.running = False
+        self.sourceIsRunning = False
         self.sourceIsTDM = False
         self.cols = 0
         self.rows = 0
@@ -107,6 +109,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
         self.tabWidget.setEnabled(False)
         self.buildStatusBar()
+
+        self.pushButton_initializeCrate.clicked.connect(self.crateInitialize)
+        self.pushButton_startAndAutotune.clicked.connect(self.crateStartAndAutotune)
 
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
@@ -161,7 +166,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.updateStatusBar(d)
                 self.observeTab.handleStatusUpdate(d)
                 self.observeWindow.handleStatusUpdate(d)
-                self._setGuiRunning(d["Running"], d["SourceName"])
+                self._setGuiRunning(d["Running"])
                 self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 self.workflowTab.handleStatusUpdate(d)
 
@@ -330,7 +335,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if mb <= 0:
             # No data is okay...unless server says it's running!
-            if self.running:
+            if self.sourceIsRunning:
                 self.statusFreshLabel.setText("no fresh data")
                 color("white", bg="red")
             else:
@@ -571,7 +576,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def startStop(self):
         """Slot to handle pressing the Start/Stop data button."""
-        if self.running:
+        if self.sourceIsRunning:
             okay = self._stop()
             self._setGuiRunning(False)
             # I think we want to do this even if stop failed, because it's usually due to an already stopped source?
@@ -588,8 +593,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Stopping Data")
         return True
 
-    def _setGuiRunning(self, running, sourceName=""):
-        self.running = running
+    def _setGuiRunning(self, running):
+        self.sourceIsRunning = running
         label = "Start Data"
         if running:
             label = "Stop Data"
@@ -694,7 +699,6 @@ class MainWindow(QtWidgets.QMainWindow):
             "Nsamp": nsamp,
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
-            "AutoRestart": self.checkBox_lanceroAutoRestart.isChecked()
         }
         print("START LANCERO CONFIG")
         print(config)
@@ -876,6 +880,54 @@ class MainWindow(QtWidgets.QMainWindow):
             "Request": "Unpause "+self.lineEdit_unpauseExperimentalLabel.text()
         }
         self.client.call("SourceControl.WriteControl", config)
+
+
+    def _cringeCommand(self, command):
+        cringe_address = "localhost"
+        cringe_port = 5509
+        ctx = zmq.Context() # just create a new context each time so we dont need to keep track of it
+        cringe = ctx.socket(zmq.REQ)
+        cringe.LINGER = 0 # ms
+        cringe.RCVTIMEO = 30*1000 # ms
+        cringe_addr = f"tcp://{cringe_address}:{cringe_port}"
+        cringe.connect(cringe_addr)
+        print(f"connect to cringe at {cringe_addr}")   
+        cringe.send_string(command)
+        print(f"sent `{command}` to cringe")
+        try:
+            reply = cringe.recv().decode() # this blocks until cringe replies, or until RCVTIMEO
+            print(f"reply `{reply}` from cringe")
+            message = f"reply={reply}"
+            success = True
+        except zmq.Again:
+            message = f"Socket timeout, timeout = {cringe.RCVTIMEO/1000} s" 
+            print(message)
+            success = False
+        if not success:
+            resultBox = QtWidgets.QMessageBox(self)
+            resultBox.setText(f"Cringe Control Error\ncommand={command}\n{message}")
+            resultBox.setWindowTitle("Cringe Control Error")
+            # The above line doesn't work on mac, from qt docs "On macOS, the window
+            # title is ignored (as required by the macOS Guidelines)."
+            resultBox.show()
+
+    def crateInitialize(self):
+        self._cringeCommand("SETUP_CRATE")
+
+    def crateStartAndAutotune(self):
+        print("crateStartAndAutotune")
+        if not self.sourceIsRunning:
+            print("starting lancero")
+            success = self._start() # _startLancero wont set self.sourceIsTDM
+            if not success:
+                print("failed to start lancero, return early from crateStartAndAutotune")
+                return
+            wait_ms = 500
+        else:
+            print("lancero already started, not starting")
+            wait_ms = 0
+        # wait a bit for dastard to get the lancero souce setup, then run full tune
+        QtCore.QTimer.singleShot(wait_ms, lambda: self._cringeCommand("FULL_TUNE"))
 
 
 class HostPortDialog(QtWidgets.QDialog):
