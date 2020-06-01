@@ -38,7 +38,11 @@ class ZMQListener(QtCore.QObject):
             if self.socket.poll(100) == 0:
                 continue
 
-            [topic, contents] = self.socket.recv_multipart()
+            msg = self.socket.recv_multipart()
+            try:
+                topic, contents = msg
+            except TypeError:
+                raise Exception(f"msg: `{msg}` should have two parts, but does not")
             topic = topic.decode()
             contents = contents.decode()
             self.messages_seen[topic] += 1
