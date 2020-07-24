@@ -59,7 +59,8 @@ class MainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
-        self.setWindowTitle("Dastard Commander %s    (connected to %s:%d)" % (__version__, host, port))
+        self.setWindowTitle("Dastard Commander %s    (connected to %s:%d)" %
+                            (__version__, host, port))
         self.reconnect = False
         self.disconnectReason = ""
         self.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
@@ -144,17 +145,22 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             d = json.loads(message)
         except Exception as e:
-            print("Error processing status message [topic,msg]: %s, %s" % (
+            print("Error processing status message [topic,msg]: '%s', '%s'" % (
                 topic, message))
             print("Error is: %s" % e)
             return
 
-        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "ALIVE", "EXTERNALTRIGGER"])
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER"])  # add "ALIVE"
         if topic not in quietTopics or self.nmsg < 15:
             print("%s %5d: %s" % (topic, self.nmsg, d))
+        if self.nmsg == 15:
+            print("For message 15+, suppressing {} messages.".format(quietTopics))
 
         if topic == "ALIVE":
             self.heartbeat(d)
+
+        elif topic == "CURRENTTIME":
+            print("CurrentTime message: '%s'" % message)
 
         elif topic == "TRIGGERRATE":
             self.observeTab.handleTriggerRateMessage(d)
@@ -613,7 +619,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTab.coupleFBToErrCheckBox.setChecked(False)
         self.triggerTab.coupleErrToFBCheckBox.setChecked(False)
 
-
     def _start(self):
         self.sourceIsTDM = False
         sourceID = self.dataSource.currentIndex()
@@ -733,13 +738,13 @@ class MainWindow(QtWidgets.QMainWindow):
             config["Rates"].append(rate)
         okay, error = self.client.call("SourceControl.ConfigureRoachSource", config)
         if not okay:
-            print ("Could not ConfigureRoachSource")
+            print("Could not ConfigureRoachSource")
             return False
         okay, error = self.client.call("SourceControl.Start", "ROACHSOURCE")
         if not okay:
-            print ("Could not Start ROACH")
+            print("Could not Start ROACH")
             return False
-        print ("Starting ROACH")
+        print("Starting ROACH")
         return True
 
     def _startAbaco(self):
@@ -881,26 +886,25 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         self.client.call("SourceControl.WriteControl", config)
 
-
     def _cringeCommand(self, command):
         cringe_address = "localhost"
         cringe_port = 5509
-        ctx = zmq.Context() # just create a new context each time so we dont need to keep track of it
+        ctx = zmq.Context()  # just create a new context each time so we dont need to keep track of it
         cringe = ctx.socket(zmq.REQ)
-        cringe.LINGER = 0 # ms
-        cringe.RCVTIMEO = 30*1000 # ms
+        cringe.LINGER = 0  # ms
+        cringe.RCVTIMEO = 30*1000  # ms
         cringe_addr = f"tcp://{cringe_address}:{cringe_port}"
         cringe.connect(cringe_addr)
-        print(f"connect to cringe at {cringe_addr}")   
+        print(f"connect to cringe at {cringe_addr}")
         cringe.send_string(command)
         print(f"sent `{command}` to cringe")
         try:
-            reply = cringe.recv().decode() # this blocks until cringe replies, or until RCVTIMEO
+            reply = cringe.recv().decode()  # this blocks until cringe replies, or until RCVTIMEO
             print(f"reply `{reply}` from cringe")
             message = f"reply={reply}"
             success = True
         except zmq.Again:
-            message = f"Socket timeout, timeout = {cringe.RCVTIMEO/1000} s" 
+            message = f"Socket timeout, timeout = {cringe.RCVTIMEO/1000} s"
             print(message)
             success = False
         if not success:
@@ -918,7 +922,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("crateStartAndAutotune")
         if not self.sourceIsRunning:
             print("starting lancero")
-            success = self._start() # _startLancero wont set self.sourceIsTDM
+            success = self._start()  # _startLancero wont set self.sourceIsTDM
             if not success:
                 print("failed to start lancero, return early from crateStartAndAutotune")
                 return
@@ -955,6 +959,7 @@ class HostPortDialog(QtWidgets.QDialog):
         self.settings.setValue("host", host)
         self.settings.setValue("port", int(port))
         return (host, port)
+
 
 def main():
     if sys.version_info.major <= 2:

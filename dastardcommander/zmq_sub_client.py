@@ -24,10 +24,14 @@ print("Collecting updates from dastard server...")
 socket.connect("tcp://%s" % host)
 
 # for topicfilter in ("TRIGGER", "STATUS"):
-#     socket.setsockopt(zmq.SUBSCRIBE, topicfilter)
-socket.setsockopt(zmq.SUBSCRIBE, "")
+#     socket.setsockopt_string(zmq.SUBSCRIBE, topicfilter)
+socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
 total_value = 0
 while True:
-    topic, messagedata = socket.recv_multipart()
-    print(topic, messagedata)
+    message = socket.recv_multipart()
+    if len(message) == 2:
+        topic, messagedata = message
+        print(topic, messagedata)
+    else:
+        print("WARNING: message of length {} is {}".format(len(message), message))

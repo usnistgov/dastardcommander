@@ -41,10 +41,13 @@ class ZMQListener(QtCore.QObject):
             msg = self.socket.recv_multipart()
             try:
                 topic, contents = msg
-            except TypeError:
+            except (ValueError, TypeError):
                 raise Exception(f"msg: `{msg}` should have two parts, but does not")
             topic = topic.decode()
             contents = contents.decode()
+
+            if topic == "CURRENTTIME":
+                print("Current time: '%s'" % contents)
             self.messages_seen[topic] += 1
             self.message.emit(topic, contents)
 
