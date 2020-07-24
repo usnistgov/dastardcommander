@@ -13,3 +13,4 @@ noise_analysis_autocorr_input
 XDG_CACHE_HOME
 
 *egg-info*
+SubscribeTester/zmq_sub_client
