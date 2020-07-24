@@ -1,34 +1,15 @@
-CXX      := -c++
-CXXFLAGS := -Wall -Wextra -Werror
-LDFLAGS  := -L/opt/local/lib -lstdc++ -lm
-BUILD    := ./build
-OBJ_DIR  := .
-APP_DIR  := .
-TARGET   := zmq_sub_client
-INCLUDE  := -I/opt/local/include/
-SRC      := $(wildcard *.cpp)
+CC    = gcc
+RM     = rm -f
+INCLUDE = -I/opt/local/include
+CPPFLAGS = -Wall -O2 -g $(INCLUDE)
+LDFLAGS = -L/opt/local/lib -lpthread -lzmq
+SOURCES = $(wildcard *.cpp)
+TARGETS = zmq_sub_client
 
-OBJECTS  := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
-
-all: $(APP_DIR)/$(TARGET)
-
-$(OBJ_DIR)/%.o: %.cpp
-	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
-
-$(APP_DIR)/$(TARGET): $(OBJECTS)
-	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -o $(APP_DIR)/$(TARGET) $^ $(LDFLAGS)
-
-
-.PHONY: all clean debug release
-
-debug: CXXFLAGS += -DDEBUG -g
-debug: all
-
-release: CXXFLAGS += -O2
-release: all
+all:	${TARGETS}
 
 clean:
-	-@rm -rvf $(OBJ_DIR)/*
-	-@rm -rvf $(APP_DIR)/*
+	${RM} *.o *~* ${TARGETS}
+
+${TARGETS}:
+	${CC} ${CPPFLAGS} -o $@ ${@:%=%.c} ${LDFLAGS}
