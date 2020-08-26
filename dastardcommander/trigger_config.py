@@ -12,8 +12,9 @@ class TriggerConfig(QtWidgets.QWidget):
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent, client):
         QtWidgets.QWidget.__init__(self, parent)
+        self.client = client
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/trigger_config.ui"), self)
         self.recordLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)

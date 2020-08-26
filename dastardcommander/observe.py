@@ -83,8 +83,9 @@ class Observe(QtWidgets.QWidget):
     dc has processed both a CHANNELNAMES message and a STATUS message (to get the
     number of rows and columns)."""
 
-    def __init__(self, parent=None, host=""):
+    def __init__(self, parent, host, client):
         QtWidgets.QWidget.__init__(self, parent)
+        self.client = client
         self.host = host
         self.client = None
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/observe.ui"), self)
