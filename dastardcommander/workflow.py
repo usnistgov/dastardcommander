@@ -102,7 +102,7 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        self.dc.triggerTab.goNoiseMode()
+        self.dc.triggerTabSimple.handleSendNoise()
         # start writing files
         self.dc.writingTab.start()
 
@@ -132,8 +132,6 @@ class Workflow(QtWidgets.QWidget):
         # # stop writing files
         self.dc.writingTab.stop()
 
-        # Enable next step
-        self.pushButton_createNoiseModel.setEnabled(True)
 
     def handleTakePulses(self):
         """
@@ -144,10 +142,7 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        if self.checkBox_useEdgeMultiForTakePulses.isChecked():
-            self.dc.sendEdgeMulti()
-        else:
-            self.dc.triggerTab.goPulseMode()
+        self.dc.triggerTabSimple.handleSendPulse()
         # start writing files
         self.dc.writingTab.start()
         comment = """Pulse Data for analysis training\nWorkflow: Take Pulses button pushed"""

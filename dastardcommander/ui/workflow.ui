@@ -14,6 +14,34 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0,0">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>1.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>2.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="pushButton_takeNoise">
+     <property name="text">
+      <string>Take Noise</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="pushButton_createProjectors">
+     <property name="text">
+      <string>Create Projectors</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
@@ -37,44 +65,24 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="2">
-    <widget class="QLabel" name="label_pulseFile">
-     <property name="text">
-      <string>pulse file:</string>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="pushButton_takeNoise">
-     <property name="text">
-      <string>Take Noise</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QCheckBox" name="checkBox_useEdgeMultiForTakePulses">
-     <property name="text">
-      <string>Use EdgeMulti for Take Pulses</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="pushButton_createProjectors">
-     <property name="text">
-      <string>Create Projectors</string>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="1">
     <widget class="QPushButton" name="pushButton_loadProjectors">
      <property name="text">
       <string>Load Projectors</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_11">
+     <property name="text">
+      <string>3.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_13">
+     <property name="text">
+      <string>4.</string>
      </property>
     </widget>
    </item>
@@ -88,27 +96,24 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
-    <widget class="QLabel" name="label_projectors">
+   <item row="1" column="2">
+    <widget class="QLabel" name="label_pulseFile">
      <property name="text">
-      <string>projectors file:</string>
+      <string>pulse file:</string>
      </property>
      <property name="textInteractionFlags">
       <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
-    <widget class="QPushButton" name="pushButton_viewProjectorsPlot">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="pushButton_takePulses">
      <property name="text">
-      <string>View Projectors Plots</string>
+      <string>Take Pulses</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="5" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -121,38 +126,23 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="pushButton_takePulses">
+   <item row="4" column="1">
+    <widget class="QPushButton" name="pushButton_viewProjectorsPlot">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
-      <string>Take Pulses</string>
+      <string>View Projectors Plots</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="label_13">
+   <item row="2" column="2">
+    <widget class="QLabel" name="label_projectors">
      <property name="text">
-      <string>4.</string>
+      <string>projectors file:</string>
      </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_11">
-     <property name="text">
-      <string>3.</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_7">
-     <property name="text">
-      <string>2.</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>1.</string>
+     <property name="textInteractionFlags">
+      <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
      </property>
     </widget>
    </item>

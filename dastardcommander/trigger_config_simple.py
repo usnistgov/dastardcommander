@@ -8,6 +8,7 @@ import os
 from enum import Enum
 import numpy as np
 import time
+from . import projectors
 
 """keep track of the state of sync between the GUI and dastard"""
 class Sync(Enum):
@@ -15,7 +16,24 @@ class Sync(Enum):
     PULSE = 1
     NOISE = 2
 
-TWO_TRIGGER_RECORD_OPTIONS = ["Zero records", "Two overlapping full length records", "Two shorter records"]
+class TwoPulseChoice(Enum):
+    NO_RECORD = 0
+    CONTAMINATED = 1
+    VARIABLE_LENGTH = 2
+
+    def to_str(self):
+        if self == TwoPulseChoice.NO_RECORD:
+            return "Zero records"
+        elif self == TwoPulseChoice.CONTAMINATED:
+            return "Two overlapping full length records"
+        elif self == TwoPulseChoice.VARIABLE_LENGTH:
+            return "Two shorter records"
+        else:
+            raise Exception()
+
+    def equals_int(self, i):
+        return self.value == i
+
 
 
 class TriggerConfigSimple(QtWidgets.QWidget):
@@ -30,13 +48,14 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         
         self.readSettings()
         self.connect()
-        self.setSync(Sync.UNKNOWN)
+        self.setPulseSync(Sync.UNKNOWN)
+        self.setProjectorSync(False)
         self._lastSentConfig = None
         self._lastSentConfigTime = None
 
     def setupCombo(self):
-        for i, t in enumerate(TWO_TRIGGER_RECORD_OPTIONS):
-            self.comboBox_twoTriggers.setItemText(i, t)
+        for i, t in enumerate(TwoPulseChoice):
+            self.comboBox_twoTriggers.setItemText(i, t.to_str())
 
     def connect(self):
         self.spinBox_recordLength.valueChanged.connect(self.handleRecordLengthOrPercentPretrigChange)
@@ -48,6 +67,8 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.comboBox_twoTriggers.currentIndexChanged.connect(self.handleUIChange)
         self.pushButton_sendPulse.clicked.connect(self.handleSendPulse)
         self.pushButton_sendNoise.clicked.connect(self.handleSendNoise)
+        self.toolButton_chooseProjectors.clicked.connect(self.handleChooseProjectors)
+        self.pushButton_sendProjectors.clicked.connect(self.handleSendProjectors)
 
     def handleRecordLengthOrPercentPretrigChange(self):
         rl = self.spinBox_recordLength.value()
@@ -56,7 +77,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.spinBox_pretrigLength.blockSignals(True)
         self.spinBox_pretrigLength.setValue(pt)
         self.spinBox_pretrigLength.blockSignals(False)
-        self.setSync(Sync.UNKNOWN)
+        self.setPulseSync(Sync.UNKNOWN)
 
     def handlePretrigLengthChange(self):
         rl = self.spinBox_recordLength.value()
@@ -64,11 +85,11 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.spinBox_percentPretrigger.blockSignals(True)
         self.spinBox_percentPretrigger.setValue(100*pt/rl)
         self.spinBox_percentPretrigger.blockSignals(False)       
-        self.setSync(Sync.UNKNOWN)
+        self.setPulseSync(Sync.UNKNOWN)
 
 
     def handleSendNoise(self):
-        self.setSync(Sync.NOISE)
+        self.setPulseSync(Sync.NOISE)
         self.writeSettings() # there are no noise settings, but if there are in the future, we're good
         self.zeroAllTriggers()
         self.sendRecordLength()
@@ -81,31 +102,33 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self._lastSentConfigTime = time.time()
 
     def handleSendPulse(self):
-        self.setSync(Sync.PULSE)
         self.writeSettings()
         self.zeroAllTriggers()
         self.sendRecordLength()
         # first send the trigger mesage for all channels
-        v = self.comboBox_twoTriggers.currentIndex()
+        s = self.comboBox_twoTriggers.currentText()
+        print(s,"\n\n")
 
         config = {
             "ChannelIndicies": self.channelIndiciesSignalOnlyWithExcludes(),
             "EdgeMulti": True,
             "EdgeMultiNoise": False,
-            "EdgeMultiMakeShortRecords": v == 2,
-            "EdgeMultiMakeContaminatedRecords": v == 1,
+            "EdgeMultiMakeShortRecords": s == TwoPulseChoice.VARIABLE_LENGTH.to_str(),
+            "EdgeMultiMakeContaminatedRecords": s == TwoPulseChoice.CONTAMINATED.to_str(),
             "EdgeMultiVerifyNMonotone": self.spinBox_nMonotone.value(),
-            "EdgeMultiLevel": self.spinBox_level.value()
+            "EdgeMultiLevel": self.spinBox_level.value(),
+            "EdgeMultiDisableZeroThreshold": self.checkBox_disableZeroThreshold.isChecked(),
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
         self._lastSentConfig = config
         self._lastSentConfigTime = time.time()
+        self.setPulseSync(Sync.PULSE)
 
 
     def handleUIChange(self):
-        self.setSync(Sync.UNKNOWN)
+        self.setPulseSync(Sync.UNKNOWN)
 
-    def setSync(self, sync: Sync):
+    def setPulseSync(self, sync: Sync):
         if sync == Sync.UNKNOWN:
             s = "Unknown"
         elif sync == Sync.PULSE:
@@ -116,6 +139,13 @@ class TriggerConfigSimple(QtWidgets.QWidget):
             raise Exception("wtf, thought I handled all of them")
         self.label_sync.setText(f"Current Trigger State: {s}")
 
+    def setProjectorSync(self, b: bool):
+        if b:
+            s = "Sent"
+        else:
+            s = "Unknown"
+        self.label_projectorsSync.setText(f"Projectors state: {s}")       
+
     def readSettings(self):
         s = self.settings
         self.spinBox_recordLength.setValue(s.value("record_length", 1024))
@@ -125,6 +155,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.spinBox_nMonotone.setValue(s.value("n_monotone", 5))
         self.checkBox_disableZeroThreshold.setChecked(s.value("disable_zero_threshold", False))
         self.comboBox_twoTriggers.setCurrentIndex(s.value("two_triggers", 0))
+        self.lineEdit_projectors.setText(s.value("projectors_file", ""))
 
     def writeSettings(self):
         s = self.settings
@@ -135,7 +166,8 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         s.setValue("n_monotone", self.spinBox_nMonotone.value())
         s.setValue("disable_zero_threshold", self.checkBox_disableZeroThreshold.isChecked())
         s.setValue("two_triggers", self.comboBox_twoTriggers.currentIndex())
- 
+        s.setValue("projectors_file", self.lineEdit_projectors.text())
+
     def sendRecordLength(self):
         self.dcom.triggerTab.blockSignals(True)
         self.client.call("SourceControl.ConfigurePulseLengths",
@@ -162,10 +194,27 @@ class TriggerConfigSimple(QtWidgets.QWidget):
             return
         elapsed_s = time.time()-self._lastSentConfigTime
         if elapsed_s > 0.1:
-            self.setSync(Sync.UNKNOWN)
+            self.setPulseSync(Sync.UNKNOWN)
 
     def handleNsamplesNpresamplesMessage(self, nsamp, npre):
         nsmatch = nsamp == self.spinBox_recordLength.value()
         nprematch = npre == self.spinBox_pretrigLength.value()
         if not (nsmatch and nprematch):
-            self.setSync(Sync.UNKNOWN)
+            self.setPulseSync(Sync.UNKNOWN)
+
+
+    def handleChooseProjectors(self):
+        startdir = os.path.dirname(self.lineEdit_projectors.text())
+        if not os.path.isdir(startdir):
+            startdir = os.path.expanduser("~")
+        fileName = projectors.getFileNameWithDialog(self, startdir)
+        if fileName:
+            self.lineEdit_projectors.setText(fileName)
+        
+
+    def handleSendProjectors(self):
+        fileName = self.lineEdit_projectors.text()
+        success = projectors.sendProjectors(self, fileName, self.dcom.channel_names, self.client)
+        if success:
+            self.settings.setValue("projectors_file", self.lineEdit_projectors.text())
+            self.setProjectorSync(True)

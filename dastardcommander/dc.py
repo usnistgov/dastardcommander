@@ -774,34 +774,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def loadProjectorsBasis(self):
-        options = QFileDialog.Options()
         if not hasattr(self, "lastdir"):
-            dir = os.path.expanduser("~")
+            startdir = os.path.expanduser("~")
         else:
-            dir = self.lastdir
-        fileName, _ = QFileDialog.getOpenFileName(
-            self, "Find Projectors Basis file", dir,
-            "Model Files (*_model.hdf5);;All Files (*)", options=options)
+            startdir = self.lastdir
+        fileName = projetors.getFileNameWithDialog(qtparent=self, startdir=startdir)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
-            print("opening: {}".format(fileName))
-            configs = projectors.getConfigs(fileName, self.channel_names)
-            print("Sending model for {} chans".format(len(configs)))
-            success_chans = []
-            failures = OrderedDict()
-            for channelIndex, config in list(configs.items()):
-                print("sending ProjectorsBasis for {}".format(channelIndex))
-                okay, error = self.client.call(
-                    "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
-                if okay:
-                    success_chans.append(channelIndex)
-                else:
-                    failures[channelIndex] = error
-            result = "success on channelIndicies (not channelName): {}\n".format(
-                sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
-            resultBox = QtWidgets.QMessageBox(self)
-            resultBox.setText(result)
-            resultBox.show()
+            projectors.sendProjectors(self, fileName, self.channel_names, self.client)
 
     @pyqtSlot()
     def loadMix(self):
