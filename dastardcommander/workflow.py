@@ -1,6 +1,6 @@
 # Qt5 imports
 import PyQt5.uic
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QSettings
 
 import numpy as np
 import json
@@ -33,8 +33,10 @@ class ProjectorCaller(object):
             if returncode != 0:
                 raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
 
-    def createBasis(self, pulseFile, noiseFile):
+    def createBasis(self, pulseFile, noiseFile, invertPulses):
         args = ["--n_basis", "5", pulseFile, noiseFile]
+        if invertPulses:
+            args = args[:2] + ["--invert_data"] + args[2:]
         self.scriptcall("make_projectors", args)
 
     def plotBasis(self, outName):
@@ -65,7 +67,13 @@ class Workflow(QtWidgets.QWidget):
         self.reset()
 
         self.pcaller = ProjectorCaller()
+        self.settings = QSettings()
+        self.checkBox_invertPulses.setChecked(bool(self.settings.value("invert_pulses", False)))
+        self.checkBox_invertPulses.stateChanged.connect(self.handleCheckBoxStateChanged)
         # self.testingInit() # REMOVE
+
+    def handleCheckBoxStateChanged(self):
+        self.settings.setValue("invert_pulses", self.checkBox_invertPulses.isChecked())
 
     def testingInit(self):
         """
@@ -212,7 +220,7 @@ class Workflow(QtWidgets.QWidget):
             print("{} exists, skipping make_projectors".format(outName))
         else:
             try:
-                self.pcaller.createBasis(pulseFile, noiseFile)
+                self.pcaller.createBasis(pulseFile, noiseFile, self.checkBox_invertPulses.isChecked())
             except OSError as e:
                 dialog = QtWidgets.QMessageBox()
                 dialog.setText("Create Projectors failed: {}".format(e))
