@@ -148,13 +148,15 @@ class TriggerConfigSimple(QtWidgets.QWidget):
 
     def readSettings(self):
         s = self.settings
-        self.spinBox_recordLength.setValue(s.value("record_length", 1024))
-        self.spinBox_pretrigLength.setValue(s.value("pretrigger_length", 512))
-        self.spinBox_percentPretrigger.setValue(s.value("percent_pretrigger", 25.0))
-        self.spinBox_level.setValue(s.value("level", 100))
-        self.spinBox_nMonotone.setValue(s.value("n_monotone", 5))
-        self.checkBox_disableZeroThreshold.setChecked(s.value("disable_zero_threshold", False))
-        self.comboBox_twoTriggers.setCurrentIndex(s.value("two_triggers", 0))
+        self.spinBox_recordLength.setValue(int(s.value("record_length", 1024)))
+        self.spinBox_pretrigLength.setValue(int(s.value("pretrigger_length", 512)))
+        self.spinBox_percentPretrigger.setValue(float(s.value("percent_pretrigger", 25.0)))
+        self.spinBox_level.setValue(int(s.value("level", 100)))
+        self.spinBox_nMonotone.setValue(int(s.value("n_monotone", 5)))
+        v = int(s.value("disable_zero_threshold")) # apparently QSettings sucks with bools, so use an int
+        assert v == 1 or v == 0
+        self.checkBox_disableZeroThreshold.setChecked(v==1)
+        self.comboBox_twoTriggers.setCurrentIndex(int(s.value("two_triggers", 0)))
         self.lineEdit_projectors.setText(s.value("projectors_file", ""))
 
     def writeSettings(self):
@@ -164,7 +166,9 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         s.setValue("percent_pretrigger", self.spinBox_percentPretrigger.value())
         s.setValue("level", self.spinBox_level.value())
         s.setValue("n_monotone", self.spinBox_nMonotone.value())
-        s.setValue("disable_zero_threshold", self.checkBox_disableZeroThreshold.isChecked())
+        s.setValue("disable_zero_threshold", int(self.checkBox_disableZeroThreshold.isChecked()))
+        print("disable_zero_threshold as read from qsettings",s.value("disable_zero_threshold"))
+
         s.setValue("two_triggers", self.comboBox_twoTriggers.currentIndex())
         s.setValue("projectors_file", self.lineEdit_projectors.text())
 
@@ -193,7 +197,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         if self._lastSentConfigTime is None:
             return
         elapsed_s = time.time()-self._lastSentConfigTime
-        if elapsed_s > 0.1:
+        if elapsed_s > 1.5:
             self.setPulseSync(Sync.UNKNOWN)
 
     def handleNsamplesNpresamplesMessage(self, nsamp, npre):

@@ -778,7 +778,7 @@ class MainWindow(QtWidgets.QMainWindow):
             startdir = os.path.expanduser("~")
         else:
             startdir = self.lastdir
-        fileName = projetors.getFileNameWithDialog(qtparent=self, startdir=startdir)
+        fileName = projectors.getFileNameWithDialog(qtparent=self, startdir=startdir)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
             projectors.sendProjectors(self, fileName, self.channel_names, self.client)
