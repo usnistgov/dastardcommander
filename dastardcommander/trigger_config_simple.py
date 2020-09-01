@@ -159,6 +159,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.comboBox_twoTriggers.setCurrentIndex(int(s.value("two_triggers", 0)))
         self.lineEdit_projectors.setText(s.value("projectors_file", ""))
 
+
     def writeSettings(self):
         s = self.settings
         s.setValue("record_length", self.spinBox_recordLength.value())
@@ -167,8 +168,6 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         s.setValue("level", self.spinBox_level.value())
         s.setValue("n_monotone", self.spinBox_nMonotone.value())
         s.setValue("disable_zero_threshold", int(self.checkBox_disableZeroThreshold.isChecked()))
-        print("disable_zero_threshold as read from qsettings",s.value("disable_zero_threshold"))
-
         s.setValue("two_triggers", self.comboBox_twoTriggers.currentIndex())
         s.setValue("projectors_file", self.lineEdit_projectors.text())
 
@@ -219,6 +218,8 @@ class TriggerConfigSimple(QtWidgets.QWidget):
     def handleSendProjectors(self):
         fileName = self.lineEdit_projectors.text()
         success = projectors.sendProjectors(self, fileName, self.dcom.channel_names, self.client)
+        print(f"sendprojectors success success = {success}")
         if success:
             self.settings.setValue("projectors_file", self.lineEdit_projectors.text())
             self.setProjectorSync(True)
+        return success

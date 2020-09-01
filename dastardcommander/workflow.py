@@ -1,6 +1,7 @@
 # Qt5 imports
 import PyQt5.uic
-from PyQt5 import QtWidgets, QSettings
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QSettings
 
 import numpy as np
 import json
@@ -246,25 +247,10 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("{} does not exist".format(self.projectorsFilename))
             return
-        print("opening: {}".format(self.projectorsFilename))
-        configs = projectors.getConfigs(self.projectorsFilename, self.dc.channel_names)
-        print("Sending model for {} chans".format(len(configs)))
-        success_chans = []
-        failures = OrderedDict()
-        for channelIndex, config in list(configs.items()):
-            print("sending ProjectorsBasis for {}".format(channelIndex))
-            okay, error = self.dc.client.call(
-                "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
-            if okay:
-                success_chans.append(channelIndex)
-            else:
-                failures[channelIndex] = error
-        result = "success on channelIndicies (not channelName): {}\n".format(
-            sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
-        resultBox = QtWidgets.QMessageBox(self)
-        resultBox.setText(result)
-        resultBox.show()
-        self.label_loadedProjectors.setText("projectors loaded? yes")
+        self.dc.triggerTabSimple.lineEdit_projectors.setText(self.projectorsFilename)
+        success = self.dc.triggerTabSimple.handleSendProjectors()
+        if success:
+            self.label_loadedProjectors.setText("projectors loaded? yes")
 
     def handleStatusUpdate(self, d):
         if self.nsamples != d["Nsamples"] or self.npresamples != d["Npresamp"]:

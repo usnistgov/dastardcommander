@@ -133,7 +133,7 @@ def sendProjectors(qtparent, fileName, channel_names, client):
             else:
                 failures[channelIndex] = error
 
-        success = len(failures) == 0 and len(success_chans) == n_expected
+        success = len(failures) == 0
         result = "success on channelIndicies (not channelName): {}\n".format(
         sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
         if not success:
