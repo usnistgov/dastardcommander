@@ -24,13 +24,14 @@ import numpy as np
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QSettings, pyqtSlot
+from PyQt5.QtCore import QSettings, pyqtSlot, QCoreApplication
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
 from . import rpc_client
 from . import status_monitor
 from . import trigger_config
+from . import trigger_config_simple
 from . import writing
 from . import projectors
 from . import observe
@@ -48,6 +49,9 @@ __version__ = '0.2.1'
 # TODO: don't process ui files at run-time, but compile them.
 # note we now use PyQt5.uic.loadUi, but the principle remains that compiling these would speed startup
 
+QCoreApplication.setOrganizationName("Quantum Sensors Group")
+QCoreApplication.setOrganizationDomain("nist.gov")
+QCoreApplication.setApplicationName("DastardCommander")
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, host, port, parent=None):
@@ -71,6 +75,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Mix.triggered.connect(self.loadMix)
         self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
         self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
+        self.actionAdvanced_Triggering.triggered.connect(lambda: self.setTriggerTabVisible(False))
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
@@ -84,16 +89,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
-        self.triggerTab = trigger_config.TriggerConfig(self.tabTriggering)
-        self.triggerTab.client = self.client
-        self.writingTab = writing.WritingControl(self.tabWriting, host)
-        self.writingTab.client = self.client
-        self.observeTab = observe.Observe(self.tabObserve, host=host)
-        self.observeTab.client = self.client
-        self.observeWindow = observe.Observe(host=host)
-        self.observeWindow.client = self.client
-        self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
+        self.triggerTab = trigger_config.TriggerConfig(self.tabTriggering, self.client)
+        self.triggerTabSimple = trigger_config_simple.TriggerConfigSimple(self.tabTriggeringSimple, self)
+        self.writingTab = writing.WritingControl(self.tabWriting, host, self.client)
+        self.observeTab = observe.Observe(self.tabObserve, host, self.client)
         self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
+        self.observeWindow = observe.Observe(parent=None, host=host, client=self.client)
+        self.triggerTab.changedTriggerStateSig.connect(self.observeWindow.resetIntegration)
+        self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
+
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
@@ -138,6 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimer.start(self.hbTimeout)
         self.fullyConfigured = False
 
+
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
 
@@ -168,6 +173,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.observeWindow.handleStatusUpdate(d)
                 self._setGuiRunning(d["Running"])
                 self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
+                self.triggerTabSimple.handleNsamplesNpresamplesMessage(d["Nsamples"], d["Npresamp"])
                 self.workflowTab.handleStatusUpdate(d)
 
                 source = d["SourceName"]
@@ -188,6 +194,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
+                self.triggerTabSimple.handleTriggerMessage(d, self.nmsg)
 
             elif topic == "WRITING":
                 self.writingTab.handleWritingMessage(d)
@@ -241,6 +248,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TRIGCOUPLING":
                 self.triggerTab.handleTrigCoupling(d)
+                self.triggerTabSimple.handleTriggerMessage(d, self.nmsg)
 
             elif topic == "NUMBERWRITTEN":
                 self.writingTab.handleNumberWritten(d)
@@ -594,6 +602,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return True
 
     def _setGuiRunning(self, running):
+        was_running = self.sourceIsRunning
         self.sourceIsRunning = running
         label = "Start Data"
         if running:
@@ -604,8 +613,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dataSourcesStackedWidget.setEnabled(not running)
         self.tabTriggering.setEnabled(running)
         self.launchMicroscopeButton.setEnabled(running)
-        if running:
-            self.tabWidget.setCurrentWidget(self.tabTriggering)
+        if running and not was_running:
+            self.tabWidget.setCurrentWidget(self.tabTriggeringSimple)
 
         runningTDM = running and self.sourceIsTDM
         self.triggerTab.coupleFBToErrCheckBox.setEnabled(runningTDM)
@@ -765,34 +774,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def loadProjectorsBasis(self):
-        options = QFileDialog.Options()
         if not hasattr(self, "lastdir"):
-            dir = os.path.expanduser("~")
+            startdir = os.path.expanduser("~")
         else:
-            dir = self.lastdir
-        fileName, _ = QFileDialog.getOpenFileName(
-            self, "Find Projectors Basis file", dir,
-            "Model Files (*_model.hdf5);;All Files (*)", options=options)
+            startdir = self.lastdir
+        fileName = projectors.getFileNameWithDialog(qtparent=self, startdir=startdir)
         if fileName:
             self.lastdir = os.path.dirname(fileName)
-            print("opening: {}".format(fileName))
-            configs = projectors.getConfigs(fileName, self.channel_names)
-            print("Sending model for {} chans".format(len(configs)))
-            success_chans = []
-            failures = OrderedDict()
-            for channelIndex, config in list(configs.items()):
-                print("sending ProjectorsBasis for {}".format(channelIndex))
-                okay, error = self.client.call(
-                    "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
-                if okay:
-                    success_chans.append(channelIndex)
-                else:
-                    failures[channelIndex] = error
-            result = "success on channelIndicies (not channelName): {}\n".format(
-                sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
-            resultBox = QtWidgets.QMessageBox(self)
-            resultBox.setText(result)
-            resultBox.show()
+            projectors.sendProjectors(self, fileName, self.channel_names, self.client)
 
     @pyqtSlot()
     def loadMix(self):
@@ -928,6 +917,12 @@ class MainWindow(QtWidgets.QMainWindow):
             wait_ms = 0
         # wait a bit for dastard to get the lancero souce setup, then run full tune
         QtCore.QTimer.singleShot(wait_ms, lambda: self._cringeCommand("FULL_TUNE"))
+
+    def channelIndiciesAll(self):
+        return list(range(len(self.channel_names)))
+    
+    def channelIndiciesSignalOnly(self):
+        return [i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")]
 
 
 class HostPortDialog(QtWidgets.QDialog):

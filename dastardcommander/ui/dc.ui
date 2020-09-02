@@ -988,9 +988,14 @@
         <string>Workflow</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabTriggering">
+      <widget class="QWidget" name="tabTriggeringSimple">
        <attribute name="title">
         <string>Triggering</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tabTriggering">
+       <attribute name="title">
+        <string>Advanced Triggering</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tabWriting">
@@ -1263,6 +1268,7 @@
     <addaction name="actionLoad_Mix"/>
     <addaction name="actionPop_out_Observe"/>
     <addaction name="actionTDM_Autotune"/>
+    <addaction name="actionAdvanced_Triggering"/>
    </widget>
    <addaction name="menuConnection"/>
    <addaction name="menuExpert"/>
@@ -1296,6 +1302,11 @@
   <action name="actionTDM_Autotune">
    <property name="text">
     <string>TDM Autotune</string>
+   </property>
+  </action>
+  <action name="actionAdvanced_Triggering">
+   <property name="text">
+    <string>Advanced Triggering</string>
    </property>
   </action>
  </widget>
