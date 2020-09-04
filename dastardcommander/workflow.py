@@ -1,6 +1,7 @@
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QSettings
 
 import numpy as np
 import json
@@ -33,8 +34,10 @@ class ProjectorCaller(object):
             if returncode != 0:
                 raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
 
-    def createBasis(self, pulseFile, noiseFile):
+    def createBasis(self, pulseFile, noiseFile, invertPulses):
         args = ["--n_basis", "5", pulseFile, noiseFile]
+        if invertPulses:
+            args = args[:2] + ["--invert_data"] + args[2:]
         self.scriptcall("make_projectors", args)
 
     def plotBasis(self, outName):
@@ -65,7 +68,13 @@ class Workflow(QtWidgets.QWidget):
         self.reset()
 
         self.pcaller = ProjectorCaller()
+        self.settings = QSettings()
+        self.checkBox_invertPulses.setChecked(bool(self.settings.value("invert_pulses", False)))
+        self.checkBox_invertPulses.stateChanged.connect(self.handleCheckBoxStateChanged)
         # self.testingInit() # REMOVE
+
+    def handleCheckBoxStateChanged(self):
+        self.settings.setValue("invert_pulses", self.checkBox_invertPulses.isChecked())
 
     def testingInit(self):
         """
@@ -102,7 +111,7 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        self.dc.triggerTab.goNoiseMode()
+        self.dc.triggerTabSimple.handleSendNoise()
         # start writing files
         self.dc.writingTab.start()
 
@@ -132,8 +141,6 @@ class Workflow(QtWidgets.QWidget):
         # # stop writing files
         self.dc.writingTab.stop()
 
-        # Enable next step
-        self.pushButton_createNoiseModel.setEnabled(True)
 
     def handleTakePulses(self):
         """
@@ -144,10 +151,7 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("dastard is currently writing, stop it and try again")
             return
-        if self.checkBox_useEdgeMultiForTakePulses.isChecked():
-            self.dc.sendEdgeMulti()
-        else:
-            self.dc.triggerTab.goPulseMode()
+        self.dc.triggerTabSimple.handleSendPulse()
         # start writing files
         self.dc.writingTab.start()
         comment = """Pulse Data for analysis training\nWorkflow: Take Pulses button pushed"""
@@ -217,7 +221,7 @@ class Workflow(QtWidgets.QWidget):
             print("{} exists, skipping make_projectors".format(outName))
         else:
             try:
-                self.pcaller.createBasis(pulseFile, noiseFile)
+                self.pcaller.createBasis(pulseFile, noiseFile, self.checkBox_invertPulses.isChecked())
             except OSError as e:
                 dialog = QtWidgets.QMessageBox()
                 dialog.setText("Create Projectors failed: {}".format(e))
@@ -243,25 +247,10 @@ class Workflow(QtWidgets.QWidget):
             em = QtWidgets.QErrorMessage(self)
             em.showMessage("{} does not exist".format(self.projectorsFilename))
             return
-        print("opening: {}".format(self.projectorsFilename))
-        configs = projectors.getConfigs(self.projectorsFilename, self.dc.channel_names)
-        print("Sending model for {} chans".format(len(configs)))
-        success_chans = []
-        failures = OrderedDict()
-        for channelIndex, config in list(configs.items()):
-            print("sending ProjectorsBasis for {}".format(channelIndex))
-            okay, error = self.dc.client.call(
-                "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
-            if okay:
-                success_chans.append(channelIndex)
-            else:
-                failures[channelIndex] = error
-        result = "success on channelIndicies (not channelName): {}\n".format(
-            sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
-        resultBox = QtWidgets.QMessageBox(self)
-        resultBox.setText(result)
-        resultBox.show()
-        self.label_loadedProjectors.setText("projectors loaded? yes")
+        self.dc.triggerTabSimple.lineEdit_projectors.setText(self.projectorsFilename)
+        success = self.dc.triggerTabSimple.handleSendProjectors()
+        if success:
+            self.label_loadedProjectors.setText("projectors loaded? yes")
 
     def handleStatusUpdate(self, d):
         if self.nsamples != d["Nsamples"] or self.npresamples != d["Npresamp"]:

@@ -13,8 +13,9 @@ class WritingControl(QtWidgets.QWidget):
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
 
-    def __init__(self, parent=None, host=""):
+    def __init__(self, parent, host, client):
         QtWidgets.QWidget.__init__(self, parent)
+        self.client = client
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/writing.ui"), self)
         self.host = host
         self.writing = False

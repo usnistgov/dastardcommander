@@ -2,7 +2,11 @@ import h5py
 import numpy as np
 import base64
 from collections import OrderedDict
+import json
 
+import PyQt5
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QFileDialog
 #  0 -  3  Version = 1          (uint32)
 #  4       'G'                  (byte)
 #  5       'F'                  (byte)
@@ -31,7 +35,8 @@ def toMatBase64(array):
     dt = np.dtype([('version', np.uint32), ('magic', np.uint8, (4,)), ("nrow", np.int64),
                    ("ncol", np.int64), ("zeros", np.int64, 2), ("data", np.float64, nrow*ncol)])
     a = np.array([(1, [ord("G"), ord("F"), ord("A"), 0], nrow, ncol, [0, 0], array.ravel())], dt)
-    s = base64.b64encode(a)
+    s_bytes = base64.b64encode(a)
+    s = s_bytes.decode(encoding="ascii")
     return s, a[0]
 
 
@@ -52,8 +57,8 @@ def getConfigs(filename, channelNames):
     for key in list(h5.keys()):
         nameNumber = int(key)
         channelIndex = nameNumberToIndex[nameNumber]
-        projectors = h5[key]["svdbasis"]["projectors"].value
-        basis = h5[key]["svdbasis"]["basis"].value
+        projectors = h5[key]["svdbasis"]["projectors"][()]
+        basis = h5[key]["svdbasis"]["basis"][()]
         rows, cols = projectors.shape
         # projectors has size (n,z) where it is (rows,cols)
         # basis has size (z,n)
@@ -91,9 +96,9 @@ def getNameNumberToIndex(channelNames):
         nameNumber = int(name[4:])
         nameNumberToIndex[nameNumber] = i
         # for now since we only use this with lancero sources, error for non-odd index
-        if i % 2 != 1:
-            raise Exception(
-                "all fb channelIndicies on a lancero source are odd, we shouldn't load projectors for even channelIndicies")
+        # if i % 2 != 1:
+        #     raise Exception(
+        #         "all fb channelIndicies on a lancero source are odd, we shouldn't load projectors for even channelIndicies")
     return nameNumberToIndex
 #
 # def remapConfigs(configs0, channelNames):
@@ -102,3 +107,38 @@ def getNameNumberToIndex(channelNames):
 #     for (nameNumber,config) in configs0.items():
 #         configs[nameNumberToIndex[nameNumber]] = config
 #     return configs
+
+
+def getFileNameWithDialog(qtparent, startdir):
+    options = QFileDialog.Options()
+    fileName, _ = QFileDialog.getOpenFileName(
+        qtparent, "Find Projectors Basis file", startdir,
+        "Model Files (*_model.hdf5);;All Files (*)", options=options)
+    return fileName
+
+
+def sendProjectors(qtparent, fileName, channel_names, client):
+        print("sendProjectors: opening: {}".format(fileName))
+        configs = getConfigs(fileName, channel_names)
+        print("sendProjectors: Sending model for {} chans".format(len(configs)))
+        success_chans = []
+        failures = OrderedDict()
+        n_expected = np.sum([s.startswith("chan") for s in channel_names])
+        for channelIndex, config in list(configs.items()):
+            # print("sending ProjectorsBasis for {}".format(channelIndex))
+            okay, error = client.call(
+                "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
+            if okay:
+                success_chans.append(channelIndex)
+            else:
+                failures[channelIndex] = error
+
+        success = len(failures) == 0
+        result = "success on channelIndicies (not channelName): {}\n".format(
+        sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+        if not success:
+            resultBox = QtWidgets.QMessageBox(qtparent)
+            resultBox.setText(result)
+            resultBox.show()
+        print(result)
+        return success 
