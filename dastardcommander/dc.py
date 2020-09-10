@@ -53,6 +53,7 @@ QCoreApplication.setOrganizationName("Quantum Sensors Group")
 QCoreApplication.setOrganizationDomain("nist.gov")
 QCoreApplication.setApplicationName("DastardCommander")
 
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, host, port, parent=None):
         self.client = rpc_client
@@ -91,14 +92,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateLanceroCardChoices()
         self.buildLanceroFiberBoxes(8)
         self.triggerTab = trigger_config.TriggerConfig(self.tabTriggering, self.client)
-        self.triggerTabSimple = trigger_config_simple.TriggerConfigSimple(self.tabTriggeringSimple, self)
+        self.triggerTabSimple = trigger_config_simple.TriggerConfigSimple(
+            self.tabTriggeringSimple, self)
         self.writingTab = writing.WritingControl(self.tabWriting, host, self.client)
         self.observeTab = observe.Observe(self.tabObserve, host, self.client)
         self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
         self.observeWindow = observe.Observe(parent=None, host=host, client=self.client)
         self.triggerTab.changedTriggerStateSig.connect(self.observeWindow.resetIntegration)
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
-
+        self.workflowTab.projectorsLoadedSig.connect(self.writingTab.checkBox_OFF.setChecked)
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
@@ -142,7 +144,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
         self.fullyConfigured = False
-
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
@@ -924,7 +925,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def channelIndiciesAll(self):
         return list(range(len(self.channel_names)))
-    
+
     def channelIndiciesSignalOnly(self):
         return [i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")]
 

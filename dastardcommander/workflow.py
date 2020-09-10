@@ -1,7 +1,7 @@
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QSettings
+from PyQt5.QtCore import QSettings, pyqtSignal
 
 import numpy as np
 import json
@@ -14,6 +14,7 @@ from collections import OrderedDict
 
 # usercode imports
 import dastardcommander.projectors as projectors
+
 
 class ProjectorCaller(object):
     "A class that can make projectors."
@@ -72,6 +73,9 @@ class Workflow(QtWidgets.QWidget):
         self.checkBox_invertPulses.setChecked(bool(self.settings.value("invert_pulses", False)))
         self.checkBox_invertPulses.stateChanged.connect(self.handleCheckBoxStateChanged)
         # self.testingInit() # REMOVE
+
+    # Allow us to connect loading of projectors to the OFF file check box in the writing tab.
+    projectorsLoadedSig = pyqtSignal(bool)
 
     def handleCheckBoxStateChanged(self):
         self.settings.setValue("invert_pulses", self.checkBox_invertPulses.isChecked())
@@ -141,7 +145,6 @@ class Workflow(QtWidgets.QWidget):
         # # stop writing files
         self.dc.writingTab.stop()
 
-
     def handleTakePulses(self):
         """
         take pulse data, record filename for future use
@@ -203,7 +206,6 @@ class Workflow(QtWidgets.QWidget):
         print(repr(cmd)+"\n")
         subprocess.Popen(cmd)
 
-
     def handleCreateProjectors(self):
         # call pope script
         outName = self.pulseFilename[:-9]+"model.hdf5"
@@ -214,14 +216,15 @@ class Workflow(QtWidgets.QWidget):
         pulseFile = g[0]
         gn = glob.glob(self.noiseFilename)
         if len(g) == 0:
-            raise Exception("could not find any files matching {}".format(self.noiseFilename))        
+            raise Exception("could not find any files matching {}".format(self.noiseFilename))
         noiseFile = gn[0]
         print(outName, pulseFile, noiseFile)
         if os.path.isfile(outName):
             print("{} exists, skipping make_projectors".format(outName))
         else:
             try:
-                self.pcaller.createBasis(pulseFile, noiseFile, self.checkBox_invertPulses.isChecked())
+                self.pcaller.createBasis(pulseFile, noiseFile,
+                                         self.checkBox_invertPulses.isChecked())
             except OSError as e:
                 dialog = QtWidgets.QMessageBox()
                 dialog.setText("Create Projectors failed: {}".format(e))
@@ -251,6 +254,7 @@ class Workflow(QtWidgets.QWidget):
         success = self.dc.triggerTabSimple.handleSendProjectors()
         if success:
             self.label_loadedProjectors.setText("projectors loaded? yes")
+            self.projectorsLoadedSig.emit(True)
 
     def handleStatusUpdate(self, d):
         if self.nsamples != d["Nsamples"] or self.npresamples != d["Npresamp"]:

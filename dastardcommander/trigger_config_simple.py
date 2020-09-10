@@ -11,10 +11,13 @@ import time
 from . import projectors
 
 """keep track of the state of sync between the GUI and dastard"""
+
+
 class Sync(Enum):
     UNKNOWN = 0
     PULSE = 1
     NOISE = 2
+
 
 class TwoPulseChoice(Enum):
     NO_RECORD = 0
@@ -35,7 +38,6 @@ class TwoPulseChoice(Enum):
         return self.value == i
 
 
-
 class TriggerConfigSimple(QtWidgets.QWidget):
     """Provide a simple trigger UI designed for doing the same thing everyday with the fewest choices."""
 
@@ -44,8 +46,9 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.client = dcom.client
         self.dcom = dcom
         self.settings = QSettings()
-        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/trigger_config_simple.ui"), self)
-        
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__),
+                                      "ui/trigger_config_simple.ui"), self)
+
         self.readSettings()
         self.connect()
         self.setPulseSync(Sync.UNKNOWN)
@@ -58,9 +61,11 @@ class TriggerConfigSimple(QtWidgets.QWidget):
             self.comboBox_twoTriggers.setItemText(i, t.to_str())
 
     def connect(self):
-        self.spinBox_recordLength.valueChanged.connect(self.handleRecordLengthOrPercentPretrigChange)
+        self.spinBox_recordLength.valueChanged.connect(
+            self.handleRecordLengthOrPercentPretrigChange)
         self.spinBox_pretrigLength.valueChanged.connect(self.handlePretrigLengthChange)
-        self.spinBox_percentPretrigger.valueChanged.connect(self.handleRecordLengthOrPercentPretrigChange)
+        self.spinBox_percentPretrigger.valueChanged.connect(
+            self.handleRecordLengthOrPercentPretrigChange)
         self.spinBox_level.valueChanged.connect(self.handleUIChange)
         self.spinBox_nMonotone.valueChanged.connect(self.handleUIChange)
         self.checkBox_disableZeroThreshold.stateChanged.connect(self.handleUIChange)
@@ -84,19 +89,18 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         pt = self.spinBox_pretrigLength.value()
         self.spinBox_percentPretrigger.blockSignals(True)
         self.spinBox_percentPretrigger.setValue(100*pt/rl)
-        self.spinBox_percentPretrigger.blockSignals(False)       
+        self.spinBox_percentPretrigger.blockSignals(False)
         self.setPulseSync(Sync.UNKNOWN)
-
 
     def handleSendNoise(self):
         self.setPulseSync(Sync.NOISE)
-        self.writeSettings() # there are no noise settings, but if there are in the future, we're good
+        self.writeSettings()  # there are no noise settings, but if there are in the future, we're good
         self.zeroAllTriggers()
         self.sendRecordLength()
         config = {
             "ChannelIndicies": self.channelIndiciesSignalOnlyWithExcludes(),
             "AutoTrigger": True
-        }  
+        }
         self.client.call("SourceControl.ConfigureTriggers", config)
         self._lastSentConfig = config
         self._lastSentConfigTime = time.time()
@@ -107,7 +111,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.sendRecordLength()
         # first send the trigger mesage for all channels
         s = self.comboBox_twoTriggers.currentText()
-        print(s,"\n\n")
+        print(s, "\n\n")
 
         config = {
             "ChannelIndicies": self.channelIndiciesSignalOnlyWithExcludes(),
@@ -123,7 +127,6 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self._lastSentConfig = config
         self._lastSentConfigTime = time.time()
         self.setPulseSync(Sync.PULSE)
-
 
     def handleUIChange(self):
         self.setPulseSync(Sync.UNKNOWN)
@@ -144,7 +147,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
             s = "Sent"
         else:
             s = "Unknown"
-        self.label_projectorsSync.setText(f"Projectors state: {s}")       
+        self.label_projectorsSync.setText(f"Projectors state: {s}")
 
     def readSettings(self):
         s = self.settings
@@ -153,12 +156,12 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.spinBox_percentPretrigger.setValue(float(s.value("percent_pretrigger", 25.0)))
         self.spinBox_level.setValue(int(s.value("level", 100)))
         self.spinBox_nMonotone.setValue(int(s.value("n_monotone", 5)))
-        v = int(s.value("disable_zero_threshold")) # apparently QSettings sucks with bools, so use an int
+        # apparently QSettings sucks with bools, so use an int for the following
+        v = int(s.value("disable_zero_threshold", 0))
         assert v == 1 or v == 0
-        self.checkBox_disableZeroThreshold.setChecked(v==1)
+        self.checkBox_disableZeroThreshold.setChecked(v == 1)
         self.comboBox_twoTriggers.setCurrentIndex(int(s.value("two_triggers", 0)))
         self.lineEdit_projectors.setText(s.value("projectors_file", ""))
-
 
     def writeSettings(self):
         s = self.settings
@@ -174,8 +177,8 @@ class TriggerConfigSimple(QtWidgets.QWidget):
     def sendRecordLength(self):
         self.dcom.triggerTab.blockSignals(True)
         self.client.call("SourceControl.ConfigurePulseLengths",
-                    {"Nsamp": self.spinBox_recordLength.value(), 
-                    "Npre": self.spinBox_pretrigLength.value()})
+                         {"Nsamp": self.spinBox_recordLength.value(),
+                          "Npre": self.spinBox_pretrigLength.value()})
         time.sleep(0.1)
         self.dcom.triggerTab.blockSignals(False)
 
@@ -191,7 +194,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
 
     def handleTriggerMessage(self, d, nmsg):
         """If DASTARD indicates the trigger state has changed, change the UI to say so."""
-        # we assume any TRIGGER message more than 100 ms after this class changed the trigger settings 
+        # we assume any TRIGGER message more than 100 ms after this class changed the trigger settings
         # has changed the state
         if self._lastSentConfigTime is None:
             return
@@ -205,7 +208,6 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         if not (nsmatch and nprematch):
             self.setPulseSync(Sync.UNKNOWN)
 
-
     def handleChooseProjectors(self):
         startdir = os.path.dirname(self.lineEdit_projectors.text())
         if not os.path.isdir(startdir):
@@ -213,7 +215,6 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         fileName = projectors.getFileNameWithDialog(self, startdir)
         if fileName:
             self.lineEdit_projectors.setText(fileName)
-        
 
     def handleSendProjectors(self):
         fileName = self.lineEdit_projectors.text()
