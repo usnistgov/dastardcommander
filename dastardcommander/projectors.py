@@ -98,7 +98,7 @@ def getNameNumberToIndex(channelNames):
         # for now since we only use this with lancero sources, error for non-odd index
         # if i % 2 != 1:
         #     raise Exception(
-        #         "all fb channelIndicies on a lancero source are odd, we shouldn't load projectors for even channelIndicies")
+        #         "all fb channelIndices on a lancero source are odd, we shouldn't load projectors for even channelIndices")
     return nameNumberToIndex
 #
 # def remapConfigs(configs0, channelNames):
@@ -134,7 +134,7 @@ def sendProjectors(qtparent, fileName, channel_names, client):
                 failures[channelIndex] = error
 
         success = len(failures) == 0
-        result = "success on channelIndicies (not channelName): {}\n".format(
+        result = "success on channelIndices (not channelName): {}\n".format(
         sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
         if not success:
             resultBox = QtWidgets.QMessageBox(qtparent)

@@ -818,7 +818,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def sendEdgeMulti(self):
         # first send the trigger mesage for all channels
         config = {
-            "ChannelIndicies": list(range(len(self.channel_names))),
+            "ChannelIndices": list(range(len(self.channel_names))),
             "EdgeMulti": self.checkBox_EdgeMulti.isChecked(),
             "EdgeRising": self.checkBox_EdgeMulti.isChecked(),
             "EdgeTrigger": self.checkBox_EdgeMulti.isChecked(),
@@ -835,7 +835,7 @@ class MainWindow(QtWidgets.QMainWindow):
         omitEvenChannels = (self.sourceIsTDM and not
                             self.checkBox_edgeMultiTriggerOnError.isChecked())
         if omitEvenChannels:
-            config = {"ChannelIndicies": list(range(0, len(self.channel_names), 2))}
+            config = {"ChannelIndices": list(range(0, len(self.channel_names), 2))}
             self.client.call("SourceControl.ConfigureTriggers", config)
 
     @pyqtSlot()
@@ -923,10 +923,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # wait a bit for dastard to get the lancero souce setup, then run full tune
         QtCore.QTimer.singleShot(wait_ms, lambda: self._cringeCommand("FULL_TUNE"))
 
-    def channelIndiciesAll(self):
+    def channelIndicesAll(self):
         return list(range(len(self.channel_names)))
 
-    def channelIndiciesSignalOnly(self):
+    def channelIndicesSignalOnly(self):
         return [i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")]
 
 

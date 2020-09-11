@@ -98,7 +98,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.zeroAllTriggers()
         self.sendRecordLength()
         config = {
-            "ChannelIndicies": self.channelIndiciesSignalOnlyWithExcludes(),
+            "ChannelIndices": self.channelIndicesSignalOnlyWithExcludes(),
             "AutoTrigger": True
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
@@ -114,7 +114,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         print(s, "\n\n")
 
         config = {
-            "ChannelIndicies": self.channelIndiciesSignalOnlyWithExcludes(),
+            "ChannelIndices": self.channelIndicesSignalOnlyWithExcludes(),
             "EdgeMulti": True,
             "EdgeMultiNoise": False,
             "EdgeMultiMakeShortRecords": s == TwoPulseChoice.VARIABLE_LENGTH.to_str(),
@@ -184,12 +184,12 @@ class TriggerConfigSimple(QtWidgets.QWidget):
 
     def zeroAllTriggers(self):
         config = {
-            "ChannelIndicies": self.dcom.channelIndiciesAll(),
+            "ChannelIndices": self.dcom.channelIndicesAll(),
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
 
-    def channelIndiciesSignalOnlyWithExcludes(self):
-        return self.dcom.channelIndiciesSignalOnly()
+    def channelIndicesSignalOnlyWithExcludes(self):
+        return self.dcom.channelIndicesSignalOnly()
         # TODO: add exclude list, and maybe a way to auto populate it?
 
     def handleTriggerMessage(self, d, nmsg):

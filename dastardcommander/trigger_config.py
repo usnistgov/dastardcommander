@@ -81,7 +81,7 @@ class TriggerConfig(QtWidgets.QWidget):
         for d in dicts:
             d["EdgeMulti"] = False  # ignore all EdgeMulti settings from the server
             # so that we don't send them back... avoid EdgeMulti being stuck on
-            for channelIndex in d["ChannelIndicies"]:
+            for channelIndex in d["ChannelIndices"]:
                 self.trigger_state[channelIndex] = d
         self.updateTriggerGUIElements()
         self.changedTriggerStateSig.emit()
@@ -182,7 +182,7 @@ class TriggerConfig(QtWidgets.QWidget):
         # Now we need to split states if any of allstates refers to channels both
         # in AND out of self.chosenChannels. Those dictionaries each become 2 dictionaries.
         for state in allstates:
-            chans = state["ChannelIndicies"]
+            chans = state["ChannelIndices"]
             keep = []
             splitoff = []
             for c in chans:
@@ -191,11 +191,11 @@ class TriggerConfig(QtWidgets.QWidget):
                 else:
                     splitoff.append(c)
             if len(splitoff) > 0:
-                state["ChannelIndicies"] = keep
+                state["ChannelIndices"] = keep
                 for c in keep:
                     self.trigger_state[c] = state
                 newstate = state.copy()
-                newstate["ChannelIndicies"] = splitoff
+                newstate["ChannelIndices"] = splitoff
                 for c in splitoff:
                     self.trigger_state[c] = newstate
 
