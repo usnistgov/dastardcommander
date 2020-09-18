@@ -377,17 +377,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def launchMicroscope(self):
-        """Launch one instance of microscope.
-        TODO: don't hard-wire in the location of the binary!"""
+        """Launch one instance of microscope. It must be on $PATH."""
         try:
-            if self.sourceIsTDM:
-                c, r = self.cols[0], self.rows[0]
-            else:
-                c, r = 1, self.streams
-                while r > 40:
-                    c *= 2
-                    r = (r+1) // 2
-            args = ["microscope", "-c%d" % c, "-r%d" % r]
+            args = ["microscope"]
             if not self.sourceIsTDM:
                 args.append("--no-error-channel")
             args.append("tcp://%s:%d" % (self.host, self.port+2))
