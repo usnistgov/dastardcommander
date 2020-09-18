@@ -707,11 +707,24 @@ class MainWindow(QtWidgets.QMainWindow):
                 activate.append(k)
                 delays.append(self.lanceroDelays[k].value())
 
+        chansep_columns = 0
+        chansep_cards = 0
+        firstrow = 1
+        if self.channels1kcardbutton.isChecked():
+            chansep_cards = 1000
+        if self.channels10kcard1kcolButton.isChecked():
+            chansep_cards = 10000
+            chansep_columns = 1000
+            firstrow = self.firstRowSpinBox.value()
+
         config = {
             "FiberMask": mask,
             "ClockMhz": clock,
             "CardDelay": delays,
             "Nsamp": nsamp,
+            "FirstRow": firstrow,
+            "ChanSepCards": chansep_cards,
+            "ChanSepColumns": chansep_columns,
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
         }
