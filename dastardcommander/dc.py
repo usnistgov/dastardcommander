@@ -711,7 +711,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         config = {
             "FiberMask": mask,
-            "ClockMhz": clock,
+            "ClockMHz": clock,
             "CardDelay": delays,
             "Nsamp": nsamp,
             "FirstRow": firstrow,
