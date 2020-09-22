@@ -377,17 +377,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def launchMicroscope(self):
-        """Launch one instance of microscope.
-        TODO: don't hard-wire in the location of the binary!"""
+        """Launch one instance of microscope. It must be on $PATH."""
         try:
-            if self.sourceIsTDM:
-                c, r = self.cols[0], self.rows[0]
-            else:
-                c, r = 1, self.streams
-                while r > 40:
-                    c *= 2
-                    r = (r+1) // 2
-            args = ["microscope", "-c%d" % c, "-r%d" % r]
+            args = ["microscope"]
             if not self.sourceIsTDM:
                 args.append("--no-error-channel")
             args.append("tcp://%s:%d" % (self.host, self.port+2))
@@ -707,11 +699,24 @@ class MainWindow(QtWidgets.QMainWindow):
                 activate.append(k)
                 delays.append(self.lanceroDelays[k].value())
 
+        chansep_columns = 0
+        chansep_cards = 0
+        firstrow = 1
+        if self.channels1kcardbutton.isChecked():
+            chansep_cards = 1000
+        if self.channels10kcard1kcolButton.isChecked():
+            chansep_cards = 10000
+            chansep_columns = 1000
+            firstrow = self.firstRowSpinBox.value()
+
         config = {
             "FiberMask": mask,
-            "ClockMhz": clock,
+            "ClockMHz": clock,
             "CardDelay": delays,
             "Nsamp": nsamp,
+            "FirstRow": firstrow,
+            "ChanSepCards": chansep_cards,
+            "ChanSepColumns": chansep_columns,
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
         }

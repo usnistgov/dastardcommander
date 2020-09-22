@@ -133,352 +133,781 @@
         <item>
          <widget class="QStackedWidget" name="dataSourcesStackedWidget">
           <property name="currentIndex">
-           <number>2</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="trianglePage">
-           <widget class="QFrame" name="gridFrame">
-            <property name="geometry">
-             <rect>
-              <x>40</x>
-              <y>40</y>
-              <width>262</width>
-              <height>176</height>
-             </rect>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Panel</enum>
-            </property>
-            <layout class="QFormLayout" name="formLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_6">
-               <property name="font">
-                <font>
-                 <family>Helvetica</family>
-                 <pointsize>14</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Configure Triangles</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Number of Channels</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QSpinBox" name="triangleNchan">
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>256</number>
-               </property>
-               <property name="value">
-                <number>8</number>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_2">
-               <property name="text">
-                <string>Samples per second</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QDoubleSpinBox" name="triangleSampleRate">
-               <property name="minimum">
-                <double>10.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>1000000.000000000000000</double>
-               </property>
-               <property name="value">
-                <double>10000.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>Triangle maximum</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QSpinBox" name="triangleMaximum">
-               <property name="maximum">
-                <number>65535</number>
-               </property>
-               <property name="value">
-                <number>20000</number>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>Triangle minimum</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QSpinBox" name="triangleMinimum">
-               <property name="maximum">
-                <number>65535</number>
-               </property>
-               <property name="value">
-                <number>10000</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+           <layout class="QGridLayout" name="gridLayout_7">
+            <item row="0" column="1">
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0">
+             <widget class="QFrame" name="triangleFrame">
+              <property name="frameShape">
+               <enum>QFrame::Panel</enum>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_8">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_6">
+                 <property name="font">
+                  <font>
+                   <family>Helvetica</family>
+                   <pointsize>14</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Configure Triangles</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>Number of Channels</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="triangleNchan">
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>256</number>
+                 </property>
+                 <property name="value">
+                  <number>8</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_2">
+                 <property name="text">
+                  <string>Samples per second</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDoubleSpinBox" name="triangleSampleRate">
+                 <property name="minimum">
+                  <double>10.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>1000000.000000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>10000.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Triangle maximum</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QSpinBox" name="triangleMaximum">
+                 <property name="maximum">
+                  <number>65535</number>
+                 </property>
+                 <property name="value">
+                  <number>20000</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_5">
+                 <property name="text">
+                  <string>Triangle minimum</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QSpinBox" name="triangleMinimum">
+                 <property name="maximum">
+                  <number>65535</number>
+                 </property>
+                 <property name="value">
+                  <number>10000</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <spacer name="verticalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="simPage">
-           <widget class="QFrame" name="gridFrame_2">
-            <property name="geometry">
-             <rect>
-              <x>40</x>
-              <y>30</y>
-              <width>316</width>
-              <height>176</height>
-             </rect>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Panel</enum>
-            </property>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="3" column="1">
-              <widget class="QDoubleSpinBox" name="simPulseAmplitude">
-               <property name="toolTip">
-                <string>Peak value of pulses, relative to baseline</string>
-               </property>
-               <property name="minimum">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>65535.000000000000000</double>
-               </property>
-               <property name="value">
-                <double>20000.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QDoubleSpinBox" name="simPulseBaseline">
-               <property name="decimals">
-                <number>0</number>
-               </property>
-               <property name="maximum">
-                <double>65535.000000000000000</double>
-               </property>
-               <property name="value">
-                <double>1000.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>Number of Channels</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_10">
-               <property name="text">
-                <string>Pulse amplitude</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QDoubleSpinBox" name="simPulseSampleRate">
-               <property name="toolTip">
-                <string/>
-               </property>
-               <property name="minimum">
-                <double>10.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>1000000.000000000000000</double>
-               </property>
-               <property name="value">
-                <double>10000.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QSpinBox" name="simPulseNchan">
-               <property name="toolTip">
-                <string>How many data streams to simulate</string>
-               </property>
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>256</number>
-               </property>
-               <property name="value">
-                <number>8</number>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_11">
-               <property name="text">
-                <string>Baseline level</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_9">
-               <property name="text">
-                <string>Samples per second</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="label_12">
-               <property name="text">
-                <string>Samples per pulse</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="1">
-              <widget class="QSpinBox" name="simPulseSamplesPerPulse">
-               <property name="toolTip">
-                <string>How many samples to simulate before next pulse is generated</string>
-               </property>
-               <property name="minimum">
-                <number>100</number>
-               </property>
-               <property name="maximum">
-                <number>999999</number>
-               </property>
-               <property name="value">
-                <number>10000</number>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" colspan="2">
-              <widget class="QLabel" name="label_7">
-               <property name="font">
-                <font>
-                 <family>Helvetica</family>
-                 <pointsize>14</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Configure Simulated Pulses</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+           <layout class="QGridLayout" name="gridLayout_6">
+            <item row="0" column="1">
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0">
+             <widget class="QFrame" name="gridFrame_2">
+              <property name="frameShape">
+               <enum>QFrame::Panel</enum>
+              </property>
+              <layout class="QGridLayout" name="gridLayout">
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="simPulseAmplitude">
+                 <property name="toolTip">
+                  <string>Peak value of pulses, relative to baseline</string>
+                 </property>
+                 <property name="minimum">
+                  <double>1.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>65535.000000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>20000.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QDoubleSpinBox" name="simPulseBaseline">
+                 <property name="decimals">
+                  <number>0</number>
+                 </property>
+                 <property name="maximum">
+                  <double>65535.000000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>1000.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>Number of Channels</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Pulse amplitude</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDoubleSpinBox" name="simPulseSampleRate">
+                 <property name="toolTip">
+                  <string/>
+                 </property>
+                 <property name="minimum">
+                  <double>10.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>1000000.000000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>10000.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSpinBox" name="simPulseNchan">
+                 <property name="toolTip">
+                  <string>How many data streams to simulate</string>
+                 </property>
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>256</number>
+                 </property>
+                 <property name="value">
+                  <number>8</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_11">
+                 <property name="text">
+                  <string>Baseline level</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Samples per second</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>Samples per pulse</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QSpinBox" name="simPulseSamplesPerPulse">
+                 <property name="toolTip">
+                  <string>How many samples to simulate before next pulse is generated</string>
+                 </property>
+                 <property name="minimum">
+                  <number>100</number>
+                 </property>
+                 <property name="maximum">
+                  <number>999999</number>
+                 </property>
+                 <property name="value">
+                  <number>10000</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="2">
+                <widget class="QLabel" name="label_7">
+                 <property name="font">
+                  <font>
+                   <family>Helvetica</family>
+                   <pointsize>14</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Configure Simulated Pulses</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <spacer name="verticalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="lanceroPage">
-           <widget class="QWidget" name="gridLayoutWidget_4">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>20</y>
-              <width>472</width>
-              <height>311</height>
-             </rect>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_3">
-             <item row="0" column="0">
-              <layout class="QVBoxLayout" name="verticalLayout_3">
-               <item>
-                <widget class="QLabel" name="label_13">
-                 <property name="text">
-                  <string>Choose devices:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="noLanceroLabel">
-                 <property name="text">
-                  <string>No devices found at /dev/lancero_*</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                 <property name="wordWrap">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QFrame" name="lanceroChooserLayout_2">
-                 <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
-                 </property>
-                 <layout class="QGridLayout" name="lanceroChooserLayout"/>
-                </widget>
-               </item>
-               <item>
-                <spacer name="verticalSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_14">
-                 <property name="text">
-                  <string>TDM Clock Speed:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_2">
-                 <item>
-                  <widget class="QRadioButton" name="lanceroClock50Button">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="toolTip">
-                    <string>Choose for 50 MHz TDM master clock speed</string>
-                   </property>
+           <layout class="QGridLayout" name="gridLayout_9">
+            <item row="1" column="0">
+             <spacer name="verticalSpacer_10">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0">
+             <layout class="QGridLayout" name="gridLayout_3">
+              <item row="0" column="2">
+               <layout class="QGridLayout" name="gridLayout_5">
+                <item row="9" column="0">
+                 <widget class="QPushButton" name="pushButton_startAndAutotune">
+                  <property name="text">
+                   <string>Start and Autotune</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="0">
+                 <widget class="QPushButton" name="pushButton_initializeCrate">
+                  <property name="text">
+                   <string>Initalize Crate</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="0">
+                 <spacer name="verticalSpacer_7">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item row="6" column="0">
+                 <widget class="QFrame" name="verticalFrame">
+                  <property name="frameShape">
+                   <enum>QFrame::Box</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Plain</enum>
+                  </property>
+                  <property name="lineWidth">
+                   <number>1</number>
+                  </property>
+                  <layout class="QVBoxLayout" name="chanNumberingLayout">
+                   <item>
+                    <widget class="QLabel" name="chanNumberingLabel">
+                     <property name="text">
+                      <string>Channel numbering:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="channels1Nbutton">
+                     <property name="toolTip">
+                      <string>Number channels consecutively from 1</string>
+                     </property>
+                     <property name="text">
+                      <string>1...N</string>
+                     </property>
+                     <property name="checked">
+                      <bool>true</bool>
+                     </property>
+                     <attribute name="buttonGroup">
+                      <string notr="true">buttonGroup</string>
+                     </attribute>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="channels1kcardbutton">
+                     <property name="toolTip">
+                      <string>Number channels consecutively by card, with card number in the 1000s place</string>
+                     </property>
+                     <property name="text">
+                      <string>1000*card + chan</string>
+                     </property>
+                     <attribute name="buttonGroup">
+                      <string notr="true">buttonGroup</string>
+                     </attribute>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="channels10kcard1kcolButton">
+                     <property name="toolTip">
+                      <string>Number channels RCxxx for card R, column C</string>
+                     </property>
+                     <property name="text">
+                      <string>10k*card+1k*col+row</string>
+                     </property>
+                     <attribute name="buttonGroup">
+                      <string notr="true">buttonGroup</string>
+                     </attribute>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="label_22">
+                     <property name="text">
+                      <string>Experts only:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_8">
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QSpinBox" name="firstRowSpinBox">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="toolTip">
+                        <string>If using the 3rd numbering mode, enter row # of the first addressed row (default 1).</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                       <property name="minimum">
+                        <number>1</number>
+                       </property>
+                       <property name="maximum">
+                        <number>999</number>
+                       </property>
+                       <property name="value">
+                        <number>1</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_24">
+                       <property name="text">
+                        <string>First row #</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="0" column="1">
+               <widget class="QFrame" name="frame">
+                <property name="frameShape">
+                 <enum>QFrame::Box</enum>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_4">
+                 <item row="2" column="1">
+                  <widget class="QPushButton" name="noFibersButton">
                    <property name="text">
-                    <string>50 MHz</string>
+                    <string>None</string>
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <widget class="QRadioButton" name="lanceroClock125Button">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="toolTip">
-                    <string>Choose for 125 MHz TDM master clock speed</string>
-                   </property>
+                 <item row="0" column="0" colspan="2">
+                  <widget class="QLabel" name="label_15">
                    <property name="text">
-                    <string>125 MHz</string>
+                    <string>Fiber Select</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0" colspan="2">
+                  <widget class="QCheckBox" name="parallelStreaming">
+                   <property name="text">
+                    <string>Parallel Streaming</string>
                    </property>
                    <property name="checked">
                     <bool>true</bool>
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <spacer name="verticalSpacer_2">
+                 <item row="2" column="0">
+                  <widget class="QPushButton" name="allFibersButton">
+                   <property name="text">
+                    <string>All</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0" colspan="2">
+                  <layout class="QGridLayout" name="lanceroFiberLayout"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <layout class="QVBoxLayout" name="verticalLayout_3">
+                <item>
+                 <widget class="QLabel" name="label_13">
+                  <property name="text">
+                   <string>Choose devices:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="noLanceroLabel">
+                  <property name="text">
+                   <string>No devices found at /dev/lancero_*</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                  <property name="wordWrap">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="lanceroChooserLayout_2">
+                  <property name="frameShape">
+                   <enum>QFrame::NoFrame</enum>
+                  </property>
+                  <layout class="QGridLayout" name="lanceroChooserLayout"/>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <item>
+                   <widget class="QLabel" name="label_14">
+                    <property name="text">
+                     <string>TDM Clock Speed:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QRadioButton" name="lanceroClock50Button">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="toolTip">
+                     <string>Choose for 50 MHz TDM master clock speed</string>
+                    </property>
+                    <property name="text">
+                     <string>50 MHz</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QRadioButton" name="lanceroClock125Button">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="toolTip">
+                     <string>Choose for 125 MHz TDM master clock speed</string>
+                    </property>
+                    <property name="text">
+                     <string>125 MHz</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_2">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <layout class="QFormLayout" name="formLayout_4">
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_16">
+                      <property name="text">
+                       <string>Error Nsamp</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QSpinBox" name="nsampSpinBox">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>50</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>NSAMP setting for DFB cards
+(the number of error samples summed)</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>16</number>
+                      </property>
+                      <property name="value">
+                       <number>4</number>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="1">
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="roachPage">
+           <layout class="QGridLayout" name="gridLayout_10">
+            <item row="0" column="0">
+             <widget class="QFrame" name="roachFrame">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <item>
+                <widget class="QLabel" name="label_23">
+                 <property name="font">
+                  <font>
+                   <family>Helvetica</family>
+                   <pointsize>14</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>ROACH configuration</string>
+                 </property>
+                 <property name="textFormat">
+                  <enum>Qt::AutoText</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QGridLayout" name="roachChooserLayout"/>
+               </item>
+               <item>
+                <widget class="Line" name="line_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QFormLayout" name="formLayout_3">
+                 <property name="fieldGrowthPolicy">
+                  <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+                 </property>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="iPAddressLabel">
+                   <property name="text">
+                    <string>IP address</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="roachIPLineEdit_1">
+                   <property name="text">
+                    <string>127.0.0.1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="roachPortLabel_1">
+                   <property name="text">
+                    <string>Port</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QSpinBox" name="roachPortSpinBox_1">
+                   <property name="minimum">
+                    <number>1024</number>
+                   </property>
+                   <property name="maximum">
+                    <number>65535</number>
+                   </property>
+                   <property name="value">
+                    <number>60000</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="roachFrameRateLabel_1">
+                   <property name="text">
+                    <string>Frames per sec</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QDoubleSpinBox" name="roachFrameRateDoubleSpinBox_1">
+                   <property name="minimum">
+                    <double>1.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000000.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>40000.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="roachDeviceLabel1">
+                   <property name="text">
+                    <string>Roach Device 1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QCheckBox" name="roachDeviceCheckBox_1">
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <spacer name="verticalSpacer_5">
                    <property name="orientation">
                     <enum>Qt::Vertical</enum>
                    </property>
@@ -490,451 +919,208 @@
                    </property>
                   </spacer>
                  </item>
-                 <item>
-                  <layout class="QFormLayout" name="formLayout_4">
-                   <property name="topMargin">
-                    <number>0</number>
+                </layout>
+               </item>
+               <item>
+                <widget class="Line" name="line">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QFormLayout" name="formLayout_5">
+                 <property name="fieldGrowthPolicy">
+                  <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+                 </property>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="iPAddressLabel_2">
+                   <property name="text">
+                    <string>IP address</string>
                    </property>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_16">
-                     <property name="text">
-                      <string>Error Nsamp</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QSpinBox" name="nsampSpinBox">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>50</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                     <property name="toolTip">
-                      <string>NSAMP setting for DFB cards
-(the number of error samples summed)</string>
-                     </property>
-                     <property name="alignment">
-                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                     </property>
-                     <property name="minimum">
-                      <number>1</number>
-                     </property>
-                     <property name="maximum">
-                      <number>16</number>
-                     </property>
-                     <property name="value">
-                      <number>4</number>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="roachIPLineEdit_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="text">
+                    <string>127.0.0.1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="roachPortLabel_2">
+                   <property name="text">
+                    <string>Port</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QSpinBox" name="roachPortSpinBox_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="minimum">
+                    <number>1024</number>
+                   </property>
+                   <property name="maximum">
+                    <number>65535</number>
+                   </property>
+                   <property name="value">
+                    <number>60001</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="roachFrameRateLabel_2">
+                   <property name="text">
+                    <string>Frames per sec</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QDoubleSpinBox" name="roachFrameRateDoubleSpinBox_2">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="minimum">
+                    <double>1.000000000000000</double>
+                   </property>
+                   <property name="maximum">
+                    <double>1000000.000000000000000</double>
+                   </property>
+                   <property name="value">
+                    <double>40000.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="roachDeviceLabel1_2">
+                   <property name="text">
+                    <string>Roach Device 2</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QCheckBox" name="roachDeviceCheckBox_2"/>
+                 </item>
+                 <item row="4" column="1">
+                  <spacer name="verticalSpacer_6">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
                  </item>
                 </layout>
                </item>
               </layout>
-             </item>
-             <item row="0" column="1">
-              <layout class="QGridLayout" name="gridLayout_4">
-               <item row="2" column="1">
-                <widget class="QPushButton" name="noFibersButton">
-                 <property name="text">
-                  <string>None</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0" colspan="2">
-                <widget class="QLabel" name="label_15">
-                 <property name="text">
-                  <string>Fiber Select</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0" colspan="2">
-                <widget class="QCheckBox" name="parallelStreaming">
-                 <property name="text">
-                  <string>Parallel Streaming</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QPushButton" name="allFibersButton">
-                 <property name="text">
-                  <string>All</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0" colspan="2">
-                <layout class="QGridLayout" name="lanceroFiberLayout"/>
-               </item>
-              </layout>
-             </item>
-             <item row="0" column="2">
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="gridLayoutWidget">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>340</y>
-              <width>171</width>
-              <height>111</height>
-             </rect>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_5">
-             <item row="0" column="0">
-              <widget class="QPushButton" name="pushButton_initializeCrate">
-               <property name="text">
-                <string>Initalize Crate</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QPushButton" name="pushButton_startAndAutotune">
-               <property name="text">
-                <string>Start and Autotune</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-          <widget class="QWidget" name="roachPage">
-           <widget class="QFrame" name="roachFrame">
-            <property name="geometry">
-             <rect>
-              <x>60</x>
-              <y>40</y>
-              <width>361</width>
-              <height>431</height>
-             </rect>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_5">
-             <item>
-              <widget class="QLabel" name="label_23">
-               <property name="font">
-                <font>
-                 <family>Helvetica</family>
-                 <pointsize>14</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>ROACH configuration</string>
-               </property>
-               <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QGridLayout" name="roachChooserLayout"/>
-             </item>
-             <item>
-              <widget class="Line" name="line_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QFormLayout" name="formLayout_3">
-               <property name="fieldGrowthPolicy">
-                <enum>QFormLayout::FieldsStayAtSizeHint</enum>
-               </property>
-               <item row="1" column="0">
-                <widget class="QLabel" name="iPAddressLabel">
-                 <property name="text">
-                  <string>IP address</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="roachIPLineEdit_1">
-                 <property name="text">
-                  <string>127.0.0.1</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="roachPortLabel_1">
-                 <property name="text">
-                  <string>Port</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QSpinBox" name="roachPortSpinBox_1">
-                 <property name="minimum">
-                  <number>1024</number>
-                 </property>
-                 <property name="maximum">
-                  <number>65535</number>
-                 </property>
-                 <property name="value">
-                  <number>60000</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="roachFrameRateLabel_1">
-                 <property name="text">
-                  <string>Frames per sec</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QDoubleSpinBox" name="roachFrameRateDoubleSpinBox_1">
-                 <property name="minimum">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1000000.000000000000000</double>
-                 </property>
-                 <property name="value">
-                  <double>40000.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="roachDeviceLabel1">
-                 <property name="text">
-                  <string>Roach Device 1</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QCheckBox" name="roachDeviceCheckBox_1">
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <spacer name="verticalSpacer_5">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="Line" name="line">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QFormLayout" name="formLayout_5">
-               <property name="fieldGrowthPolicy">
-                <enum>QFormLayout::FieldsStayAtSizeHint</enum>
-               </property>
-               <item row="1" column="0">
-                <widget class="QLabel" name="iPAddressLabel_2">
-                 <property name="text">
-                  <string>IP address</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="roachIPLineEdit_2">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="text">
-                  <string>127.0.0.1</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="roachPortLabel_2">
-                 <property name="text">
-                  <string>Port</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QSpinBox" name="roachPortSpinBox_2">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="minimum">
-                  <number>1024</number>
-                 </property>
-                 <property name="maximum">
-                  <number>65535</number>
-                 </property>
-                 <property name="value">
-                  <number>60001</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="roachFrameRateLabel_2">
-                 <property name="text">
-                  <string>Frames per sec</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QDoubleSpinBox" name="roachFrameRateDoubleSpinBox_2">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="minimum">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>1000000.000000000000000</double>
-                 </property>
-                 <property name="value">
-                  <double>40000.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="roachDeviceLabel1_2">
-                 <property name="text">
-                  <string>Roach Device 2</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QCheckBox" name="roachDeviceCheckBox_2"/>
-               </item>
-               <item row="4" column="1">
-                <spacer name="verticalSpacer_6">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="0">
+             <spacer name="verticalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="abacoPage">
-           <widget class="QFrame" name="abacoFrame">
-            <property name="geometry">
-             <rect>
-              <x>40</x>
-              <y>30</y>
-              <width>361</width>
-              <height>161</height>
-             </rect>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item>
-              <widget class="QLabel" name="label_21">
-               <property name="font">
-                <font>
-                 <family>Helvetica</family>
-                 <pointsize>14</pointsize>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Abaco configuration</string>
-               </property>
-               <property name="textFormat">
-                <enum>Qt::AutoText</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="noAbacoLabel">
-               <property name="text">
-                <string>No Abaco devices found in shared memory</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QGridLayout" name="abacoChooserLayout"/>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="0" column="1">
+             <spacer name="horizontalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0">
+             <widget class="QFrame" name="abacoFrame">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <widget class="QLabel" name="label_21">
+                 <property name="font">
+                  <font>
+                   <family>Helvetica</family>
+                   <pointsize>14</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Abaco configuration</string>
+                 </property>
+                 <property name="textFormat">
+                  <enum>Qt::AutoText</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="noAbacoLabel">
+                 <property name="text">
+                  <string>No Abaco devices found in shared memory</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QGridLayout" name="abacoChooserLayout"/>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <spacer name="verticalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
@@ -1360,5 +1546,24 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>channels10kcard1kcolButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>firstRowSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>449</x>
+     <y>206</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>410</x>
+     <y>234</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>
