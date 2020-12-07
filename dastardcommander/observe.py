@@ -194,32 +194,14 @@ class Observe(QtWidgets.QWidget):
             self.crm_map.deleteLater()
             self.crm_map = None
 
-    def handleStatusUpdate(self, d):
-        if not d["Running"]:
+    def handleStatusUpdate(self, is_running, source_name, ngroup, nrow):
+        if not is_running:
             return self.handleStop()
-
         # A hack for now to not count error channels.
-        if d["SourceName"] == "Lancero":
-            self.auxPerChan = 1
-        cols = d.get("Ncol", [])
-        rows = d.get("Nrow", [])
-        nchannels = d["Nchannels"] / (self.auxPerChan+1)
-        cols = max(1, sum(cols))
-        if len(rows) == 0:
-            rows = [1]
-        else:
-            rows = max(rows)
-        print("Rows, cols, nchan: ", rows, cols, nchannels)
-        # If numbers don't add up, trust the column count
-        if rows*cols != nchannels:
-            rows = nchannels // cols
-            if nchannels % cols > 0:
-                rows += 1
-        if rows != self.rows or cols != self.cols:
-            self.cols = cols
-            self.rows = rows
-            self.deleteCRMGrid()
-            self.deleteCRMMap()
+        self.cols = ngroup
+        self.rows = nrow
+        self.deleteCRMGrid()
+        self.deleteCRMMap()
 
     def handleStop(self):
         self.cols = 0
