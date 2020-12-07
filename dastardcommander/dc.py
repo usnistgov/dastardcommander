@@ -36,7 +36,7 @@ from . import writing
 from . import projectors
 from . import observe
 from . import workflow
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -175,16 +175,15 @@ class MainWindow(QtWidgets.QMainWindow):
         # All other messages are ignored if they haven't changed
         elif not self.last_messages[topic] == message:
             if topic == "STATUS":
-                self.updateStatusBar(d)
-                self.observeTab.handleStatusUpdate(d)
-                self.observeWindow.handleStatusUpdate(d)
-                self._setGuiRunning(d["Running"])
+                is_running = d["Running"]
+                self._setGuiRunning(is_running)
                 self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
                 self.triggerTabSimple.handleNsamplesNpresamplesMessage(d["Nsamples"], d["Npresamp"])
                 self.workflowTab.handleStatusUpdate(d)
 
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
+
                 self.sourceIsTDM = (source == "Lancero")
                 if source == "Triangles":
                     self.dataSource.setCurrentIndex(0)
@@ -198,6 +197,18 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.dataSource.setCurrentIndex(3)
                 elif source == "Abaco":
                     self.dataSource.setCurrentIndex(4)
+                if is_running:
+                    groups_info = d["ChanGroups"]
+                    ngroups = len(groups_info)
+                    # in principle chan per group can vary, we ignore that until it happens
+                    nrow = groups_info[0]["Nchan"]
+                else:
+                    groups_info = None
+                    ngroups = None
+                    nrow = None
+                self.updateStatusBar(is_running, source, ngroups, nrow)
+                self.observeTab.handleStatusUpdate(is_running, source, ngroups, nrow)
+                self.observeWindow.handleStatusUpdate(is_running, source, ngroups, nrow)
 
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
@@ -312,28 +323,13 @@ class MainWindow(QtWidgets.QMainWindow):
         sb.addWidget(self.statusMainLabel)
         sb.addWidget(self.statusFreshLabel)
 
-    def updateStatusBar(self, data):
-        run = data["Running"]
-        if run:
-            status = "%s source active, %d channels" % (
-                data["SourceName"], data["Nchannels"])
-            self.streams = data["Nchannels"]
-            self.cols = data.get("Ncol", [])
-            self.rows = data.get("Nrow", [])
-            ndev = min(len(self.cols), len(self.rows))
-            if ndev == 1:
-                status += " (%d rows x %d cols)" % (self.rows[0], self.cols[0])
-            elif ndev > 1:
-                status += " ("
-                for i in range(ndev):
-                    status += "%d x %d" % (self.rows[i], self.cols[i])
-                    if i < ndev-1:
-                        status += ", "
-                status += " rows x cols)"
+    def updateStatusBar(self, is_running, source_name, ngroups, nrows):
 
-            self.statusMainLabel.setText(status)
+        if is_running:
+            status = f"{source_name} active, {ngroups} groups x {nrows} chans per group"
         else:
-            self.statusMainLabel.setText("Data source stopped")
+            status = "Data source stopped"
+        self.statusMainLabel.setText(status)
 
     def heartbeat(self, hb):
         # Keep window open another 5 seconds
