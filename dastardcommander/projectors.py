@@ -51,7 +51,7 @@ def getConfigs(filename, channelNames):
     nameNumberToIndex = getNameNumberToIndex(channelNames)
     out = OrderedDict()
     if not h5py.is_hdf5(filename):
-        print("{} is not a valid hdf5 file")
+        print(f"{filename} is not a valid hdf5 file")
         return out
     h5 = h5py.File(filename, "r")
     for key in list(h5.keys()):

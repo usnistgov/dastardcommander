@@ -87,7 +87,6 @@ class Observe(QtWidgets.QWidget):
         QtWidgets.QWidget.__init__(self, parent)
         self.client = client
         self.host = host
-        self.client = None
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/observe.ui"), self)
         self.pushButton_resetIntegration.clicked.connect(self.resetIntegration)
         self.pushButton_autoScale.clicked.connect(self.handleAutoScaleClicked)
