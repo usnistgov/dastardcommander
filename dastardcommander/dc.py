@@ -55,11 +55,12 @@ QCoreApplication.setApplicationName("DastardCommander")
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, rpc_client, host, port, parent=None):
+    def __init__(self, rpc_client, host, port, settings, parent=None):
         self.client = rpc_client
         self.client.setQtParent(self)
         self.host = host
         self.port = port
+        self.settings = settings
 
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
@@ -90,7 +91,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.streams = 0
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
-        self.buildLanceroFiberBoxes(8)
+        parallel = settings.value("parallelStream", True, type=bool)
+        self.buildLanceroFiberBoxes(8, parallel)
         self.triggerTab = trigger_config.TriggerConfig(self.tabTriggering, self.client)
         self.triggerTabSimple = trigger_config_simple.TriggerConfigSimple(
             self.tabTriggeringSimple, self)
@@ -507,7 +509,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.abacoCheckBoxes[c] = cb
             layout.addWidget(cb, i+1, 0)
 
-    def buildLanceroFiberBoxes(self, nfibers):
+    def buildLanceroFiberBoxes(self, nfibers, parallelStreaming):
         """Build the check boxes to specify which fibers to use."""
         layout = self.lanceroFiberLayout
         self.fiberBoxes = {}
@@ -535,7 +537,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.roachDeviceCheckBox_1.toggled.connect(self.toggledRoachDeviceActive)
         self.roachDeviceCheckBox_2.toggled.connect(self.toggledRoachDeviceActive)
 
-        self.toggleParallelStreaming(self.parallelStreaming.isChecked())
+        self.parallelStreaming.setChecked(parallelStreaming)
+        if parallelStreaming:
+            self.toggleParallelStreaming(self.parallelStreaming.isChecked())
         self.parallelStreaming.toggled.connect(self.toggleParallelStreaming)
 
     @pyqtSlot(bool)
@@ -558,6 +562,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 box2 = self.fiberBoxes[i+npairs]
                 box1.toggled.disconnect()
                 box2.toggled.disconnect()
+        self.settings.setValue("parallelStream", parallelStream)
 
     @pyqtSlot(str)
     def closeReconnect(self, disconnectReason):
@@ -989,7 +994,7 @@ def main():
             continue
         print("Dastard is at %s:%d" % (host, port))
 
-        dc = MainWindow(client, host, port)
+        dc = MainWindow(client, host, port, settings)
         dc.show()
         retval = app.exec_()
         disconnectReason = dc.disconnectReason
