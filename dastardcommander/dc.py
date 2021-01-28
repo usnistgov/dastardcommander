@@ -352,6 +352,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimer.start(self.hbTimeout)
 
         mb = hb["DataMB"]
+        hwmb = hb["HWactualMB"]
         t = float(hb["Time"])
 
         def color(c, bg=None):
@@ -373,8 +374,14 @@ class MainWindow(QtWidgets.QMainWindow):
             color("red")
         else:
             rate = mb / t
-            self.statusFreshLabel.setText("%7.3f MB/s" % rate)
-            color("green")
+            if hwmb == mb:
+                self.statusFreshLabel.setText("%7.3f MB/s" % rate)
+                color("green")
+            else:
+                hwrate = hwmb / t
+                self.statusFreshLabel.setText(
+                    "%7.3f MB/s generated (%7.3f processed)" % (hwrate, rate))
+                color("orange")
 
     @pyqtSlot()
     def closeEvent(self, event):
