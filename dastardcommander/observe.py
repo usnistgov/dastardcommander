@@ -179,13 +179,13 @@ class Observe(QtWidgets.QWidget):
 
     def buildCRMMap(self):
         self.deleteCRMMap()
-        print ("Building CountRateMap with %d cols x %d rows" % (self.cols, self.rows))
+        print("Building CountRateMap with %d cols x %d rows" % (self.cols, self.rows))
         print("len(channel_names", len(self.channel_names))
         self.crm_map = CountRateMap(self, self.cols, self.rows, self.channel_names,
                                     xy=self.pixelMap)
         # if we build the crm_map before we know the source and know channel_names
         # (eg before a dastard source is started) we will need to rebuild it later
-        self.mapContainer.layout().addWidget(self.crm_map)
+        self.MapTab.layout().addWidget(self.crm_map, 0)
 
     def deleteCRMMap(self):
         if self.crm_map is not None:
