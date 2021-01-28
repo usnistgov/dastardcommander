@@ -89,6 +89,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cols = 0
         self.rows = 0
         self.streams = 0
+        self.samplePeriod = 0
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
         parallel = settings.value("parallelStream", True, type=bool)
@@ -158,7 +159,8 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Error is: %s" % e)
             return
 
-        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER"])  # add "ALIVE"
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN",
+                           "EXTERNALTRIGGER", "DATADROP"])  # add "ALIVE"
         if topic not in quietTopics or self.nmsg < 15:
             print("%s %5d: %s" % (topic, self.nmsg, d))
         if self.nmsg == 15:
@@ -185,6 +187,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
+                self.samplePeriod = d["SamplePeriod"]
 
                 self.sourceIsTDM = (source == "Lancero")
                 if source == "Triangles":
@@ -328,9 +331,20 @@ class MainWindow(QtWidgets.QMainWindow):
     def updateStatusBar(self, is_running, source_name, ngroups, nrows):
 
         if is_running:
-            status = f"{source_name} active, {ngroups} groups x {nrows} chans per group"
+            sp = self.samplePeriod
+            if sp < 1000:
+                per = f"{sp} ns"
+            elif sp < 10000:
+                per = "{:.3f} µs".format(sp/1000)
+            elif sp < 100000:
+                per = "{:.2f} µs".format(sp/1000)
+            elif sp < 1000000:
+                per = "{:.1f} µs".format(sp/1000)
+            else:
+                per = "{:.3f} ms".format(sp/1e6)
+            status = f"{source_name} active: sample period {per}, {ngroups} groups x {nrows} chans per group."
         else:
-            status = "Data source stopped"
+            status = "Data source stopped."
         self.statusMainLabel.setText(status)
 
     def heartbeat(self, hb):
