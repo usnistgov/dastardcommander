@@ -346,18 +346,3 @@ class CountRateMap(QtWidgets.QWidget):
             colorString = "rgb({},{},{})".format(color[0], color[1], color[2])
             colorString = 'QPushButton {background-color: %s;}' % colorString
             button.setStyleSheet(colorString)
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    obs = Observe()
-    obs.setColsRows(4, 4)
-    obs.setColsRows(10, 10)
-    obs.setColsRows(8, 32)
-    obs.crm.setCountRates(np.arange(obs.crm.cols*obs.crm.rows), obs.crm.cols*obs.crm.rows)
-    # obs.crm.deleteButtons()
-    # obs.crm.initButtons()
-
-    obs.show()
-    sys.exit(app.exec_())
