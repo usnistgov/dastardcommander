@@ -96,15 +96,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.buildLanceroFiberBoxes(8, parallel)
         self.triggerTab = trigger_config.TriggerConfig(None, self.client)
         self.tabTriggering.layout().addWidget(self.triggerTab)
+
         self.triggerTabSimple = trigger_config_simple.TriggerConfigSimple(None, self)
-        self.tabTriggeringSimple.layout().addWidget(self.triggerTabSimple, 0)
+        self.tabTriggeringSimple.layout().addWidget(self.triggerTabSimple)
+        self.tabTriggeringSimple.layout().addStretch()
+
         self.writingTab = writing.WritingControl(None, host, self.client)
         self.tabWriting.layout().addWidget(self.writingTab)
-        self.observeTab = observe.Observe(None, host, self.client)
+
+        self.observeWindow = observe.Observe(parent=None, host=host, client=self.client)
+        self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
         self.tabObserve.layout().addWidget(self.observeTab)
         self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
-        self.observeWindow = observe.Observe(parent=None, host=host, client=self.client)
         self.triggerTab.changedTriggerStateSig.connect(self.observeWindow.resetIntegration)
+
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
         self.workflowTab.projectorsLoadedSig.connect(self.writingTab.checkBox_OFF.setChecked)
 
