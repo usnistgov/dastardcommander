@@ -36,7 +36,7 @@ from . import writing
 from . import projectors
 from . import observe
 from . import workflow
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
