@@ -179,13 +179,13 @@ class Observe(QtWidgets.QWidget):
 
     def buildCRMMap(self):
         self.deleteCRMMap()
-        print ("Building CountRateMap with %d cols x %d rows" % (self.cols, self.rows))
+        print("Building CountRateMap with %d cols x %d rows" % (self.cols, self.rows))
         print("len(channel_names", len(self.channel_names))
         self.crm_map = CountRateMap(self, self.cols, self.rows, self.channel_names,
                                     xy=self.pixelMap)
         # if we build the crm_map before we know the source and know channel_names
         # (eg before a dastard source is started) we will need to rebuild it later
-        self.mapContainer.layout().addWidget(self.crm_map)
+        self.MapTab.layout().addWidget(self.crm_map, 0)
 
     def deleteCRMMap(self):
         if self.crm_map is not None:
@@ -304,26 +304,33 @@ class CountRateMap(QtWidgets.QWidget):
             self.initButtons()
 
     def initButtons(self, scale=25, xy=None):
+        MaxPerRow = 32  # no more than this many buttons per row
         self.deleteButtons()
         print(self.channel_names)
-        row = col = i = 0
+        rowdisp = rownum = coldisp = colnum = i = 0
+        # rowdisp means row number on the display
+        # rownum means TES's actual row number
         for name in self.channel_names:
             if not name.startswith("chan"):
                 self.buttons.append(None)
                 continue
             if xy is None:
-                x = scale*row
-                y = scale*col
+                x = scale*rowdisp
+                y = scale*coldisp
             else:
                 x = scale*xy[i][0]
                 y = scale*xy[i][1]
             self.addButton(x, y, scale-1, scale-1,
-                           "{}, row{}col{} matterchan{}".format(name, row, col, 2*(self.rows*col+row)+1))
-            row += 1
+                           "{}, row{}col{} (matterchan{})".format(name, rownum, colnum, 2*(self.rows*colnum+rownum)+1))
+            rowdisp += 1
+            rownum += 1
             i += 1
-            if row >= self.rows:
-                row = 0
-                col += 1
+            if rownum >= self.rows:
+                rownum = 0
+                colnum += 1
+            elif rowdisp >= MaxPerRow:
+                rowdisp = 2  # Indent "continuation rows"
+                coldisp += 1
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
@@ -346,18 +353,3 @@ class CountRateMap(QtWidgets.QWidget):
             colorString = "rgb({},{},{})".format(color[0], color[1], color[2])
             colorString = 'QPushButton {background-color: %s;}' % colorString
             button.setStyleSheet(colorString)
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    obs = Observe()
-    obs.setColsRows(4, 4)
-    obs.setColsRows(10, 10)
-    obs.setColsRows(8, 32)
-    obs.crm.setCountRates(np.arange(obs.crm.cols*obs.crm.rows), obs.crm.cols*obs.crm.rows)
-    # obs.crm.deleteButtons()
-    # obs.crm.initButtons()
-
-    obs.show()
-    sys.exit(app.exec_())

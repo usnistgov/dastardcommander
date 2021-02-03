@@ -36,7 +36,7 @@ from . import writing
 from . import projectors
 from . import observe
 from . import workflow
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -55,11 +55,12 @@ QCoreApplication.setApplicationName("DastardCommander")
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, rpc_client, host, port, parent=None):
+    def __init__(self, rpc_client, host, port, settings, parent=None):
         self.client = rpc_client
         self.client.setQtParent(self)
         self.host = host
         self.port = port
+        self.settings = settings
 
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon('dc.png'))
@@ -88,17 +89,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cols = 0
         self.rows = 0
         self.streams = 0
+        self.samplePeriod = 0
         self.lanceroCheckBoxes = {}
         self.updateLanceroCardChoices()
-        self.buildLanceroFiberBoxes(8)
-        self.triggerTab = trigger_config.TriggerConfig(self.tabTriggering, self.client)
-        self.triggerTabSimple = trigger_config_simple.TriggerConfigSimple(
-            self.tabTriggeringSimple, self)
-        self.writingTab = writing.WritingControl(self.tabWriting, host, self.client)
-        self.observeTab = observe.Observe(self.tabObserve, host, self.client)
-        self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
+        parallel = settings.value("parallelStream", True, type=bool)
+        self.buildLanceroFiberBoxes(8, parallel)
+        self.triggerTab = trigger_config.TriggerConfig(None, self.client)
+        self.tabTriggering.layout().addWidget(self.triggerTab)
+
+        self.triggerTabSimple = trigger_config_simple.TriggerConfigSimple(None, self)
+        self.tabTriggeringSimple.layout().addWidget(self.triggerTabSimple)
+        self.tabTriggeringSimple.layout().addStretch()
+
+        self.writingTab = writing.WritingControl(None, host, self.client)
+        self.tabWriting.layout().addWidget(self.writingTab)
+
         self.observeWindow = observe.Observe(parent=None, host=host, client=self.client)
+        self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
+        self.tabObserve.layout().addWidget(self.observeTab)
+        self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
         self.triggerTab.changedTriggerStateSig.connect(self.observeWindow.resetIntegration)
+
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
         self.workflowTab.projectorsLoadedSig.connect(self.writingTab.checkBox_OFF.setChecked)
 
@@ -156,7 +167,8 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Error is: %s" % e)
             return
 
-        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER"])  # add "ALIVE"
+        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN",
+                           "EXTERNALTRIGGER", "DATADROP"])  # add "ALIVE"
         if topic not in quietTopics or self.nmsg < 15:
             print("%s %5d: %s" % (topic, self.nmsg, d))
         if self.nmsg == 15:
@@ -183,6 +195,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
+                self.samplePeriod = d["SamplePeriod"]
 
                 self.sourceIsTDM = (source == "Lancero")
                 if source == "Triangles":
@@ -326,9 +339,20 @@ class MainWindow(QtWidgets.QMainWindow):
     def updateStatusBar(self, is_running, source_name, ngroups, nrows):
 
         if is_running:
-            status = f"{source_name} active, {ngroups} groups x {nrows} chans per group"
+            sp = self.samplePeriod
+            if sp < 1000:
+                per = f"{sp} ns"
+            elif sp < 10000:
+                per = "{:.3f} µs".format(sp/1000)
+            elif sp < 100000:
+                per = "{:.2f} µs".format(sp/1000)
+            elif sp < 1000000:
+                per = "{:.1f} µs".format(sp/1000)
+            else:
+                per = "{:.3f} ms".format(sp/1e6)
+            status = f"{source_name} active: sample period {per}, {ngroups} groups x {nrows} chans per group."
         else:
-            status = "Data source stopped"
+            status = "Data source stopped."
         self.statusMainLabel.setText(status)
 
     def heartbeat(self, hb):
@@ -336,6 +360,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hbTimer.start(self.hbTimeout)
 
         mb = hb["DataMB"]
+        hwmb = hb["HWactualMB"]
         t = float(hb["Time"])
 
         def color(c, bg=None):
@@ -357,8 +382,14 @@ class MainWindow(QtWidgets.QMainWindow):
             color("red")
         else:
             rate = mb / t
-            self.statusFreshLabel.setText("%7.3f MB/s" % rate)
-            color("green")
+            if hwmb == mb:
+                self.statusFreshLabel.setText("%7.3f MB/s" % rate)
+                color("green")
+            else:
+                hwrate = hwmb / t
+                self.statusFreshLabel.setText(
+                    "%7.3f MB/s generated (%7.3f processed)" % (hwrate, rate))
+                color("orange")
 
     @pyqtSlot()
     def closeEvent(self, event):
@@ -507,7 +538,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.abacoCheckBoxes[c] = cb
             layout.addWidget(cb, i+1, 0)
 
-    def buildLanceroFiberBoxes(self, nfibers):
+    def buildLanceroFiberBoxes(self, nfibers, parallelStreaming):
         """Build the check boxes to specify which fibers to use."""
         layout = self.lanceroFiberLayout
         self.fiberBoxes = {}
@@ -535,7 +566,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.roachDeviceCheckBox_1.toggled.connect(self.toggledRoachDeviceActive)
         self.roachDeviceCheckBox_2.toggled.connect(self.toggledRoachDeviceActive)
 
-        self.toggleParallelStreaming(self.parallelStreaming.isChecked())
+        self.parallelStreaming.setChecked(parallelStreaming)
+        if parallelStreaming:
+            self.toggleParallelStreaming(self.parallelStreaming.isChecked())
         self.parallelStreaming.toggled.connect(self.toggleParallelStreaming)
 
     @pyqtSlot(bool)
@@ -558,6 +591,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 box2 = self.fiberBoxes[i+npairs]
                 box1.toggled.disconnect()
                 box2.toggled.disconnect()
+        self.settings.setValue("parallelStream", parallelStream)
 
     @pyqtSlot(str)
     def closeReconnect(self, disconnectReason):
@@ -989,7 +1023,7 @@ def main():
             continue
         print("Dastard is at %s:%d" % (host, port))
 
-        dc = MainWindow(client, host, port)
+        dc = MainWindow(client, host, port, settings)
         dc.show()
         retval = app.exec_()
         disconnectReason = dc.disconnectReason
