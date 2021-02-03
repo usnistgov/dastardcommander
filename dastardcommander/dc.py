@@ -262,6 +262,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "ABACO":
                 self.updateAbacoCardChoices(d["AvailableCards"])
+                self.updatePhaseReset(d["Unwrapping"], d["UnwrapResetSamp"])
 
             elif topic == "CHANNELNAMES":
                 self.channel_names[:] = []   # Careful: don't replace the variable
@@ -538,6 +539,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.abacoCheckBoxes[c] = cb
             layout.addWidget(cb, i+1, 0)
 
+    def updatePhaseReset(self, unwrapping, unwrapResetSamp):
+        self.neverUnwrapCheck.setChecked(not unwrapping)
+        self.phaseResetSamplesBox.setValue(unwrapResetSamp)
+
     def buildLanceroFiberBoxes(self, nfibers, parallelStreaming):
         """Build the check boxes to specify which fibers to use."""
         layout = self.lanceroFiberLayout
@@ -801,6 +806,8 @@ class MainWindow(QtWidgets.QMainWindow):
         config = {
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
+            "Unwrapping": not self.neverUnwrapCheck.isChecked(),
+            "UnwrapResetSamp": self.phaseResetSamplesBox.value(),
         }
         okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
         if not okay:
