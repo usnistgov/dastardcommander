@@ -1141,7 +1141,7 @@
                  <item row="0" column="0">
                   <widget class="QSpinBox" name="phaseResetSamplesBox">
                    <property name="toolTip">
-                    <string extracomment="Phase unwrap resets to near-zero after this many samples"/>
+                    <string>Phase unwrap resets to near-zero after this many samples</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1167,10 +1167,13 @@
                  <item row="1" column="0">
                   <widget class="QDoubleSpinBox" name="phaseResetMultiplierBox">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="toolTip">
-                    <string extracomment="Set Phase Unwrap Samples to be this multiple of the record length"/>
+                    <string>Set Phase Unwrap Samples to be this multiple of the record length</string>
+                   </property>
+                   <property name="decimals">
+                    <number>4</number>
                    </property>
                    <property name="minimum">
                     <double>1.000000000000000</double>
@@ -1195,7 +1198,7 @@
                <item>
                 <widget class="QCheckBox" name="neverUnwrapCheck">
                  <property name="toolTip">
-                  <string extracomment="Disable phase unwrapping completely"/>
+                  <string extracomment="Disable phase unwrapping completely">Disable phase unwrapping for Abaco data</string>
                  </property>
                  <property name="text">
                   <string>Never unwrap</string>
