@@ -101,6 +101,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tabTriggeringSimple.layout().addWidget(self.triggerTabSimple)
         self.tabTriggeringSimple.layout().addStretch()
 
+        self.phaseResetSamplesBox.editingFinished.connect(self.slotPhaseResetUpdate)
+        self.phaseResetMultiplierBox.editingFinished.connect(self.slotPhaseResetUpdate)
+        self.triggerTab.recordLengthSpinBox.editingFinished.connect(self.slotPhaseResetUpdate)
+
         self.writingTab = writing.WritingControl(None, host, self.client)
         self.tabWriting.layout().addWidget(self.writingTab)
 
@@ -262,7 +266,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "ABACO":
                 self.updateAbacoCardChoices(d["AvailableCards"])
-                self.updatePhaseReset(d["Unwrapping"], d["UnwrapResetSamp"])
+                self.fillPhaseResetInfo(d["Unwrapping"], d["UnwrapResetSamp"])
 
             elif topic == "CHANNELNAMES":
                 self.channel_names[:] = []   # Careful: don't replace the variable
@@ -539,9 +543,30 @@ class MainWindow(QtWidgets.QMainWindow):
             self.abacoCheckBoxes[c] = cb
             layout.addWidget(cb, i+1, 0)
 
-    def updatePhaseReset(self, unwrapping, unwrapResetSamp):
+    def fillPhaseResetInfo(self, unwrapping, unwrapResetSamp):
         self.neverUnwrapCheck.setChecked(not unwrapping)
         self.phaseResetSamplesBox.setValue(unwrapResetSamp)
+
+    @pyqtSlot()
+    def slotPhaseResetUpdate(self):
+        print("Slot: slotPhaseResetUpdate sent by ", self.sender())
+        sender = self.sender()
+        if sender == self.phaseResetSamplesBox:
+            ratio = self.phaseResetSamplesBox.value() / self.triggerTab.recordLengthSpinBox.value()
+            self.phaseResetMultiplierBox.setValue(ratio)
+        elif sender == self.phaseResetMultiplierBox:
+            ns = self.phaseResetMultiplierBox.value() * self.triggerTab.recordLengthSpinBox.value()
+            self.phaseResetSamplesBox.setValue(int(ns+0.5))
+        elif sender == self.triggerTab.recordLengthSpinBox:
+            reclen = self.triggerTab.recordLengthSpinBox.value()
+            ratio = self.phaseResetSamplesBox.value() / reclen
+            self.phaseResetMultiplierBox.setValue(ratio)
+            self.triggerTabSimple.spinBox_recordLength.setValue(reclen)
+        elif sender == self.triggerTabSimple.spinBox_recordLength:
+            reclen = self.triggerTabSimple.spinBox_recordLength.value()
+            ratio = self.phaseResetSamplesBox.value() / reclen
+            self.phaseResetMultiplierBox.setValue(ratio)
+            self.triggerTab.recordLengthSpinBox.setValue(reclen)
 
     def buildLanceroFiberBoxes(self, nfibers, parallelStreaming):
         """Build the check boxes to specify which fibers to use."""
