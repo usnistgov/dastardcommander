@@ -561,12 +561,6 @@ class MainWindow(QtWidgets.QMainWindow):
             reclen = self.triggerTab.recordLengthSpinBox.value()
             ratio = self.phaseResetSamplesBox.value() / reclen
             self.phaseResetMultiplierBox.setValue(ratio)
-            self.triggerTabSimple.spinBox_recordLength.setValue(reclen)
-        elif sender == self.triggerTabSimple.spinBox_recordLength:
-            reclen = self.triggerTabSimple.spinBox_recordLength.value()
-            ratio = self.phaseResetSamplesBox.value() / reclen
-            self.phaseResetMultiplierBox.setValue(ratio)
-            self.triggerTab.recordLengthSpinBox.setValue(reclen)
 
     def buildLanceroFiberBoxes(self, nfibers, parallelStreaming):
         """Build the check boxes to specify which fibers to use."""

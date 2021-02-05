@@ -126,7 +126,7 @@ class TriggerConfig(QtWidgets.QWidget):
         self.chosenChannels accordingly."""
         self.chosenChannels = []
         chantext = self.channelsChosenEdit.toPlainText()
-        print ("Trying to update the channel information")
+        print("Trying to update the channel information")
         chantext = chantext.replace("\t", "\n").replace(";", "\n").replace(" ", "")
         lines = chantext.split()
         for line in lines:
@@ -146,7 +146,7 @@ class TriggerConfig(QtWidgets.QWidget):
                     idx = self.channel_names.index(name)
                     self.chosenChannels.append(idx)
                 except ValueError:
-                    print ("Channel '%s' is not known" % (name))
+                    print("Channel '%s' is not known" % (name))
         self.channelChooserBox.setCurrentIndex(0)
         print("The chosen channels are ", self.chosenChannels)
 
