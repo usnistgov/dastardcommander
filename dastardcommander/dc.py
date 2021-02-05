@@ -103,7 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.phaseResetSamplesBox.editingFinished.connect(self.slotPhaseResetUpdate)
         self.phaseResetMultiplierBox.editingFinished.connect(self.slotPhaseResetUpdate)
-        self.triggerTab.recordLengthSpinBox.editingFinished.connect(self.slotPhaseResetUpdate)
+        self.triggerTab.recordLengthSpinBox.valueChanged.connect(self.slotPhaseResetUpdate)
 
         self.writingTab = writing.WritingControl(None, host, self.client)
         self.tabWriting.layout().addWidget(self.writingTab)
@@ -549,7 +549,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def slotPhaseResetUpdate(self):
-        print("Slot: slotPhaseResetUpdate sent by ", self.sender())
         sender = self.sender()
         if sender == self.phaseResetSamplesBox:
             ratio = self.phaseResetSamplesBox.value() / self.triggerTab.recordLengthSpinBox.value()
