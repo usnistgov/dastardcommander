@@ -826,7 +826,16 @@ class MainWindow(QtWidgets.QMainWindow):
             "AvailableCards": [],   # This is filled in only by server, not us.
             "Unwrapping": not self.neverUnwrapCheck.isChecked(),
             "UnwrapResetSamp": self.phaseResetSamplesBox.value(),
+            "HostPortUDP": []
         }
+        for id in (1, 2, 3, 4):
+            if not self.__dict__["udpActive%d" % id].isChecked():
+                continue
+            ipwidget = self.__dict__["udpHost%d" % id]
+            portwidget = self.__dict__["udpPort%d" % id]
+            hostport = "%s:%d" % (ipwidget.text(), portwidget.value())
+            config["HostPortUDP"].append(hostport)
+
         okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
         if not okay:
             print("Could not ConfigureAbacoSource")
