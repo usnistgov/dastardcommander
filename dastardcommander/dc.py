@@ -510,7 +510,7 @@ class MainWindow(QtWidgets.QMainWindow):
         cards is a list of integers: which cards are available on the sever"""
 
         TEST_CARD_NUMBER = 3
-        layout = self.abacoChooserLayout
+        layout = self.shmChooserLayout
         # Empty the layout
         while True:
             item = layout.takeAt(0)
