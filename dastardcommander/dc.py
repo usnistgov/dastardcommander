@@ -266,6 +266,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "ABACO":
                 self.updateAbacoCardChoices(d["AvailableCards"])
+                self.activateUDPsources(d["HostPortUDP"])
                 self.fillPhaseResetInfo(d["Unwrapping"], d["UnwrapResetSamp"])
 
             elif topic == "CHANNELNAMES":
@@ -542,6 +543,45 @@ class MainWindow(QtWidgets.QMainWindow):
             cb.setSizePolicy(wide)
             self.abacoCheckBoxes[c] = cb
             layout.addWidget(cb, i+1, 0)
+
+    def activateUDPsources(self, sources):
+        """Given sources=["localhost:4000"] or similar, find GUI entries that matches elements
+        of the list. If none, change GUI entries (from top to bottom) to match. Activate the check
+        box for all sources in the `sources` argument."""
+        self.udpActive1.setChecked(False)
+        self.udpActive2.setChecked(False)
+        self.udpActive3.setChecked(False)
+        self.udpActive4.setChecked(False)
+        unperturbed_guis = [1, 2, 3, 4]
+        sources_to_insert = []
+        if len(sources) > 4:
+            print("UDP sources '%s' is too long. Truncating to 4 sources".format(sources))
+            sources = sources[:4]
+
+        localsynonyms = ("127.0.0.1", "localhost", "localhost.local")
+        for text in sources:
+            parts = text.split(":")
+            if len(parts) != 2:
+                print("Could not parse '%s' as host:port".format(text))
+                return
+            host, port = parts[0], int(parts[1])
+            found = False
+            for id in unperturbed_guis:
+                guihost = self.__dict__["udpHost%d" % id].text()
+                guiport = self.__dict__["udpPort%d" % id].value()
+                if guiport != port:
+                    continue
+                if guihost == host or (guihost in localsynonyms and host in localsynonyms):
+                    self.__dict__["udpActive%d" % id].setChecked(True)
+                    found = True
+                    unperturbed_guis.remove(id)
+                    break
+            if not found:
+                sources_to_insert.append((host, port))
+        for id, (host, port) in zip(unperturbed_guis, sources_to_insert):
+            self.__dict__["udpActive%d" % id].setChecked(True)
+            self.__dict__["udpHost%d" % id].setText(host)
+            self.__dict__["udpPort%d" % id].setValue(port)
 
     def fillPhaseResetInfo(self, unwrapping, unwrapResetSamp):
         self.neverUnwrapCheck.setChecked(not unwrapping)
