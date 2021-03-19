@@ -552,6 +552,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.udpActive2.setChecked(False)
         self.udpActive3.setChecked(False)
         self.udpActive4.setChecked(False)
+        if sources is None:
+            return
         unperturbed_guis = [1, 2, 3, 4]
         sources_to_insert = []
         if len(sources) > 4:
