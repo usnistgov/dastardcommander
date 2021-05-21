@@ -394,7 +394,7 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 hwrate = hwmb / t
                 self.statusFreshLabel.setText(
-                    "%7.3f MB/s generated (%7.3f processed)" % (hwrate, rate))
+                    "%7.3f MB/s received (%7.3f processed)" % (hwrate, rate))
                 color("orange")
 
     @pyqtSlot()
