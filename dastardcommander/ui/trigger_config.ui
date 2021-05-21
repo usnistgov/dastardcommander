@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>617</width>
-    <height>511</height>
+    <width>620</width>
+    <height>655</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -590,42 +590,128 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="couplingGridLayout" columnstretch="0,0" columnminimumwidth="0,0">
-     <property name="topMargin">
-      <number>2</number>
+    <widget class="QFrame" name="GroupTriggerFrame">
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
      </property>
-     <property name="bottomMargin">
-      <number>2</number>
-     </property>
-     <item row="0" column="0">
-      <widget class="QCheckBox" name="coupleFBToErrCheckBox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>If checked, any trigger in a FB channel will also trigger
-the corresponding Error chan (Lancero only).</string>
-       </property>
-       <property name="text">
-        <string>Couple Feedback --&gt; Error (for SQUID checking)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QCheckBox" name="coupleErrToFBCheckBox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>If checked, any trigger in an error channel will also
+     <layout class="QGridLayout" name="gridLayout_3">
+      <property name="leftMargin">
+       <number>4</number>
+      </property>
+      <property name="topMargin">
+       <number>4</number>
+      </property>
+      <property name="rightMargin">
+       <number>4</number>
+      </property>
+      <property name="bottomMargin">
+       <number>4</number>
+      </property>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="topMargin">
+         <number>5</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Group from chan:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="groupTriggerSource">
+          <property name="toolTip">
+           <string>Let this channel cause group triggers</string>
+          </property>
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>to (1+ channel #s):</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="groupTriggerReceivers">
+          <property name="toolTip">
+           <string>These channels receive group triggers (comma-separated list; invalid numbers are ignored)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="groupTriggerAdd">
+          <property name="text">
+           <string>Add</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Group Triggering</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <layout class="QGridLayout" name="couplingGridLayout" columnstretch="0,0,0" columnminimumwidth="0,0,0">
+        <property name="topMargin">
+         <number>2</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
+        <item row="0" column="1">
+         <widget class="QCheckBox" name="coupleErrToFBCheckBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>If checked, any trigger in an error channel will also
 trigger the corresponding FB chan (Lancero only).</string>
-       </property>
-       <property name="text">
-        <string>Couple Error --&gt; Feedback (rare)</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+          </property>
+          <property name="text">
+           <string>Couple Error --&gt; Feedback (rare)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>Clear all group triggers</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QCheckBox" name="coupleFBToErrCheckBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>If checked, any trigger in a FB channel will also trigger
+the corresponding Error chan (Lancero only).</string>
+          </property>
+          <property name="text">
+           <string>Couple Feedback --&gt; Error (for SQUID checking)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QFrame" name="triggerLoadSaveFrame">
@@ -714,38 +800,6 @@ trigger the corresponding FB chan (Lancero only).</string>
     <hint type="destinationlabel">
      <x>461</x>
      <y>123</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>coupleFBToErrCheckBox</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>triggerConfigTab</receiver>
-   <slot>checkedCoupleFBErr(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>50</x>
-     <y>515</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>51</x>
-     <y>302</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>coupleErrToFBCheckBox</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>triggerConfigTab</receiver>
-   <slot>checkedCoupleErrFB(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>610</x>
-     <y>515</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>401</x>
-     <y>349</y>
     </hint>
    </hints>
   </connection>
