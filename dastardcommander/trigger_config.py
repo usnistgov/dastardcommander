@@ -6,6 +6,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 # other non qt imports
 import os
 
+
 class TriggerConfig(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
 
@@ -20,9 +21,11 @@ class TriggerConfig(QtWidgets.QWidget):
         self.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
-        self.auto1psModeButton.pressed.connect(self.go1psMode)
-        self.noiseModeButton.pressed.connect(self.goNoiseMode)
-        self.pulseModeButton.pressed.connect(self.goPulseMode)
+        self.auto1psModeButton.clicked.connect(self.go1psMode)
+        self.noiseModeButton.clicked.connect(self.goNoiseMode)
+        self.pulseModeButton.clicked.connect(self.goPulseMode)
+        self.groupTriggerClearAll.clicked.connect(self.pushedClearGroupTrigger)
+        self.groupTriggerAdd.clicked.connect(self.pushedAddGroupTrigger)
         self.trigger_state = {}
         self.chosenChannels = []
         self.editWidgets = [self.recordLengthSpinBox,
@@ -34,6 +37,8 @@ class TriggerConfig(QtWidgets.QWidget):
         # Initialize these two to a value that definitly won't match next value
         self.lastPretrigLength = -1
         self.lastRecordLength = -1
+
+        self.groupConnections = {}
 
     def _closing(self):
         """The main window calls this to block any editingFinished events from
@@ -250,6 +255,42 @@ class TriggerConfig(QtWidgets.QWidget):
             self.edgeRiseFallBoth.setCurrentIndex(1)
         else:
             self.edgeRiseFallBoth.setCurrentIndex(0)
+
+    @pyqtSlot()
+    def pushedAddGroupTrigger(self):
+        print("Add Group Trigger not implemented yet.")
+        # Parse trigger list
+        rx = self.groupTriggerReceivers.text()
+        rxsplit = rx.replace(",", " ").split()  # split on comma and/or white space
+        rx_channums = []
+        for x in rxsplit:
+            try:
+                rx_channums.append(int(x))
+            except ValueError:
+                pass
+        if len(rx_channums) == 0:
+            print("Could not parse channel list '{}'".format(rx))
+            return
+        sourcenum = self.groupTriggerSource.value()
+        print("Channel list is {}->{}".format(sourcenum, rx_channums))
+        self.groupConnections[sourcenum] = rx_channums
+        sources = [s for s in self.groupConnections]
+        sources.sort()
+        text = "Active group trigger sources: {}".format(sources)
+        self.groupTriggerActive.setText(text)
+        normalized_rx = ",".join([str(r) for r in rx_channums])
+        self.groupTriggerReceivers.setText(normalized_rx)
+        # self.client.call("")
+
+    @pyqtSlot()
+    def pushedClearGroupTrigger(self):
+        self.coupleFBToErrCheckBox.setChecked(False)
+        self.coupleErrToFBCheckBox.setChecked(False)
+        self.groupConnections.clear()
+        text = "Active group trigger sources: <none>"
+        self.groupTriggerActive.setText(text)
+        print("Clear Group Trigger not implemented yet.")
+        # self.client.call("")
 
     @pyqtSlot()
     def checkedCoupleFBErr(self):

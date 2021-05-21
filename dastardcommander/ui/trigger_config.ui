@@ -665,8 +665,8 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <layout class="QGridLayout" name="couplingGridLayout" columnstretch="0,0,0" columnminimumwidth="0,0,0">
+      <item row="3" column="0">
+       <layout class="QGridLayout" name="couplingGridLayout" columnstretch="0,0" columnminimumwidth="0,0">
         <property name="topMargin">
          <number>2</number>
         </property>
@@ -688,7 +688,7 @@ trigger the corresponding FB chan (Lancero only).</string>
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="groupTriggerClearAll">
           <property name="text">
            <string>Clear all group triggers</string>
           </property>
@@ -709,6 +709,13 @@ the corresponding Error chan (Lancero only).</string>
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="groupTriggerActive">
+        <property name="text">
+         <string>Active group trigger sources: &lt;none&gt;</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
