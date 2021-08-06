@@ -821,11 +821,18 @@ class MainWindow(QtWidgets.QMainWindow):
             if v.isChecked():
                 activate.append(k)
 
+        if self.unwrapBiasSlider.value() == 3:
+            bias = +1
+        elif self.unwrapBiasSlider.value() == 1:
+            bias = -1
+        else:
+            bias = 0
         config = {
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
             "Unwrapping": not self.neverUnwrapCheck.isChecked(),
             "UnwrapResetSamp": self.phaseResetSamplesBox.value(),
+            "Bias": bias
         }
         okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
         if not okay:
