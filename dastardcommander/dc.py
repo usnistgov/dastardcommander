@@ -867,12 +867,11 @@ class MainWindow(QtWidgets.QMainWindow):
             if v.isChecked():
                 activate.append(k)
 
-        if self.unwrapBiasCheck.isChecked():
-            if self.phasePosPulses.isChecked():
-                bias = +1
-            else:
-                bias = -1
+        if self.phasePosPulses.isChecked():
+            pulsesign = bias = +1
         else:
+            pulsesign = bias = -1
+        if not self.unwrapBiasCheck.isChecked():
             bias = 0
         config = {
             "ActiveCards": activate,
@@ -880,6 +879,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "Unwrapping": not self.neverUnwrapCheck.isChecked(),
             "UnwrapResetSamp": self.phaseResetSamplesBox.value(),
             "HostPortUDP": [],
+            "PulseSign": pulsesign,
             "Bias": bias,
         }
         for id in (1, 2, 3, 4):
