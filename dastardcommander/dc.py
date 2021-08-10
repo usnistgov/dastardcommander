@@ -135,6 +135,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pushButton_initializeCrate.clicked.connect(self.crateInitialize)
         self.pushButton_startAndAutotune.clicked.connect(self.crateStartAndAutotune)
 
+        self.phasePosPulses.clicked.connect(self.updateBiasText)
+        self.phaseNegPulses.clicked.connect(self.updateBiasText)
+        self.unwrapBiasCheck.clicked.connect(self.updateBiasText)
+
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
         self.zmqthread = QtCore.QThread()
@@ -863,10 +867,11 @@ class MainWindow(QtWidgets.QMainWindow):
             if v.isChecked():
                 activate.append(k)
 
-        if self.unwrapBiasSlider.value() == 3:
-            bias = +1
-        elif self.unwrapBiasSlider.value() == 1:
-            bias = -1
+        if self.unwrapBiasCheck.isChecked():
+            if self.phasePosPulses.isChecked():
+                bias = +1
+            else:
+                bias = -1
         else:
             bias = 0
         config = {
@@ -895,6 +900,17 @@ class MainWindow(QtWidgets.QMainWindow):
             return False
         print("Starting Abaco")
         return True
+
+    @pyqtSlot()
+    def updateBiasText(self):
+        if self.unwrapBiasCheck.isChecked():
+            if self.phasePosPulses.isChecked():
+                label = "Pos bias: [-.12, +.88]"
+            else:
+                label = "Neg bias: [-.88, +.12]"
+        else:
+            label = "No bias: [-.50, +.50]"
+        self.biasTextLabel.setText(label)
 
     @pyqtSlot()
     def loadProjectorsBasis(self):
