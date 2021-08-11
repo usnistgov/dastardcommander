@@ -868,11 +868,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 activate.append(k)
 
         if self.phasePosPulses.isChecked():
-            pulsesign = bias = +1
+            pulsesign = +1
         else:
-            pulsesign = bias = -1
-        if not self.unwrapBiasCheck.isChecked():
-            bias = 0
+            pulsesign = -1
+        unwrapBias = self.unwrapBiasCheck.isChecked()
         config = {
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
@@ -880,7 +879,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "UnwrapResetSamp": self.phaseResetSamplesBox.value(),
             "HostPortUDP": [],
             "PulseSign": pulsesign,
-            "Bias": bias,
+            "Bias": unwrapBias,
         }
         for id in (1, 2, 3, 4):
             if not self.__dict__["udpActive%d" % id].isChecked():
