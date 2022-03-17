@@ -296,13 +296,11 @@ class TriggerConfig(QtWidgets.QWidget):
 
     def handleGroupTriggerMessage(self, msg):
         """Handle the group trigger state message"""
-        print("Message: ", msg)
-        conn = msg["Connections"]
-
         # Store sources and receivers in set objects to de-duplicate the numbering.
         # Do not store the complete set of src->rx connections, b/c there's no GUI
         # purpose to doing so at this time.
         allsrc, allrx = set(), set()
+        conn = msg["Connections"]
         for src, rx in conn.items():
             allsrc.add(src)
             allrx.update(rx)
