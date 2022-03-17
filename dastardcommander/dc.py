@@ -19,7 +19,7 @@ import sys
 import os
 import zmq
 
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 import numpy as np
 # Qt5 imports
 import PyQt5.uic
@@ -36,7 +36,7 @@ from . import writing
 from . import projectors
 from . import observe
 from . import workflow
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -166,7 +166,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot(str, str)
     def updateReceived(self, topic, message):
-
         try:
             d = json.loads(message)
         except Exception as e:
@@ -179,8 +178,8 @@ class MainWindow(QtWidgets.QMainWindow):
                            "EXTERNALTRIGGER", "DATADROP"])  # add "ALIVE"
         if topic not in quietTopics or self.nmsg < 15:
             print("%s %5d: %s" % (topic, self.nmsg, d))
-        if self.nmsg == 15:
-            print("For message 15+, suppressing {} messages.".format(quietTopics))
+        if self.nmsg == 21:
+            print("After message #20, suppressing {} messages.".format(quietTopics))
 
         if topic == "ALIVE":
             self.heartbeat(d)
@@ -234,6 +233,9 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
                 self.triggerTabSimple.handleTriggerMessage(d, self.nmsg)
+
+            elif topic == "GROUPTRIGGER":
+                self.triggerTab.handleGroupTriggerMessage(d)
 
             elif topic == "WRITING":
                 self.writingTab.handleWritingMessage(d)
@@ -315,7 +317,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     mix = d[1]
                     self.doubleSpinBox_MixFraction.setValue(mix)
                 except Exception as e:
-                    print("Could not set mix; selecting 0")
+                    print("Could not set mix; selecting 0 (exception: {})".format(e))
                     self.doubleSpinBox_MixFraction.setValue(0.0)
 
             elif topic == "EXTERNALTRIGGER":
@@ -561,14 +563,14 @@ class MainWindow(QtWidgets.QMainWindow):
         unperturbed_guis = [1, 2, 3, 4]
         sources_to_insert = []
         if len(sources) > 4:
-            print("UDP sources '%s' is too long. Truncating to 4 sources".format(sources))
+            print("UDP sources '{}' is too long. Truncating to 4 sources".format(sources))
             sources = sources[:4]
 
         localsynonyms = ("127.0.0.1", "localhost", "localhost.local")
         for text in sources:
             parts = text.split(":")
             if len(parts) != 2:
-                print("Could not parse '%s' as host:port".format(text))
+                print("Could not parse '{}' as host:port".format(text))
                 return
             host, port = parts[0], int(parts[1])
             found = False

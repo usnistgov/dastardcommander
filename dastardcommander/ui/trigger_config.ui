@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>620</width>
-    <height>655</height>
+    <width>665</width>
+    <height>679</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -648,8 +648,21 @@
         </item>
         <item>
          <widget class="QPushButton" name="groupTriggerAdd">
+          <property name="toolTip">
+           <string>Add these groupings</string>
+          </property>
           <property name="text">
            <string>Add</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="groupTriggerRemove">
+          <property name="toolTip">
+           <string>Remove these groupings</string>
+          </property>
+          <property name="text">
+           <string>Rem</string>
           </property>
          </widget>
         </item>
@@ -666,6 +679,27 @@
        </widget>
       </item>
       <item row="3" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="groupTriggerActiveSrc">
+          <property name="text">
+           <string>Active group trigger sources: &lt;none&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="groupTriggerActiveRx">
+          <property name="text">
+           <string>Active group trigger receivers: &lt;none&gt;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="0">
        <layout class="QGridLayout" name="couplingGridLayout" columnstretch="0,0" columnminimumwidth="0,0">
         <property name="topMargin">
          <number>2</number>
@@ -690,7 +724,7 @@ trigger the corresponding FB chan (Lancero only).</string>
         <item row="2" column="1">
          <widget class="QPushButton" name="groupTriggerClearAll">
           <property name="text">
-           <string>Clear all group triggers</string>
+           <string>Clear all group triggers and coupling</string>
           </property>
          </widget>
         </item>
@@ -709,13 +743,6 @@ the corresponding Error chan (Lancero only).</string>
          </widget>
         </item>
        </layout>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="groupTriggerActive">
-        <property name="text">
-         <string>Active group trigger sources: &lt;none&gt;</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>
