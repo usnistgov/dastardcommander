@@ -75,4 +75,5 @@ class JSONClient(object):
         if not self._closed:
             self._closed = True
             self._socket.close()
-            self.qtParent.close()
+            if self.qtParent is not None:
+                self.qtParent.close()
