@@ -6,6 +6,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 # other non qt imports
 import os
 
+
 class TriggerConfig(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
 
@@ -20,9 +21,12 @@ class TriggerConfig(QtWidgets.QWidget):
         self.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
-        self.auto1psModeButton.pressed.connect(self.go1psMode)
-        self.noiseModeButton.pressed.connect(self.goNoiseMode)
-        self.pulseModeButton.pressed.connect(self.goPulseMode)
+        self.auto1psModeButton.clicked.connect(self.go1psMode)
+        self.noiseModeButton.clicked.connect(self.goNoiseMode)
+        self.pulseModeButton.clicked.connect(self.goPulseMode)
+        self.groupTriggerClearAll.clicked.connect(self.pushedClearGroupTrigger)
+        self.groupTriggerAdd.clicked.connect(self.pushedAddGroupTrigger)
+        self.groupTriggerRemove.clicked.connect(self.pushedRemoveGroupTrigger)
         self.trigger_state = {}
         self.chosenChannels = []
         self.editWidgets = [self.recordLengthSpinBox,
@@ -250,6 +254,75 @@ class TriggerConfig(QtWidgets.QWidget):
             self.edgeRiseFallBoth.setCurrentIndex(1)
         else:
             self.edgeRiseFallBoth.setCurrentIndex(0)
+
+    @pyqtSlot()
+    def pushedAddGroupTrigger(self):
+        self.changeGroupTrigger(True)
+
+    @pyqtSlot()
+    def pushedRemoveGroupTrigger(self):
+        self.changeGroupTrigger(False)
+
+    def changeGroupTrigger(self, add):
+        # Parse trigger list
+        rx = self.groupTriggerReceivers.text()
+        rxsplit = rx.replace(",", " ").split()  # split on comma and/or white space
+        rx_channums = []
+        for x in rxsplit:
+            try:
+                rx_channums.append(int(x))
+            except ValueError:
+                pass
+        if len(rx_channums) == 0:
+            print("Could not parse channel list '{}'".format(rx))
+            return
+        sourcenum = self.groupTriggerSource.value()
+        # print("Channel list is {:d}->{}".format(sourcenum, rx_channums))
+        state = {"Connections": {sourcenum: rx_channums}}
+        request = "SourceControl.AddGroupTriggerCoupling"
+        if not add:
+            request = "SourceControl.DeleteGroupTriggerCoupling"
+        self.client.call(request, state)
+
+    @pyqtSlot()
+    def pushedClearGroupTrigger(self):
+        self.coupleFBToErrCheckBox.setChecked(False)
+        self.coupleErrToFBCheckBox.setChecked(False)
+        text = "Active group trigger sources: <none>"
+        self.groupTriggerActiveSrc.setText(text)
+        self.groupTriggerActiveRx.setText(text)
+        dummy = True
+        self.client.call("SourceControl.StopTriggerCoupling", dummy)
+
+    def handleGroupTriggerMessage(self, msg):
+        """Handle the group trigger state message"""
+        # Store sources and receivers in set objects to de-duplicate the numbering.
+        # Do not store the complete set of src->rx connections, b/c there's no GUI
+        # purpose to doing so at this time.
+        allsrc, allrx = set(), set()
+        conn = msg["Connections"]
+        for src, rx in conn.items():
+            allsrc.add(src)
+            allrx.update(rx)
+
+        # Update the two GUI labels that list the active sources and receivers
+        for cnum_set, name, gui_label in zip(
+            (allsrc, allrx),
+            ("sources", "receivers"),
+            (self.groupTriggerActiveSrc, self.groupTriggerActiveRx)
+        ):
+            cnum_text = "<none>"
+            if len(cnum_set) > 0:
+                cnumbers = list(cnum_set)
+                cnumbers.sort()
+                cnum_list = [str(x) for x in cnumbers]
+                # Truncate a too-long list (replace last with ellipsis)
+                if len(cnumbers) > 35:
+                    cnum_list = cnum_list[:35]
+                    cnum_list[-1] = "..."
+                cnum_text = "[{:}]".format(",".join(cnum_list))
+            text = "Active group trigger {}: {}".format(name, cnum_text)
+            gui_label.setText(text)
 
     @pyqtSlot()
     def checkedCoupleFBErr(self):
