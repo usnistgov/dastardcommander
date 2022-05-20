@@ -3,6 +3,12 @@ Dastard Commander is a GUI for operating [DASTARD](https://github.com/usnistgov/
 
 ## Installation
 
+### xcb
+```
+sudo apt install libxcb*
+```
+This is required for some sort of qt plugin, seems to cause problems as of Ubuntu 20 if you don't do it.
+
 ### Pip in a virtualenv (recommended)
 This project requires Python 3. We suggest that you use virtualenv and also that you upgrade pip before installing. Suppose you want to put dastardcommander in a virtualenv located at `~/qsp/`. This setup would look like:
 ```
