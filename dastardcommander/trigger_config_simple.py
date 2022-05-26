@@ -34,9 +34,6 @@ class TwoPulseChoice(Enum):
         else:
             raise Exception()
 
-    def equals_int(self, i):
-        return self.value == i
-
 
 class TriggerConfigSimple(QtWidgets.QWidget):
     """Provide a simple trigger UI designed for doing the same thing everyday with the fewest choices."""

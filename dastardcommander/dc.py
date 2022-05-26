@@ -273,7 +273,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "ABACO":
                 self.updateAbacoCardChoices(d["AvailableCards"])
                 self.activateUDPsources(d["HostPortUDP"])
-                self.fillPhaseResetInfo(d["Unwrapping"], d["UnwrapResetSamp"])
+                self.fillPhaseResetInfo(d)
 
             elif topic == "CHANNELNAMES":
                 self.channel_names[:] = []   # Careful: don't replace the variable
@@ -591,9 +591,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__dict__["udpHost%d" % id].setText(host)
             self.__dict__["udpPort%d" % id].setValue(port)
 
-    def fillPhaseResetInfo(self, unwrapping, unwrapResetSamp):
-        self.neverUnwrapCheck.setChecked(not unwrapping)
-        self.phaseResetSamplesBox.setValue(unwrapResetSamp)
+    def fillPhaseResetInfo(self, d):
+        self.phaseResetSamplesBox.setValue(d["ResetAfter"])
+        enable, dropBits = d["Enable"], d["DropBits"]
+        if enable==True and dropBits==True:
+            index = AbacoUnwrapChoice.ENABLE
+        elif enable==False and dropBits==True:
+            index = AbacoUnwrapChoice.DISABLE_DROPBITS
+        elif enable==False and dropBits==False:
+            index = AbacoUnwrapChoice.DISABLE_NODROPBITS
+        else:
+            # invalid combo, default to enable
+            index = AbacoUnwrapChoice.ENABLE
+        self.comboBox_AbacoUnwrapEnable.setCurrentIndex(index)
 
     @pyqtSlot()
     def slotPhaseResetUpdate(self):
@@ -874,15 +884,27 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             pulsesign = -1
         unwrapBias = self.unwrapBiasCheck.isChecked()
+
+        index = self.comboBox_AbacoUnwrapEnable.currentIndex()
+        if index == AbacoUnwrapChoice.ENABLE:
+            enable, dropBits = True, True
+        elif index == AbacoUnwrapChoice.DISABLE_DROPBITS:
+            enable, dropBits = False, True
+        elif index == AbacoUnwrapChoice.DISABLE_NODROPBITS:
+            enable, dropBits = False, False
         config = {
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
-            "Unwrapping": not self.neverUnwrapCheck.isChecked(),
-            "UnwrapResetSamp": self.phaseResetSamplesBox.value(),
             "HostPortUDP": [],
+            # the following are fields of AbacoUnwrapOptions
+            # but I can't nest them in the dict to make it more clear :()
+            "Enable": enable,
+            "ResetAfter": self.phaseResetSamplesBox.value(),
             "PulseSign": pulsesign,
             "Bias": unwrapBias,
-        }
+            "DropBits": dropBits
+            }
+
         for id in (1, 2, 3, 4):
             if not self.__dict__["udpActive%d" % id].isChecked():
                 continue
@@ -1129,6 +1151,11 @@ def main():
         disconnectReason = dc.disconnectReason
         if not dc.reconnect:
             sys.exit(retval)
+
+class AbacoUnwrapChoice():
+    ENABLE = 0
+    DISABLE_DROPBITS = 1
+    DISABLE_NODROPBITS = 2
 
 
 if __name__ == "__main__":
