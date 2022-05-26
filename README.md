@@ -15,7 +15,7 @@ This project requires Python 3. We suggest that you use virtualenv and also that
 python3 -m venv ~/qsp
 source ~/qsp/bin/activate
 pip install --upgrade pip
-pip install -e git+https://github.com/usnistgov/dastardcommander#egg=dastardcommander
+pip install -e git+ssh://git@github.com/usnistgov/dastardcommander.git#egg=dastardcommander
 ```
 
 The first line is safe (but optional) if you already have a virtualenv at `~/qsp/`. Thanks to [nist-qsp-tdm](https://bitbucket.org/nist_microcal/nist-qsp-tdm/src/master/) for these instructions.
