@@ -103,6 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.phaseResetSamplesBox.editingFinished.connect(self.slotPhaseResetUpdate)
         self.phaseResetMultiplierBox.editingFinished.connect(self.slotPhaseResetUpdate)
+        self.comboBox_AbacoUnwrapEnable.currentIndexChanged.connect(self.slotPhaseUnwrapComboUpdate)
         self.triggerTab.recordLengthSpinBox.valueChanged.connect(self.slotPhaseResetUpdate)
 
         self.writingTab = writing.WritingControl(None, host, self.client)
@@ -593,17 +594,29 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def fillPhaseResetInfo(self, d):
         self.phaseResetSamplesBox.setValue(d["ResetAfter"])
-        enable, dropBits = d["Enable"], d["DropBits"]
-        if enable==True and dropBits==True:
-            index = AbacoUnwrapChoice.ENABLE
-        elif enable==False and dropBits==True:
-            index = AbacoUnwrapChoice.DISABLE_DROPBITS
-        elif enable==False and dropBits==False:
-            index = AbacoUnwrapChoice.DISABLE_NODROPBITS
+        unwrap, dropBits = d["Unwrap"], d["RescaleRaw"]
+        if unwrap and dropBits:
+            index = AbacoUnwrapChoice.UNWRAP
+        elif not unwrap and dropBits:
+            index = AbacoUnwrapChoice.DROPBITS_ONLY
+        elif not unwrap and not dropBits:
+            index = AbacoUnwrapChoice.NODROPBITS
         else:
-            # invalid combo, default to enable
-            index = AbacoUnwrapChoice.ENABLE
+            # invalid combination; default to unwrap
+            index = AbacoUnwrapChoice.UNWRAP
         self.comboBox_AbacoUnwrapEnable.setCurrentIndex(index)
+
+    @pyqtSlot(int)
+    def slotPhaseUnwrapComboUpdate(self, index):
+        """When the phase unwrapping combo box changes (self.comboBox_AbacoUnwrapEnable),
+        enable or disable all the GUI elements that control unwrapping parameters. Enable
+        if changed to the AbacoUnwrapChoice.UNWRAP state; otherwise disable."""
+        toenable = (index == AbacoUnwrapChoice.UNWRAP)
+        for widget in (self.unwrapBiasCheck, self.phaseNegPulses, self.phasePosPulses,
+                       self.biasTextLabel, self.phaseResetSamplesBox, self.phaseResetMultiplierBox,
+                       self.phaseResetSamplesLabel, self.phaseResetMultiplierLabel,
+                       self.resetAfterLabel):
+            widget.setEnabled(toenable)
 
     @pyqtSlot()
     def slotPhaseResetUpdate(self):
@@ -886,24 +899,24 @@ class MainWindow(QtWidgets.QMainWindow):
         unwrapBias = self.unwrapBiasCheck.isChecked()
 
         index = self.comboBox_AbacoUnwrapEnable.currentIndex()
-        if index == AbacoUnwrapChoice.ENABLE:
-            enable, dropBits = True, True
-        elif index == AbacoUnwrapChoice.DISABLE_DROPBITS:
-            enable, dropBits = False, True
-        elif index == AbacoUnwrapChoice.DISABLE_NODROPBITS:
-            enable, dropBits = False, False
+        if index == AbacoUnwrapChoice.UNWRAP:
+            unwrap, dropBits = True, True
+        elif index == AbacoUnwrapChoice.DROPBITS_ONLY:
+            unwrap, dropBits = False, True
+        elif index == AbacoUnwrapChoice.NODROPBITS:
+            unwrap, dropBits = False, False
         config = {
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
             "HostPortUDP": [],
             # the following are fields of AbacoUnwrapOptions
             # but I can't nest them in the dict to make it more clear :()
-            "Enable": enable,
+            "Unwrap": unwrap,
             "ResetAfter": self.phaseResetSamplesBox.value(),
             "PulseSign": pulsesign,
             "Bias": unwrapBias,
-            "DropBits": dropBits
-            }
+            "RescaleRaw": dropBits
+        }
 
         for id in (1, 2, 3, 4):
             if not self.__dict__["udpActive%d" % id].isChecked():
@@ -1152,10 +1165,11 @@ def main():
         if not dc.reconnect:
             sys.exit(retval)
 
+
 class AbacoUnwrapChoice():
-    ENABLE = 0
-    DISABLE_DROPBITS = 1
-    DISABLE_NODROPBITS = 2
+    UNWRAP = 0
+    DROPBITS_ONLY = 1
+    NODROPBITS = 2
 
 
 if __name__ == "__main__":
