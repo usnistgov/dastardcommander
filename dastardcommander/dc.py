@@ -593,12 +593,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def fillPhaseResetInfo(self, d):
         self.phaseResetSamplesBox.setValue(d["ResetAfter"])
-        enable, dropBits = d["Enable"], d["DropBits"]
-        if enable==True and dropBits==True:
+        enable, overRideDropBitsBool, overRideDropBitsValue = d["Enable"], d["OverrideAbacoDefaultBitsToDrop"], d["OverrideBitsToDropValue"]
+        if enable==True and overRideDropBitsBool==False:
             index = AbacoUnwrapChoice.ENABLE
-        elif enable==False and dropBits==True:
+        elif enable==False and overRideDropBitsBool==False:
             index = AbacoUnwrapChoice.DISABLE_DROPBITS
-        elif enable==False and dropBits==False:
+        elif enable==False and overRideDropBitsBool==True:
             index = AbacoUnwrapChoice.DISABLE_NODROPBITS
         else:
             # invalid combo, default to enable
@@ -887,11 +887,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         index = self.comboBox_AbacoUnwrapEnable.currentIndex()
         if index == AbacoUnwrapChoice.ENABLE:
-            enable, dropBits = True, True
+            enable, overrideDropBits = True, False
         elif index == AbacoUnwrapChoice.DISABLE_DROPBITS:
-            enable, dropBits = False, True
+            enable, overrideDropBits = False, False
         elif index == AbacoUnwrapChoice.DISABLE_NODROPBITS:
-            enable, dropBits = False, False
+            enable, overrideDropBits = False, True
         config = {
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
@@ -902,7 +902,10 @@ class MainWindow(QtWidgets.QMainWindow):
             "ResetAfter": self.phaseResetSamplesBox.value(),
             "PulseSign": pulsesign,
             "Bias": unwrapBias,
-            "DropBits": dropBits
+            "OverrideAbacoDefaultBitsToDrop": overrideDropBits,
+            "OverrideBitsToDropValue": 0 # anytime we override, we want to drop zero for the ni2dastard.py script
+            # if we don't override, the value doesn't matter, so 0 is still fine
+            # could be done by leaving the field out, but this is easier to understand and document
             }
 
         for id in (1, 2, 3, 4):
