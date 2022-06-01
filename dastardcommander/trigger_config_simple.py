@@ -1,12 +1,11 @@
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QSettings
+from PyQt5.QtCore import QSettings
 
 # other non qt imports
 import os
 from enum import Enum
-import numpy as np
 import time
 from . import projectors
 
@@ -33,9 +32,6 @@ class TwoPulseChoice(Enum):
             return "Two shorter records"
         else:
             raise Exception()
-
-    def equals_int(self, i):
-        return self.value == i
 
 
 class TriggerConfigSimple(QtWidgets.QWidget):

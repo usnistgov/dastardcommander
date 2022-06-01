@@ -103,6 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.phaseResetSamplesBox.editingFinished.connect(self.slotPhaseResetUpdate)
         self.phaseResetMultiplierBox.editingFinished.connect(self.slotPhaseResetUpdate)
+        self.comboBox_AbacoUnwrapEnable.currentIndexChanged.connect(self.slotPhaseUnwrapComboUpdate)
         self.triggerTab.recordLengthSpinBox.valueChanged.connect(self.slotPhaseResetUpdate)
 
         self.writingTab = writing.WritingControl(None, host, self.client)
@@ -273,7 +274,7 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "ABACO":
                 self.updateAbacoCardChoices(d["AvailableCards"])
                 self.activateUDPsources(d["HostPortUDP"])
-                self.fillPhaseResetInfo(d["Unwrapping"], d["UnwrapResetSamp"])
+                self.fillPhaseResetInfo(d)
 
             elif topic == "CHANNELNAMES":
                 self.channel_names[:] = []   # Careful: don't replace the variable
@@ -591,9 +592,31 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__dict__["udpHost%d" % id].setText(host)
             self.__dict__["udpPort%d" % id].setValue(port)
 
-    def fillPhaseResetInfo(self, unwrapping, unwrapResetSamp):
-        self.neverUnwrapCheck.setChecked(not unwrapping)
-        self.phaseResetSamplesBox.setValue(unwrapResetSamp)
+    def fillPhaseResetInfo(self, d):
+        self.phaseResetSamplesBox.setValue(d["ResetAfter"])
+        unwrap, dropBits = d["Unwrap"], d["RescaleRaw"]
+        if unwrap and dropBits:
+            index = AbacoUnwrapChoice.UNWRAP
+        elif not unwrap and dropBits:
+            index = AbacoUnwrapChoice.DROPBITS_ONLY
+        elif not unwrap and not dropBits:
+            index = AbacoUnwrapChoice.NODROPBITS
+        else:
+            # invalid combination; default to unwrap
+            index = AbacoUnwrapChoice.UNWRAP
+        self.comboBox_AbacoUnwrapEnable.setCurrentIndex(index)
+
+    @pyqtSlot(int)
+    def slotPhaseUnwrapComboUpdate(self, index):
+        """When the phase unwrapping combo box changes (self.comboBox_AbacoUnwrapEnable),
+        enable or disable all the GUI elements that control unwrapping parameters. Enable
+        if changed to the AbacoUnwrapChoice.UNWRAP state; otherwise disable."""
+        toenable = (index == AbacoUnwrapChoice.UNWRAP)
+        for widget in (self.unwrapBiasCheck, self.phaseNegPulses, self.phasePosPulses,
+                       self.biasTextLabel, self.phaseResetSamplesBox, self.phaseResetMultiplierBox,
+                       self.phaseResetSamplesLabel, self.phaseResetMultiplierLabel,
+                       self.resetAfterLabel):
+            widget.setEnabled(toenable)
 
     @pyqtSlot()
     def slotPhaseResetUpdate(self):
@@ -874,15 +897,27 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             pulsesign = -1
         unwrapBias = self.unwrapBiasCheck.isChecked()
+
+        index = self.comboBox_AbacoUnwrapEnable.currentIndex()
+        if index == AbacoUnwrapChoice.UNWRAP:
+            unwrap, dropBits = True, True
+        elif index == AbacoUnwrapChoice.DROPBITS_ONLY:
+            unwrap, dropBits = False, True
+        elif index == AbacoUnwrapChoice.NODROPBITS:
+            unwrap, dropBits = False, False
         config = {
             "ActiveCards": activate,
             "AvailableCards": [],   # This is filled in only by server, not us.
-            "Unwrapping": not self.neverUnwrapCheck.isChecked(),
-            "UnwrapResetSamp": self.phaseResetSamplesBox.value(),
             "HostPortUDP": [],
+            # the following are fields of AbacoUnwrapOptions
+            # but I can't nest them in the dict to make it more clear :()
+            "Unwrap": unwrap,
+            "ResetAfter": self.phaseResetSamplesBox.value(),
             "PulseSign": pulsesign,
             "Bias": unwrapBias,
+            "RescaleRaw": dropBits
         }
+
         for id in (1, 2, 3, 4):
             if not self.__dict__["udpActive%d" % id].isChecked():
                 continue
@@ -1129,6 +1164,12 @@ def main():
         disconnectReason = dc.disconnectReason
         if not dc.reconnect:
             sys.exit(retval)
+
+
+class AbacoUnwrapChoice():
+    UNWRAP = 0
+    DROPBITS_ONLY = 1
+    NODROPBITS = 2
 
 
 if __name__ == "__main__":
