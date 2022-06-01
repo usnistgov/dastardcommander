@@ -1425,13 +1425,22 @@
                 </layout>
                </item>
                <item>
-                <widget class="QCheckBox" name="neverUnwrapCheck">
-                 <property name="toolTip">
-                  <string extracomment="Disable phase unwrapping completely">Disable phase unwrapping for Abaco data</string>
-                 </property>
-                 <property name="text">
-                  <string>Never unwrap</string>
-                 </property>
+                <widget class="QComboBox" name="comboBox_AbacoUnwrapEnable">
+                 <item>
+                  <property name="text">
+                   <string>Unwrap</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Never unwrap, still drop bits</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Never unwrap, do not drop bits</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
               </layout>
