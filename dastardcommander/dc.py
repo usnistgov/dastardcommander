@@ -21,6 +21,7 @@ import zmq
 
 from collections import defaultdict
 import numpy as np
+
 # Qt5 imports
 import PyQt5.uic
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -36,7 +37,8 @@ from . import writing
 from . import projectors
 from . import observe
 from . import workflow
-__version__ = '0.2.5'
+
+__version__ = "0.2.5"
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -63,27 +65,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings = settings
 
         QtWidgets.QMainWindow.__init__(self, parent)
-        self.setWindowIcon(QtGui.QIcon('dc.png'))
+        self.setWindowIcon(QtGui.QIcon("dc.png"))
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
-        self.setWindowTitle("Dastard Commander %s    (connected to %s:%d)" %
-                            (__version__, host, port))
+        self.setWindowTitle(
+            "Dastard Commander %s    (connected to %s:%d)" % (__version__, host, port)
+        )
         self.reconnect = False
         self.disconnectReason = ""
-        self.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
+        self.disconnectButton.clicked.connect(
+            lambda: self.closeReconnect("disconnect button")
+        )
         self.actionDisconnect.triggered.connect(
-            lambda: self.closeReconnect("disconnect menu item"))
+            lambda: self.closeReconnect("disconnect menu item")
+        )
         self.startStopButton.clicked.connect(self.startStop)
         self.dataSourcesStackedWidget.setCurrentIndex(self.dataSource.currentIndex())
         self.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
         self.actionLoad_Mix.triggered.connect(self.loadMix)
         self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
         self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
-        self.actionAdvanced_Triggering.triggered.connect(lambda: self.setTriggerTabVisible(False))
+        self.actionAdvanced_Triggering.triggered.connect(
+            lambda: self.setTriggerTabVisible(False)
+        )
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
-        self.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
+        self.pushButton_sendExperimentStateLabel.clicked.connect(
+            self.sendExperimentStateLabel
+        )
         self.pushButton_pauseExperimental.clicked.connect(self.handlePauseExperimental)
-        self.pushButton_unpauseExperimental.clicked.connect(self.handleUnpauseExperimental)
+        self.pushButton_unpauseExperimental.clicked.connect(
+            self.handleUnpauseExperimental
+        )
         self.sourceIsRunning = False
         self.sourceIsTDM = False
         self.cols = 0
@@ -103,8 +115,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.phaseResetSamplesBox.editingFinished.connect(self.slotPhaseResetUpdate)
         self.phaseResetMultiplierBox.editingFinished.connect(self.slotPhaseResetUpdate)
-        self.comboBox_AbacoUnwrapEnable.currentIndexChanged.connect(self.slotPhaseUnwrapComboUpdate)
-        self.triggerTab.recordLengthSpinBox.valueChanged.connect(self.slotPhaseResetUpdate)
+        self.comboBox_AbacoUnwrapEnable.currentIndexChanged.connect(
+            self.slotPhaseUnwrapComboUpdate
+        )
+        self.triggerTab.recordLengthSpinBox.valueChanged.connect(
+            self.slotPhaseResetUpdate
+        )
 
         self.writingTab = writing.WritingControl(None, host, self.client)
         self.tabWriting.layout().addWidget(self.writingTab)
@@ -113,10 +129,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
         self.tabObserve.layout().addWidget(self.observeTab)
         self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
-        self.triggerTab.changedTriggerStateSig.connect(self.observeWindow.resetIntegration)
+        self.triggerTab.changedTriggerStateSig.connect(
+            self.observeWindow.resetIntegration
+        )
 
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
-        self.workflowTab.projectorsLoadedSig.connect(self.writingTab.checkBox_OFF.setChecked)
+        self.workflowTab.projectorsLoadedSig.connect(
+            self.writingTab.checkBox_OFF.setChecked
+        )
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
@@ -170,13 +190,16 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             d = json.loads(message)
         except Exception as e:
-            print("Error processing status message [topic,msg]: '%s', '%s'" % (
-                topic, message))
+            print(
+                "Error processing status message [topic,msg]: '%s', '%s'"
+                % (topic, message)
+            )
             print("Error is: %s" % e)
             return
 
-        quietTopics = set(["TRIGGERRATE", "NUMBERWRITTEN",
-                           "EXTERNALTRIGGER", "DATADROP"])  # add "ALIVE"
+        quietTopics = set(
+            ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
+        )  # add "ALIVE"
         if topic not in quietTopics or self.nmsg < 15:
             print("%s %5d: %s" % (topic, self.nmsg, d))
         if self.nmsg == 21:
@@ -197,15 +220,19 @@ class MainWindow(QtWidgets.QMainWindow):
             if topic == "STATUS":
                 is_running = d["Running"]
                 self._setGuiRunning(is_running)
-                self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
-                self.triggerTabSimple.handleNsamplesNpresamplesMessage(d["Nsamples"], d["Npresamp"])
+                self.triggerTab.updateRecordLengthsFromServer(
+                    d["Nsamples"], d["Npresamp"]
+                )
+                self.triggerTabSimple.handleNsamplesNpresamplesMessage(
+                    d["Nsamples"], d["Npresamp"]
+                )
                 self.workflowTab.handleStatusUpdate(d)
 
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
                 self.samplePeriod = d["SamplePeriod"]
 
-                self.sourceIsTDM = (source == "Lancero")
+                self.sourceIsTDM = source == "Lancero"
                 if source == "Triangles":
                     self.dataSource.setCurrentIndex(0)
                     self.triangleNchan.setValue(nchan)
@@ -277,7 +304,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fillPhaseResetInfo(d)
 
             elif topic == "CHANNELNAMES":
-                self.channel_names[:] = []   # Careful: don't replace the variable
+                self.channel_names[:] = []  # Careful: don't replace the variable
                 self.channel_prefixes.clear()
                 for name in d:
                     self.channel_names.append(name)
@@ -356,13 +383,13 @@ class MainWindow(QtWidgets.QMainWindow):
             if sp < 1000:
                 per = f"{sp} ns"
             elif sp < 10000:
-                per = "{:.3f} µs".format(sp/1000)
+                per = "{:.3f} µs".format(sp / 1000)
             elif sp < 100000:
-                per = "{:.2f} µs".format(sp/1000)
+                per = "{:.2f} µs".format(sp / 1000)
             elif sp < 1000000:
-                per = "{:.1f} µs".format(sp/1000)
+                per = "{:.1f} µs".format(sp / 1000)
             else:
-                per = "{:.3f} ms".format(sp/1e6)
+                per = "{:.3f} ms".format(sp / 1e6)
             status = f"{source_name} active: sample period {per}, {ngroups} groups x {nrows} chans per group."
         else:
             status = "Data source stopped."
@@ -401,7 +428,8 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 hwrate = hwmb / t
                 self.statusFreshLabel.setText(
-                    "%7.3f MB/s received (%7.3f processed)" % (hwrate, rate))
+                    "%7.3f MB/s received (%7.3f processed)" % (hwrate, rate)
+                )
                 color("orange")
 
     @pyqtSlot()
@@ -422,7 +450,7 @@ class MainWindow(QtWidgets.QMainWindow):
             args = ["microscope"]
             if not self.sourceIsTDM:
                 args.append("--no-error-channel")
-            args.append("tcp://%s:%d" % (self.host, self.port+2))
+            args.append("tcp://%s:%d" % (self.host, self.port + 2))
             sps = subprocess.Popen(args)
             self.microscopes.append(sps)
         except OSError as e:
@@ -442,8 +470,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def updateRoachSettings(self, settings):
         rates = settings["Rates"]
         if rates is not None:
-            rateguis = (self.roachFrameRateDoubleSpinBox_1,
-                        self.roachFrameRateDoubleSpinBox_2)
+            rateguis = (
+                self.roachFrameRateDoubleSpinBox_1,
+                self.roachFrameRateDoubleSpinBox_2,
+            )
             for r, rategui in zip(rates, rateguis):
                 rategui.setValue(r)
 
@@ -503,7 +533,7 @@ class MainWindow(QtWidgets.QMainWindow):
             cb.setChecked(True)
             cb.setSizePolicy(wide)
             self.lanceroCheckBoxes[c] = cb
-            layout.addWidget(cb, i+1, 0)
+            layout.addWidget(cb, i + 1, 0)
             sb = QtWidgets.QSpinBox()
             sb.setMinimum(0)
             sb.setMaximum(40)
@@ -511,7 +541,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sb.setSizePolicy(narrow)
             sb.setToolTip("Card delay for card %d" % c)
             self.lanceroDelays[c] = sb
-            layout.addWidget(sb, i+1, 1)
+            layout.addWidget(sb, i + 1, 1)
 
     def updateAbacoCardChoices(self, cards=None):
         """Build the check boxes to specify which Abaco cards to use.
@@ -549,7 +579,7 @@ class MainWindow(QtWidgets.QMainWindow):
             cb.setChecked(True)
             cb.setSizePolicy(wide)
             self.abacoCheckBoxes[c] = cb
-            layout.addWidget(cb, i+1, 0)
+            layout.addWidget(cb, i + 1, 0)
 
     def activateUDPsources(self, sources):
         """Given sources=["localhost:4000"] or similar, find GUI entries that matches elements
@@ -564,7 +594,9 @@ class MainWindow(QtWidgets.QMainWindow):
         unperturbed_guis = [1, 2, 3, 4]
         sources_to_insert = []
         if len(sources) > 4:
-            print("UDP sources '{}' is too long. Truncating to 4 sources".format(sources))
+            print(
+                "UDP sources '{}' is too long. Truncating to 4 sources".format(sources)
+            )
             sources = sources[:4]
 
         localsynonyms = ("127.0.0.1", "localhost", "localhost.local")
@@ -580,7 +612,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 guiport = self.__dict__["udpPort%d" % id].value()
                 if guiport != port:
                     continue
-                if guihost == host or (guihost in localsynonyms and host in localsynonyms):
+                if guihost == host or (
+                    guihost in localsynonyms and host in localsynonyms
+                ):
                     self.__dict__["udpActive%d" % id].setChecked(True)
                     found = True
                     unperturbed_guis.remove(id)
@@ -611,22 +645,35 @@ class MainWindow(QtWidgets.QMainWindow):
         """When the phase unwrapping combo box changes (self.comboBox_AbacoUnwrapEnable),
         enable or disable all the GUI elements that control unwrapping parameters. Enable
         if changed to the AbacoUnwrapChoice.UNWRAP state; otherwise disable."""
-        toenable = (index == AbacoUnwrapChoice.UNWRAP)
-        for widget in (self.unwrapBiasCheck, self.phaseNegPulses, self.phasePosPulses,
-                       self.biasTextLabel, self.phaseResetSamplesBox, self.phaseResetMultiplierBox,
-                       self.phaseResetSamplesLabel, self.phaseResetMultiplierLabel,
-                       self.resetAfterLabel):
+        toenable = index == AbacoUnwrapChoice.UNWRAP
+        for widget in (
+            self.unwrapBiasCheck,
+            self.phaseNegPulses,
+            self.phasePosPulses,
+            self.biasTextLabel,
+            self.phaseResetSamplesBox,
+            self.phaseResetMultiplierBox,
+            self.phaseResetSamplesLabel,
+            self.phaseResetMultiplierLabel,
+            self.resetAfterLabel,
+        ):
             widget.setEnabled(toenable)
 
     @pyqtSlot()
     def slotPhaseResetUpdate(self):
         sender = self.sender()
         if sender == self.phaseResetSamplesBox:
-            ratio = self.phaseResetSamplesBox.value() / self.triggerTab.recordLengthSpinBox.value()
+            ratio = (
+                self.phaseResetSamplesBox.value()
+                / self.triggerTab.recordLengthSpinBox.value()
+            )
             self.phaseResetMultiplierBox.setValue(ratio)
         elif sender == self.phaseResetMultiplierBox:
-            ns = self.phaseResetMultiplierBox.value() * self.triggerTab.recordLengthSpinBox.value()
-            self.phaseResetSamplesBox.setValue(int(ns+0.5))
+            ns = (
+                self.phaseResetMultiplierBox.value()
+                * self.triggerTab.recordLengthSpinBox.value()
+            )
+            self.phaseResetSamplesBox.setValue(int(ns + 0.5))
         elif sender == self.triggerTab.recordLengthSpinBox:
             reclen = self.triggerTab.recordLengthSpinBox.value()
             ratio = self.phaseResetSamplesBox.value() / reclen
@@ -637,9 +684,9 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = self.lanceroFiberLayout
         self.fiberBoxes = {}
         for i in range(nfibers):
-            box = QtWidgets.QCheckBox("%d" % (i+nfibers))
+            box = QtWidgets.QCheckBox("%d" % (i + nfibers))
             layout.addWidget(box, i, 1)
-            self.fiberBoxes[i+nfibers] = box
+            self.fiberBoxes[i + nfibers] = box
 
             box = QtWidgets.QCheckBox("%d" % i)
             layout.addWidget(box, i, 0)
@@ -669,11 +716,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def toggleParallelStreaming(self, parallelStream):
         """Make the parallel streaming connection between boxes."""
         nfibers = len(self.fiberBoxes)
-        npairs = nfibers//2
+        npairs = nfibers // 2
         if parallelStream:
             for i in range(npairs):
                 box1 = self.fiberBoxes[i]
-                box2 = self.fiberBoxes[i+npairs]
+                box2 = self.fiberBoxes[i + npairs]
                 either = box1.isChecked() or box2.isChecked()
                 box1.setChecked(either)
                 box2.setChecked(either)
@@ -682,7 +729,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             for i in range(npairs):
                 box1 = self.fiberBoxes[i]
-                box2 = self.fiberBoxes[i+npairs]
+                box2 = self.fiberBoxes[i + npairs]
                 box1.toggled.disconnect()
                 box2.toggled.disconnect()
         self.settings.setValue("parallelStream", parallelStream)
@@ -764,7 +811,9 @@ class MainWindow(QtWidgets.QMainWindow):
             result = self._startAbaco()
             return result
         else:
-            raise ValueError("invalid sourceID. have {}, want 0,1,2,3 or 4".format(sourceID))
+            raise ValueError(
+                "invalid sourceID. have {}, want 0,1,2,3 or 4".format(sourceID)
+            )
 
     def _startTriangle(self):
         config = {
@@ -786,7 +835,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _startSimPulse(self):
         a0 = self.simPulseAmplitude.value()
-        amps = [a0, a0*0.8, a0*0.6]
+        amps = [a0, a0 * 0.8, a0 * 0.6]
         config = {
             "Nchan": self.simPulseNchan.value(),
             "SampleRate": self.simPulseSampleRate.value(),
@@ -809,7 +858,7 @@ class MainWindow(QtWidgets.QMainWindow):
         mask = 0
         for k, v in list(self.fiberBoxes.items()):
             if v.isChecked():
-                mask |= (1 << k)
+                mask |= 1 << k
         print("Fiber mask: 0x%4.4x" % mask)
         clock = 125
         if self.lanceroClock50Button.isChecked():
@@ -842,16 +891,18 @@ class MainWindow(QtWidgets.QMainWindow):
             "ChanSepCards": chansep_cards,
             "ChanSepColumns": chansep_columns,
             "ActiveCards": activate,
-            "AvailableCards": [],   # This is filled in only by server, not us.
+            "AvailableCards": [],  # This is filled in only by server, not us.
         }
         print("START LANCERO CONFIG")
         print(config)
         okay, error = self.client.call(
-            "SourceControl.ConfigureLanceroSource", config, errorBox=True)
+            "SourceControl.ConfigureLanceroSource", config, errorBox=True
+        )
         if not okay:
             return False
         okay, error = self.client.call(
-            "SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False)
+            "SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False
+        )
         if not okay:
             return False
         self.triggerTab.coupleFBToErrCheckBox.setEnabled(True)
@@ -861,10 +912,7 @@ class MainWindow(QtWidgets.QMainWindow):
         return True
 
     def _startRoach(self):
-        config = {
-            "HostPort": [],
-            "Rates": []
-        }
+        config = {"HostPort": [], "Rates": []}
         for id in (1, 2):
             if not self.__dict__["roachDeviceCheckBox_%d" % id].isChecked():
                 continue
@@ -907,7 +955,7 @@ class MainWindow(QtWidgets.QMainWindow):
             unwrap, dropBits = False, False
         config = {
             "ActiveCards": activate,
-            "AvailableCards": [],   # This is filled in only by server, not us.
+            "AvailableCards": [],  # This is filled in only by server, not us.
             "HostPortUDP": [],
             # the following are fields of AbacoUnwrapOptions
             # but I can't nest them in the dict to make it more clear :()
@@ -915,7 +963,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "ResetAfter": self.phaseResetSamplesBox.value(),
             "PulseSign": pulsesign,
             "Bias": unwrapBias,
-            "RescaleRaw": dropBits
+            "RescaleRaw": dropBits,
         }
 
         for id in (1, 2, 3, 4):
@@ -967,18 +1015,28 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             dir = self.lastdir_mix
         fileName, _ = QFileDialog.getOpenFileName(
-            self, "Find Projectors Basis file", dir,
-            "Mix Files (*.npy);;All Files (*)", options=options)
+            self,
+            "Find Projectors Basis file",
+            dir,
+            "Mix Files (*.npy);;All Files (*)",
+            options=options,
+        )
         if fileName:
             self.lastdir_mix = os.path.dirname(fileName)
             print("opening: {}".format(fileName))
             mixFractions = np.load(fileName)
             mixFractions[np.isnan(mixFractions)] = 0
             print("mixFractions.shape = {}".format(mixFractions.shape))
-            config = {"ChannelIndices":  np.arange(1, mixFractions.size*2, 2).tolist(),
-                      "MixFractions": mixFractions.flatten().tolist()}
+            config = {
+                "ChannelIndices": np.arange(1, mixFractions.size * 2, 2).tolist(),
+                "MixFractions": mixFractions.flatten().tolist(),
+            }
             okay, error = self.client.call(
-                "SourceControl.ConfigureMixFraction", config, verbose=True, throwError=False)
+                "SourceControl.ConfigureMixFraction",
+                config,
+                verbose=True,
+                throwError=False,
+            )
 
     @pyqtSlot()
     def popOutObserve(self):
@@ -996,14 +1054,15 @@ class MainWindow(QtWidgets.QMainWindow):
             "EdgeMultiMakeShortRecords": self.checkBox_EdgeMultiMakeShortRecords.isChecked(),
             "EdgeMultiMakeContaminatedRecords": self.checkBox_EdgeMultiMakeContaminatedRecords.isChecked(),
             "EdgeMultiVerifyNMonotone": self.spinBox_EdgeMultiVerifyNMonotone.value(),
-            "EdgeLevel": self.spinBox_EdgeLevel.value()
+            "EdgeLevel": self.spinBox_EdgeLevel.value(),
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
 
         # Reset trigger on even-numbered channels if source is TDM and the relevant
         # check box ("Trigger on Error Channels") isn't checked.
-        omitEvenChannels = (self.sourceIsTDM and not
-                            self.checkBox_edgeMultiTriggerOnError.isChecked())
+        omitEvenChannels = (
+            self.sourceIsTDM and not self.checkBox_edgeMultiTriggerOnError.isChecked()
+        )
         if omitEvenChannels:
             config = {"ChannelIndices": list(range(0, len(self.channel_names), 2))}
             self.client.call("SourceControl.ConfigureTriggers", config)
@@ -1012,12 +1071,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def sendMix(self):
         print("sendMIX***********")
         mixFraction = self.doubleSpinBox_MixFraction.value()
-        channels = [i for i in range(1, len(self.channel_names), 2)]  # only odd channels get mix
+        channels = [
+            i for i in range(1, len(self.channel_names), 2)
+        ]  # only odd channels get mix
         mixFractions = [mixFraction for _ in range(len(channels))]
-        config = {
-            "ChannelIndices": channels,
-            "MixFractions": mixFractions
-        }
+        config = {"ChannelIndices": channels, "MixFractions": mixFractions}
         try:
             self.client.call("SourceControl.ConfigureMixFraction", config)
             print("experimental mix config")
@@ -1034,32 +1092,32 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def handlePauseExperimental(self):
-        config = {
-            "Request": "Pause"
-        }
+        config = {"Request": "Pause"}
         self.client.call("SourceControl.WriteControl", config)
 
     @pyqtSlot()
     def handleUnpauseExperimental(self):
-        config = {
-            "Request": "Unpause "+self.lineEdit_unpauseExperimentalLabel.text()
-        }
+        config = {"Request": "Unpause " + self.lineEdit_unpauseExperimentalLabel.text()}
         self.client.call("SourceControl.WriteControl", config)
 
     def _cringeCommand(self, command):
         cringe_address = "localhost"
         cringe_port = 5509
-        ctx = zmq.Context()  # just create a new context each time so we dont need to keep track of it
+        ctx = (
+            zmq.Context()
+        )  # just create a new context each time so we dont need to keep track of it
         cringe = ctx.socket(zmq.REQ)
         cringe.LINGER = 0  # ms
-        cringe.RCVTIMEO = 30*1000  # ms
+        cringe.RCVTIMEO = 30 * 1000  # ms
         cringe_addr = f"tcp://{cringe_address}:{cringe_port}"
         cringe.connect(cringe_addr)
         print(f"connect to cringe at {cringe_addr}")
         cringe.send_string(command)
         print(f"sent `{command}` to cringe")
         try:
-            reply = cringe.recv().decode()  # this blocks until cringe replies, or until RCVTIMEO
+            reply = (
+                cringe.recv().decode()
+            )  # this blocks until cringe replies, or until RCVTIMEO
             print(f"reply `{reply}` from cringe")
             message = f"reply={reply}"
             success = True
@@ -1084,7 +1142,9 @@ class MainWindow(QtWidgets.QMainWindow):
             print("starting lancero")
             success = self._start()  # _startLancero wont set self.sourceIsTDM
             if not success:
-                print("failed to start lancero, return early from crateStartAndAutotune")
+                print(
+                    "failed to start lancero, return early from crateStartAndAutotune"
+                )
                 return
             wait_ms = 500
         else:
@@ -1097,14 +1157,18 @@ class MainWindow(QtWidgets.QMainWindow):
         return list(range(len(self.channel_names)))
 
     def channelIndicesSignalOnly(self):
-        return [i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")]
+        return [
+            i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")
+        ]
 
 
 class HostPortDialog(QtWidgets.QDialog):
     def __init__(self, host, port, disconnectReason, settings, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
-        self.setWindowIcon(QtGui.QIcon('dc.png'))
-        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/host_port.ui"), self)
+        self.setWindowIcon(QtGui.QIcon("dc.png"))
+        PyQt5.uic.loadUi(
+            os.path.join(os.path.dirname(__file__), "ui/host_port.ui"), self
+        )
         self.hostName.setText(host)
         self.basePortSpin.setValue(port)
         self.settings = settings
@@ -1129,7 +1193,9 @@ class HostPortDialog(QtWidgets.QDialog):
 
 def main():
     if sys.version_info.major <= 2:
-        print("WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***")
+        print(
+            "WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***"
+        )
     settings = QSettings("NIST Quantum Sensors", "dastardcommander")
 
     app = QtWidgets.QApplication(sys.argv)
@@ -1140,8 +1206,9 @@ def main():
         # Ask user what host:port to connect to.
         # TODO: accept a command-line argument to specify host:port.
         # If given, we'll bypass this dialog the first time through the loop.
-        d = HostPortDialog(host=host, port=port, disconnectReason=disconnectReason,
-                           settings=settings)
+        d = HostPortDialog(
+            host=host, port=port, disconnectReason=disconnectReason, settings=settings
+        )
         host, port = d.run()
         # None, None indicates user cancelled the dialog.
         if host is None and port is None:
@@ -1149,7 +1216,9 @@ def main():
 
         # One None is an invalid host:port pair
         if host is None or port is None or host == "" or port == "":
-            print("Could not start dcom (Dastard Commander) without a valid host:port selection.")
+            print(
+                "Could not start dcom (Dastard Commander) without a valid host:port selection."
+            )
             return
         try:
             client = rpc_client.JSONClient((host, port))
@@ -1166,7 +1235,7 @@ def main():
             sys.exit(retval)
 
 
-class AbacoUnwrapChoice():
+class AbacoUnwrapChoice:
     UNWRAP = 0
     DROPBITS_ONLY = 1
     NODROPBITS = 2
