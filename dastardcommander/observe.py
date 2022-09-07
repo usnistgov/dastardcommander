@@ -293,15 +293,21 @@ class CountRateMap(QtWidgets.QWidget):
         else:
             self.initButtons(scale=23, xy=xy)
 
-    def addButton(self, x, y, xwidth, ywidth, tooltip):
+    def addButton(self, x, y, xwidth, ywidth, name, tooltip):
         button = QtWidgets.QPushButton(self)
         button.move(x, y)
         button.setFixedSize(xwidth, ywidth)
         button.setFont(self.buttonFont)
         button.setFlat(False)
+        button.chanName = name
+        button.clicked.connect(lambda: self.click_callback(name))
         button.setToolTip(tooltip)
         # button.setCheckable(True)
         self.buttons.append(button)
+
+    @pyqtSlot()
+    def click_callback(self, name):
+        print("{} button clicked! TODO: have parent change disabled list".format(name))
 
     def deleteButtons(self):
         for button in self.buttons:
@@ -332,10 +338,12 @@ class CountRateMap(QtWidgets.QWidget):
                 x = scale * rowdisp
                 y = scale * coldisp
             else:
-            self.addButton(x, y, scale-1, scale-1,
-                           "{}, row{}col{} (matterchan{})".format(name, rownum, colnum, 2*(self.rows*colnum+rownum)+1))
                 x = scale * xy[i][0]
                 y = scale * xy[i][1]
+            tooltip = "{}, row{}col{} (matterchan{})".format(
+                name, rownum, colnum, 2 * (self.rows * colnum + rownum) + 1
+            )
+            self.addButton(x, y, scale - 1, scale - 1, name, tooltip)
             rowdisp += 1
             rownum += 1
             i += 1
