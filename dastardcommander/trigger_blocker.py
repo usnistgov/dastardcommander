@@ -67,21 +67,21 @@ class TriggerBlocker:
             self._change_channels(ch, False)
         self.write_config()
 
-    def _change_channels(self, channels, add=True):
-        if not isinstance(channels, int) and (channels is None or len(channels) == 0):
-            return
-
-        self.save_history()
-
+    def _change_channels(self, channels, block=True):
         if isinstance(channels, int):
             channels = [channels]
-        oldch = set(self.blocked)
-        newch = set(channels)
-        if add:
-            oldch.update(newch)
+
+        # Use python sets to simplify the logic.
+        blockedch = set(self.blocked)
+        arguments = set(channels)
+        if block:
+            blockedch.update(arguments)
         else:
-            oldch -= newch
-        self.blocked = list(oldch)
+            blockedch -= arguments
+
+        # Then convert back to a sorted list of channels
+        self.save_history()
+        self.blocked = list(blockedch)
         self.blocked.sort()
 
     def revert_prev(self):
