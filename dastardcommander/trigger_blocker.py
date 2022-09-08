@@ -77,6 +77,7 @@ class TriggerBlocker:
         with open(self.config, "w") as fp:
             obj = {field: self.__dict__[field] for field in self.FIELDS_TO_MEMO}
             json.dump(obj, fp)
+            fp.write("\n")  # ensure \n at EOF
 
     def block_channels(self, *args):
         """Add 1 or more `channels` to the blocked channels. Each chan be an int or an iterable of them."""
@@ -88,7 +89,6 @@ class TriggerBlocker:
             else:
                 channels.append(a)
         any_changed = self._change_channels(channels, block=True)
-        self.write_config()
         return any_changed
 
     def unblock_channels(self, *args):
@@ -101,7 +101,6 @@ class TriggerBlocker:
             else:
                 channels.append(a)
         any_changed = self._change_channels(channels, block=False)
-        self.write_config()
         return any_changed
 
     def toggle_channel(self, channel):
@@ -127,6 +126,7 @@ class TriggerBlocker:
             self.save_history()
             self.blocked = list(blockedch)
             self.blocked.sort()
+        self.write_config()
         return any_changed
 
     def revert_prev(self):
