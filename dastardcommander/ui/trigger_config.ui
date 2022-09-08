@@ -265,6 +265,50 @@
          </item>
         </widget>
        </item>
+       <item>
+        <widget class="QLabel" name="disable_label">
+         <property name="text">
+          <string>Disabled channels (never trigger):</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="disabledLayout">
+         <item>
+          <widget class="QPlainTextEdit" name="disabledTextEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Channels not allowed to trigger (toggle single channels in Observe tab)</string>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="clearDisabledButton">
+           <property name="toolTip">
+            <string>Clear the list of disabled channels</string>
+           </property>
+           <property name="text">
+            <string>Clear
+List</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </item>
     </layout>

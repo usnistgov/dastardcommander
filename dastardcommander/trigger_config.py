@@ -306,6 +306,12 @@ class TriggerConfig(QtWidgets.QWidget):
         dummy = True
         self.client.call("SourceControl.StopTriggerCoupling", dummy)
 
+    @pyqtSlot()
+    def pushedClearDisabled(self):
+        self.triggerBlocker.clear()
+        assert len(self.triggerBlocker.blocked) == 0
+        print("Cleared disabled trigger list")
+
     def handleGroupTriggerMessage(self, msg):
         """Handle the group trigger state message"""
         # Store sources and receivers in set objects to de-duplicate the numbering.

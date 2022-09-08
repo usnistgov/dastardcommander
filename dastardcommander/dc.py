@@ -140,6 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTabSimple.triggerBlocker = self.triggerBlocker
         self.observeWindow.triggerBlocker = self.triggerBlocker
         self.observeTab.triggerBlocker = self.triggerBlocker
+        self.triggerTab.clearDisabledButton.clicked.connect(self.triggerTab.pushedClearDisabled)
 
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
         self.workflowTab.projectorsLoadedSig.connect(
