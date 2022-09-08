@@ -12,7 +12,8 @@ class TriggerBlocker:
     including a history of the last several lists.
 
     Usage:
-    >>> tb = TriggerBlocker(tempfile.mkstemp(suffix=".json")[1])
+    >>> backingfile = tempfile.mkstemp(suffix=".json")[1]
+    >>> tb = TriggerBlocker(backingfile)
     >>> tb.block_channels(6,4,2)
     >>> print(tb.blocked)
     [2, 4, 6]
@@ -28,6 +29,10 @@ class TriggerBlocker:
     >>> tb.clear()
     >>> print(tb.blocked)
     []
+    >>> tb.block_channels(6,4,2)
+    >>> tb2 = TriggerBlocker(backingfile)
+    >>> print(tb2.blocked)
+    [2, 4, 6]
     """
 
     FIELDS_TO_MEMO = ("blocked", "blocked_history")
