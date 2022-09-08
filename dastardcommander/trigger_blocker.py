@@ -20,6 +20,12 @@ class TriggerBlocker:
     >>> tb.block_channels(8,6,[4,2],4,6,8)
     >>> print(tb.blocked)
     [2, 4, 6, 8]
+    >>> tb.toggle_channel(3)
+    >>> print(tb.blocked)
+    [2, 3, 4, 6, 8]
+    >>> tb.toggle_channel(3)
+    >>> print(tb.blocked)
+    [2, 4, 6, 8]
     >>> tb.unblock_channels(4)
     >>> print(tb.blocked)
     [2, 6, 8]
@@ -72,6 +78,11 @@ class TriggerBlocker:
         for ch in channels:
             self._change_channels(ch, False)
         self.write_config()
+
+    def toggle_channel(self, channel):
+        """Add channel to the block list, or remove it, as appropriate."""
+        toblock = channel not in self.blocked
+        self._change_channels(channel, toblock)
 
     def _change_channels(self, channels, block=True):
         if isinstance(channels, int):
