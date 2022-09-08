@@ -294,6 +294,9 @@
            <property name="readOnly">
             <bool>true</bool>
            </property>
+           <property name="plainText">
+            <string>All channels are enabled</string>
+           </property>
           </widget>
          </item>
          <item>

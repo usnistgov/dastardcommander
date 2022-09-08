@@ -308,9 +308,24 @@ class TriggerConfig(QtWidgets.QWidget):
 
     @pyqtSlot()
     def pushedClearDisabled(self):
-        self.triggerBlocker.clear()
+        changed = self.triggerBlocker.clear()
         assert len(self.triggerBlocker.blocked) == 0
         print("Cleared disabled trigger list")
+        if changed:
+            self.updateDisabledList()
+
+    @pyqtSlot()
+    def updateDisabledList(self):
+        ndisabled = len(self.triggerBlocker.blocked)
+        if ndisabled == 0:
+            msg = "All channels are enabled"
+        elif ndisabled == 1:
+            msg = "One channel is disabled: {}".format(self.triggerBlocker.blocked[0])
+        else:
+            msg = "{} channels are disabled: {}".format(
+                ndisabled, ",".join(map(str, self.triggerBlocker.blocked))
+            )
+        self.disabledTextEdit.setPlainText(msg)
 
     def handleGroupTriggerMessage(self, msg):
         """Handle the group trigger state message"""

@@ -7,7 +7,7 @@ import itertools
 
 # Qt5 imports
 from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 import PyQt5.uic
 
 
@@ -107,6 +107,8 @@ class Observe(QtWidgets.QWidget):
             self.label_experimentState,
             self,
         )
+
+    blocklist_changed = pyqtSignal()
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
@@ -284,6 +286,7 @@ class CountRateMap(QtWidgets.QWidget):
 
     def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
+        self.owner = parent
         self.buttons = []
         self.cols = cols
         self.rows = rows
@@ -314,6 +317,7 @@ class CountRateMap(QtWidgets.QWidget):
             print(f"Channel {chan} triggering is disabled.")
         else:
             print(f"Channel {chan} triggering is enabled.")
+        self.owner.blocklist_changed.emit()
 
     def deleteButtons(self):
         for button in self.buttons:
