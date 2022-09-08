@@ -50,10 +50,11 @@ class TriggerBlocker:
         try:
             with open(self.config, "r") as fp:
                 data = json.load(fp)
-                for field in self.FIELDS_TO_MEMO:
-                    self.__dict__[field] = data.get(field, [])
+            for field in data:
+                if field in self.FIELDS_TO_MEMO:
+                    self.__dict__[field] = data[field]
         except (FileNotFoundError, json.JSONDecodeError):
-            self.blocked = []
+            pass
 
     def write_config(self):
         with open(self.config, "w") as fp:
