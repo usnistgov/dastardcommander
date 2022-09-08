@@ -14,28 +14,39 @@ class TriggerBlocker:
     Usage:
     >>> backingfile = tempfile.mkstemp(suffix=".json")[1]
     >>> tb = TriggerBlocker(backingfile)
+    >>> print(tb.blocked)
+    []
     >>> tb.block_channels(6,4,2)
+    True
     >>> print(tb.blocked)
     [2, 4, 6]
     >>> tb.block_channels(8,6,[4,2],4,6,8)
+    True
     >>> print(tb.blocked)
     [2, 4, 6, 8]
     >>> tb.toggle_channel(3)
+    True
     >>> print(tb.blocked)
     [2, 3, 4, 6, 8]
     >>> tb.toggle_channel(3)
+    True
     >>> print(tb.blocked)
     [2, 4, 6, 8]
     >>> tb.unblock_channels(4)
+    True
     >>> print(tb.blocked)
     [2, 6, 8]
+    >>> tb.unblock_channels(4)
+    False
     >>> tb.revert_prev()
     >>> print(tb.blocked)
     [2, 4, 6, 8]
     >>> tb.clear()
+    True
     >>> print(tb.blocked)
     []
     >>> tb.block_channels(6,4,2)
+    True
     >>> tb2 = TriggerBlocker(backingfile)
     >>> print(tb2.blocked)
     [2, 4, 6]
@@ -67,22 +78,36 @@ class TriggerBlocker:
             obj = {field: self.__dict__[field] for field in self.FIELDS_TO_MEMO}
             json.dump(obj, fp)
 
-    def block_channels(self, *channels):
+    def block_channels(self, *args):
         """Add 1 or more `channels` to the blocked channels. Each chan be an int or an iterable of them."""
-        for ch in channels:
-            self._change_channels(ch, True)
+        # Convert a mix of int and list-of-int args to a single list
+        channels = []
+        for a in args:
+            if isinstance(a, list):
+                channels.extend(a)
+            else:
+                channels.append(a)
+        any_changed = self._change_channels(channels, block=True)
         self.write_config()
+        return any_changed
 
-    def unblock_channels(self, *channels):
+    def unblock_channels(self, *args):
         """Remove 1 or more `channels` from the blocked channels. Each chan be an int or an iterable of them."""
-        for ch in channels:
-            self._change_channels(ch, False)
+        # Convert a mix of int and list-of-int args to a single list
+        channels = []
+        for a in args:
+            if isinstance(a, list):
+                channels.extend(a)
+            else:
+                channels.append(a)
+        any_changed = self._change_channels(channels, block=False)
         self.write_config()
+        return any_changed
 
     def toggle_channel(self, channel):
         """Add channel to the block list, or remove it, as appropriate."""
         toblock = channel not in self.blocked
-        self._change_channels(channel, toblock)
+        return self._change_channels(channel, toblock)
 
     def _change_channels(self, channels, block=True):
         if isinstance(channels, int):
@@ -96,10 +121,13 @@ class TriggerBlocker:
         else:
             blockedch -= arguments
 
-        # Then convert back to a sorted list of channels
-        self.save_history()
-        self.blocked = list(blockedch)
-        self.blocked.sort()
+        # Then convert back to a sorted list of channels and notify any connected Qt slots
+        any_changed = not (blockedch == set(self.blocked))
+        if any_changed:
+            self.save_history()
+            self.blocked = list(blockedch)
+            self.blocked.sort()
+        return any_changed
 
     def revert_prev(self):
         try:
@@ -114,9 +142,12 @@ class TriggerBlocker:
             self.blocked_history = self.blocked_history[-self.HISTORY_LENGTH:]
 
     def clear(self):
+        if len(self.blocked) == 0:
+            return False
         self.save_history()
         self.blocked = []
         self.write_config()
+        return True
 
 
 if __name__ == "__main__":
