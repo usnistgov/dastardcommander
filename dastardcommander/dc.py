@@ -31,6 +31,7 @@ from PyQt5.QtWidgets import QFileDialog
 # User code imports
 from . import rpc_client
 from . import status_monitor
+from . import trigger_blocker
 from . import trigger_config
 from . import trigger_config_simple
 from . import writing
@@ -132,6 +133,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTab.changedTriggerStateSig.connect(
             self.observeWindow.resetIntegration
         )
+
+        # Create a TriggerBlocker and let the relevant tabs/windows share access to it.
+        self.triggerBlocker = trigger_blocker.TriggerBlocker()
+        self.triggerTab.triggerBlocker = self.triggerBlocker
+        self.triggerTabSimple.triggerBlocker = self.triggerBlocker
+        self.observeWindow.triggerBlocker = self.triggerBlocker
+        self.observeTab.triggerBlocker = self.triggerBlocker
 
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
         self.workflowTab.projectorsLoadedSig.connect(

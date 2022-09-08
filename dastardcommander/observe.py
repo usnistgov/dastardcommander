@@ -288,6 +288,7 @@ class CountRateMap(QtWidgets.QWidget):
         self.cols = cols
         self.rows = rows
         self.channel_names = channel_names
+        self.triggerBlocker = parent.triggerBlocker
         if xy is None:
             self.initButtons(scale=25)
         else:
@@ -307,7 +308,12 @@ class CountRateMap(QtWidgets.QWidget):
 
     @pyqtSlot()
     def click_callback(self, name):
-        print("{} button clicked! TODO: have parent change disabled list".format(name))
+        chan = int(name.replace("chan", ""))
+        self.triggerBlocker.toggle_channel(chan)
+        if chan in self.triggerBlocker.blocked:
+            print(f"Channel {chan} triggering is disabled.")
+        else:
+            print(f"Channel {chan} triggering is enabled.")
 
     def deleteButtons(self):
         for button in self.buttons:
