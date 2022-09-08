@@ -16,10 +16,16 @@ class TriggerConfig(QtWidgets.QWidget):
     def __init__(self, parent, client):
         QtWidgets.QWidget.__init__(self, parent)
         self.client = client
-        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/trigger_config.ui"), self)
+        PyQt5.uic.loadUi(
+            os.path.join(os.path.dirname(__file__), "ui/trigger_config.ui"), self
+        )
         self.recordLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
-        self.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
-        self.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
+        self.pretrigLengthSpinBox.editingFinished.connect(
+            self.sendRecordLengthsToServer
+        )
+        self.pretrigPercentSpinBox.editingFinished.connect(
+            self.sendRecordLengthsToServer
+        )
         self.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
         self.auto1psModeButton.clicked.connect(self.go1psMode)
         self.noiseModeButton.clicked.connect(self.goNoiseMode)
@@ -29,12 +35,14 @@ class TriggerConfig(QtWidgets.QWidget):
         self.groupTriggerRemove.clicked.connect(self.pushedRemoveGroupTrigger)
         self.trigger_state = {}
         self.chosenChannels = []
-        self.editWidgets = [self.recordLengthSpinBox,
-                            self.pretrigLengthSpinBox,
-                            self.pretrigPercentSpinBox,
-                            self.autoTimeEdit,
-                            self.levelEdit,
-                            self.edgeEdit]
+        self.editWidgets = [
+            self.recordLengthSpinBox,
+            self.pretrigLengthSpinBox,
+            self.pretrigPercentSpinBox,
+            self.autoTimeEdit,
+            self.levelEdit,
+            self.edgeEdit,
+        ]
         # Initialize these two to a value that definitly won't match next value
         self.lastPretrigLength = -1
         self.lastRecordLength = -1
@@ -116,7 +124,9 @@ class TriggerConfig(QtWidgets.QWidget):
 
     def chanbyprefix(self, prefix):
         """Return a string listing all channels for the given prefix"""
-        cnum = ",".join([p.lstrip(prefix) for p in self.channel_names if p.startswith(prefix)])
+        cnum = ",".join(
+            [p.lstrip(prefix) for p in self.channel_names if p.startswith(prefix)]
+        )
         return "%s:%s" % (prefix, cnum)
 
     @pyqtSlot()
@@ -138,14 +148,16 @@ class TriggerConfig(QtWidgets.QWidget):
                 continue
             prefix, cnums = line.split(":", 1)
             if prefix not in self.channel_prefixes:
-                print("Channel prefix %s not in known prefixes: %s" %
-                      (prefix, self.channel_prefixes))
+                print(
+                    "Channel prefix %s not in known prefixes: %s"
+                    % (prefix, self.channel_prefixes)
+                )
                 continue
             for cnum in cnums.split(","):
                 # Ignore the "" that follows a trailing comma
                 if len(cnum) == 0:
                     continue
-                name = prefix+cnum
+                name = prefix + cnum
                 try:
                     idx = self.channel_names.index(name)
                     self.chosenChannels.append(idx)
@@ -227,7 +239,7 @@ class TriggerConfig(QtWidgets.QWidget):
 
         levelscale = edgescale = 1.0
         if self.levelVoltsRaw.currentText().startswith("Volts"):
-            levelscale = 1./16384.0
+            levelscale = 1.0 / 16384.0
             edgescale = levelscale * 100  # TODO: replace 100 with samples per second
             self.levelUnitsLabel.setText("Volts")
             self.edgeUnitsLabel.setText("V/ms")
@@ -244,7 +256,7 @@ class TriggerConfig(QtWidgets.QWidget):
             if state is None:
                 edit.setText("")
                 continue
-            edit.setText("%f" % (state*scale))
+            edit.setText("%f" % (state * scale))
 
         r = self.getstate("EdgeRising")
         f = self.getstate("EdgeFalling")
@@ -309,7 +321,7 @@ class TriggerConfig(QtWidgets.QWidget):
         for cnum_set, name, gui_label in zip(
             (allsrc, allrx),
             ("sources", "receivers"),
-            (self.groupTriggerActiveSrc, self.groupTriggerActiveRx)
+            (self.groupTriggerActiveSrc, self.groupTriggerActiveRx),
         ):
             cnum_text = "<none>"
             if len(cnum_set) > 0:
@@ -366,7 +378,7 @@ class TriggerConfig(QtWidgets.QWidget):
 
         delay = self.autoTimeEdit.text()
         try:
-            nsdelay = int(round(float(delay)*1e6))
+            nsdelay = int(round(float(delay) * 1e6))
             self.setstate("AutoDelay", nsdelay)
         except ValueError:
             pass
@@ -393,10 +405,10 @@ class TriggerConfig(QtWidgets.QWidget):
         edgeraw = self.edgeEdit.text()
         edgescale = 1.0
         if self.levelVoltsRaw.currentText().startswith("Volts"):
-            edgescale = 1./16384.0
+            edgescale = 1.0 / 16384.0
             # TODO: convert samples to ms
         try:
-            edgeraw = int(float(edgeraw)/edgescale+0.5)
+            edgeraw = int(float(edgeraw) / edgescale + 0.5)
             self.setstate("EdgeLevel", edgeraw)
         except ValueError:
             pass
@@ -423,9 +435,9 @@ class TriggerConfig(QtWidgets.QWidget):
         levelraw = self.levelEdit.text()
         levelscale = 1.0
         if self.levelVoltsRaw.currentText().startswith("Volts"):
-            levelscale = 1./16384.0
+            levelscale = 1.0 / 16384.0
         try:
-            levelraw = int(float(levelraw)/levelscale+0.5)
+            levelraw = int(float(levelraw) / levelscale + 0.5)
             self.setstate("LevelLevel", levelraw)
         except ValueError:
             pass
@@ -453,7 +465,7 @@ class TriggerConfig(QtWidgets.QWidget):
         pretrig = self.pretrigLengthSpinBox
         pct = self.pretrigPercentSpinBox
         old_pt = pretrig.value()
-        new_pt = int(0.5+reclen*pct.value()/100.0)
+        new_pt = int(0.5 + reclen * pct.value() / 100.0)
         if old_pt != new_pt:
             pretrig.valueChanged.disconnect()
             pretrig.setValue(new_pt)
@@ -465,7 +477,7 @@ class TriggerConfig(QtWidgets.QWidget):
         pretrig = self.pretrigLengthSpinBox
         pct = self.pretrigPercentSpinBox
         pct.blockSignals(True)
-        pct.setValue(pretrig.value()*100.0/samples.value())
+        pct.setValue(pretrig.value() * 100.0 / samples.value())
         pct.blockSignals(False)
 
     @pyqtSlot()
@@ -474,7 +486,7 @@ class TriggerConfig(QtWidgets.QWidget):
         pretrig = self.pretrigLengthSpinBox
         pct = self.pretrigPercentSpinBox
         pretrig.blockSignals(True)
-        pretrig.setValue(int(0.5+samples.value()*pct.value()/100.0))
+        pretrig.setValue(int(0.5 + samples.value() * pct.value() / 100.0))
         pretrig.blockSignals(False)
 
     @pyqtSlot()
@@ -482,8 +494,9 @@ class TriggerConfig(QtWidgets.QWidget):
         samp = self.recordLengthSpinBox.value()
         presamp = self.pretrigLengthSpinBox.value()
         # Send a message to server only if one is changed
-        if (samp != self.lastRecordLength or presamp != self.lastPretrigLength):
+        if samp != self.lastRecordLength or presamp != self.lastPretrigLength:
             self.lastRecordLength = samp
             self.lastPretrigLength = presamp
-            self.client.call("SourceControl.ConfigurePulseLengths",
-                             {"Nsamp": samp, "Npre": presamp})
+            self.client.call(
+                "SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp}
+            )
