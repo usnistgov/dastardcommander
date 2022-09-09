@@ -129,10 +129,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeWindow = observe.Observe(parent=None, host=host, client=self.client)
         self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
         self.tabObserve.layout().addWidget(self.observeTab)
-        self.triggerTab.changedTriggerStateSig.connect(self.observeTab.resetIntegration)
-        self.triggerTab.changedTriggerStateSig.connect(
-            self.observeWindow.resetIntegration
-        )
+        for widget in (self.observeTab, self.observeWindow):
+            self.triggerTab.changedTriggerStateSig.connect(widget.resetIntegration)
 
         # Create a TriggerBlocker and let the relevant tabs/windows share access to it.
         self.triggerBlocker = trigger_blocker.TriggerBlocker()
@@ -144,6 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.triggerTab.pushedClearDisabled
         )
         self.observeTab.blocklist_changed.connect(self.triggerTab.updateDisabledList)
+        self.observeTab.block_channel.connect(self.triggerTab.blockTriggering)
         self.triggerTab.updateDisabledList()
 
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)

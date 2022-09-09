@@ -109,6 +109,7 @@ class Observe(QtWidgets.QWidget):
         )
 
     blocklist_changed = pyqtSignal()
+    block_channel = pyqtSignal(int)
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
@@ -315,6 +316,7 @@ class CountRateMap(QtWidgets.QWidget):
         self.triggerBlocker.toggle_channel(chan)
         if chan in self.triggerBlocker.blocked:
             print(f"Channel {chan} triggering is disabled.")
+            self.owner.block_channel.emit(chan)
         else:
             print(f"Channel {chan} triggering is enabled.")
         self.owner.blocklist_changed.emit()

@@ -122,6 +122,7 @@ class TriggerConfig(QtWidgets.QWidget):
         self.channelsChosenEdit.setPlainText(result)
         if idx != self.channelChooserBox.currentIndex():
             self.channelChooserBox.setCurrentIndex(idx)
+        self.updateTriggerGUIElements()
 
     def chanbyprefix(self, prefix, include_blocked=False):
         """Return a string listing all channels for the given prefix"""
@@ -219,8 +220,11 @@ class TriggerConfig(QtWidgets.QWidget):
                 newstate["ChannelIndices"] = splitoff
                 for c in splitoff:
                     self.trigger_state[c] = newstate
-
         return allstates
+
+    def configureDastardTriggers(self):
+        for state in self.alltriggerstates():
+            self.client.call("SourceControl.ConfigureTriggers", state)
 
     def setstate(self, name, newvalue):
         "Set the self.trigger_state value named name to newvalue"
@@ -238,8 +242,11 @@ class TriggerConfig(QtWidgets.QWidget):
         )
         for (checkbox, name) in boxes:
             state = self.getstate(name)
-            checkbox.setTristate(state is None)
-            if state is not None:
+            if state is None:
+                checkbox.setTristate(True)
+                checkbox.setCheckState(Qt.PartiallyChecked)
+            else:
+                checkbox.setTristate(False)
                 checkbox.setChecked(state)
 
         levelscale = edgescale = 1.0
@@ -333,6 +340,19 @@ class TriggerConfig(QtWidgets.QWidget):
         self.disabledTextEdit.setPlainText(msg)
         self.channelChooserChanged()  # update that text box
 
+    @pyqtSlot(int)
+    def blockTriggering(self, channelIndex):
+        """Block all triggering from channel with index `channelIndex`."""
+        self.trigger_state[channelIndex]["ChannelIndices"].remove(channelIndex)
+        notrig_state = self.trigger_state[channelIndex].copy()
+        self.trigger_state[channelIndex] = notrig_state
+        notrig_state["ChannelIndices"] = [channelIndex]
+        notrig_state["AutoTrigger"] = False
+        notrig_state["EdgeTrigger"] = False
+        notrig_state["LevelTrigger"] = False
+        self.configureDastardTriggers()
+        self.changedTriggerStateSig.emit()
+
     def handleGroupTriggerMessage(self, msg):
         """Handle the group trigger state message"""
         # Store sources and receivers in set objects to de-duplicate the numbering.
@@ -409,8 +429,7 @@ class TriggerConfig(QtWidgets.QWidget):
             self.setstate("AutoDelay", nsdelay)
         except ValueError:
             pass
-        for state in self.alltriggerstates():
-            self.client.call("SourceControl.ConfigureTriggers", state)
+        self.configureDastardTriggers()
 
     @pyqtSlot()
     def changedEdgeTrigConfig(self):
@@ -439,8 +458,7 @@ class TriggerConfig(QtWidgets.QWidget):
             self.setstate("EdgeLevel", edgeraw)
         except ValueError:
             pass
-        for state in self.alltriggerstates():
-            self.client.call("SourceControl.ConfigureTriggers", state)
+        self.configureDastardTriggers()
 
     @pyqtSlot()
     def changedLevelTrigConfig(self):
@@ -468,8 +486,7 @@ class TriggerConfig(QtWidgets.QWidget):
             self.setstate("LevelLevel", levelraw)
         except ValueError:
             pass
-        for state in self.alltriggerstates():
-            self.client.call("SourceControl.ConfigureTriggers", state)
+        self.configureDastardTriggers()
 
     @pyqtSlot()
     def changedLevelUnits(self):
