@@ -46,6 +46,7 @@ class TriggerConfig(QtWidgets.QWidget):
         # Initialize these two to a value that definitly won't match next value
         self.lastPretrigLength = -1
         self.lastRecordLength = -1
+        # self.channel_names has been set to equal the same list belonging to the main window
 
     def _closing(self):
         """The main window calls this to block any editingFinished events from
@@ -122,11 +123,15 @@ class TriggerConfig(QtWidgets.QWidget):
         if idx != self.channelChooserBox.currentIndex():
             self.channelChooserBox.setCurrentIndex(idx)
 
-    def chanbyprefix(self, prefix):
+    def chanbyprefix(self, prefix, include_blocked=False):
         """Return a string listing all channels for the given prefix"""
-        cnum = ",".join(
-            [p.lstrip(prefix) for p in self.channel_names if p.startswith(prefix)]
-        )
+        unblocked_chan = []
+        for p in self.channel_names:
+            if p.startswith(prefix):
+                num = p.lstrip(prefix)
+                if int(num) not in self.triggerBlocker.blocked:
+                    unblocked_chan.append(num)
+        cnum = ",".join(unblocked_chan)
         return "%s:%s" % (prefix, cnum)
 
     @pyqtSlot()
@@ -326,6 +331,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 ndisabled, ",".join(map(str, self.triggerBlocker.blocked))
             )
         self.disabledTextEdit.setPlainText(msg)
+        self.channelChooserChanged()  # update that text box
 
     def handleGroupTriggerMessage(self, msg):
         """Handle the group trigger state message"""
