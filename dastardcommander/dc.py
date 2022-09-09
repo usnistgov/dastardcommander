@@ -37,7 +37,6 @@ from . import trigger_config_simple
 from . import writing
 from . import projectors
 from . import observe
-# from . import workflow
 
 __version__ = "0.2.5"
 

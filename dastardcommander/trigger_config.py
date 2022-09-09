@@ -296,7 +296,8 @@ class TriggerConfig(QtWidgets.QWidget):
             except ValueError:
                 pass
         if len(rx_channums) == 0:
-            print("TriggerConfig.changeGroupTrigger: Could not parse channel list '{}'".format(rx))
+            me = "TriggerConfig.changeGroupTrigger"
+            print("{}: Could not parse channel list '{}'".format(me, rx))
             return
         sourcenum = self.groupTriggerSource.value()
         state = {"Connections": {sourcenum: rx_channums}}
@@ -347,7 +348,6 @@ class TriggerConfig(QtWidgets.QWidget):
         notrig_state["EdgeTrigger"] = False
         notrig_state["LevelTrigger"] = False
         self.configureDastardTriggers()
-        self.changedTriggerStateSig.emit()
 
     def handleGroupTriggerMessage(self, msg):
         """Handle the group trigger state message"""

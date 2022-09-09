@@ -276,18 +276,24 @@ class Observe(QtWidgets.QWidget):
             self.ExperimentStateIncrementer.resetStateLabels()
 
 
+_QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
+
+
 class CountRateMap(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
 
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
 
-    buttonFont = QtGui.QFont("Times", 7, QtGui.QFont.Bold)
+    enabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 8, QtGui.QFont.Bold)
+    disabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 16, QtGui.QFont.Bold)
+    disabledColor = "#603810"  # a dark brown
 
     def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
         self.owner = parent
         self.buttons = []
+        self.named_buttons = {}
         self.cols = cols
         self.rows = rows
         self.channel_names = channel_names
@@ -301,13 +307,20 @@ class CountRateMap(QtWidgets.QWidget):
         button = QtWidgets.QPushButton(self)
         button.move(x, y)
         button.setFixedSize(xwidth, ywidth)
-        button.setFont(self.buttonFont)
+        button.setFont(self.enabledFont)
         button.setFlat(False)
         button.chanName = name
         button.clicked.connect(lambda: self.click_callback(name))
         button.setToolTip(tooltip)
-        # button.setCheckable(True)
+        button.triggers_blocked = False
         self.buttons.append(button)
+        self.named_buttons[name] = button
+        try:
+            chnum = int(name.replace("chan", ""))
+            if chnum in self.triggerBlocker.blocked:
+                self.setButtonDisabled(name)
+        except ValueError:
+            pass
 
     @pyqtSlot()
     def click_callback(self, name):
@@ -315,10 +328,42 @@ class CountRateMap(QtWidgets.QWidget):
         self.triggerBlocker.toggle_channel(chan)
         if chan in self.triggerBlocker.blocked:
             print(f"Channel {name} triggering is disabled.")
+            self.setButtonDisabled(name)
             self.owner.block_channel.emit(chan)
         else:
             print(f"Channel {name} triggering is enabled.")
+            self.setButtonEnabled(name)
         self.owner.blocklist_changed.emit()
+
+    def setButtonDisabled(self, name):
+        button = self.named_buttons.get(name, None)
+        if button is None:
+            return
+        button.triggers_blocked = True
+        button.setFont(self.disabledFont)
+        button.setText("X")
+        colorString = (
+            f"QPushButton {{color: white; background-color : {self.disabledColor};}}"
+        )
+        button.setStyleSheet(colorString)
+        tt = button.toolTip()
+        if "DISABLED" not in tt:
+            tt = "[DISABLED] " + tt
+            button.setToolTip(tt)
+
+    def setButtonEnabled(self, name):
+        button = self.named_buttons.get(name, None)
+        if button is None:
+            return
+        button.triggers_blocked = False
+        button.setFont(self.enabledFont)
+        button.setText("--")
+        colorString = "QPushButton {color: black; background-color : white;}"
+        button.setStyleSheet(colorString)
+        tt = button.toolTip()
+        if "DISABLED" in tt:
+            tt = tt.replace("[DISABLED] ", "")
+            button.setToolTip(tt)
 
     def deleteButtons(self):
         for button in self.buttons:
@@ -371,7 +416,7 @@ class CountRateMap(QtWidgets.QWidget):
         cmap = cm.get_cmap("Wistia")
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
-            if button is None:
+            if button is None or button.triggers_blocked:
                 continue
             if cr < 10:
                 buttonText = "{:.2f}".format(cr)
