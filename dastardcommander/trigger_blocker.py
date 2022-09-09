@@ -80,7 +80,8 @@ class TriggerBlocker:
             fp.write("\n")  # ensure \n at EOF
 
     def block_channels(self, *args):
-        """Add 1 or more `channels` to the blocked channels. Each chan be an int or an iterable of them."""
+        """Add 1 or more `channels` to the blocked channels.
+        Each chan can be an int or an iterable of them."""
         # Convert a mix of int and list-of-int args to a single list
         channels = []
         for a in args:
@@ -92,7 +93,8 @@ class TriggerBlocker:
         return any_changed
 
     def unblock_channels(self, *args):
-        """Remove 1 or more `channels` from the blocked channels. Each chan be an int or an iterable of them."""
+        """Remove 1 or more `channels` from the blocked channels.
+        Each chan can be an int or an iterable of them."""
         # Convert a mix of int and list-of-int args to a single list
         channels = []
         for a in args:
