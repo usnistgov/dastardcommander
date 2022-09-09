@@ -113,10 +113,10 @@ class Observe(QtWidgets.QWidget):
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
-            print("got trigger rate message before status")
+            print("Ignoring trigger rate message that arrived before array status")
             return
         if len(self.channel_names) == 0:
-            print("got trigger rate message before channel names")
+            print("Ignoring trigger rate message that arrived before channel names")
             return
         if self.crm_grid is None:
             self.buildCRM()
@@ -262,7 +262,6 @@ class Observe(QtWidgets.QWidget):
             ((p["X"] - minx) * scale, (maxy - p["Y"]) * scale) for p in msg["Pixels"]
         ]
         print("handleTESMap with spacing ", msg["Spacing"], " scale ", scale)
-        # print(self.pixelMap)
         self.buildCRMMap()
 
     def handleExternalTriggerMessage(self, msg):
@@ -315,10 +314,10 @@ class CountRateMap(QtWidgets.QWidget):
         chan = int(name.replace("chan", ""))
         self.triggerBlocker.toggle_channel(chan)
         if chan in self.triggerBlocker.blocked:
-            print(f"Channel {chan} triggering is disabled.")
+            print(f"Channel {name} triggering is disabled.")
             self.owner.block_channel.emit(chan)
         else:
-            print(f"Channel {chan} triggering is enabled.")
+            print(f"Channel {name} triggering is enabled.")
         self.owner.blocklist_changed.emit()
 
     def deleteButtons(self):
@@ -338,7 +337,6 @@ class CountRateMap(QtWidgets.QWidget):
     def initButtons(self, scale=25, xy=None):
         MaxPerRow = 32  # no more than this many buttons per row
         self.deleteButtons()
-        print(self.channel_names)
         rowdisp = rownum = coldisp = colnum = i = 0
         # rowdisp means row number on the display
         # rownum means TES's actual row number

@@ -146,7 +146,6 @@ class TriggerConfig(QtWidgets.QWidget):
         self.chosenChannels accordingly."""
         self.chosenChannels = []
         chantext = self.channelsChosenEdit.toPlainText()
-        print("Trying to update the channel information")
         chantext = chantext.replace("\t", "\n").replace(";", "\n").replace(" ", "")
         lines = chantext.split()
         for line in lines:
@@ -170,7 +169,6 @@ class TriggerConfig(QtWidgets.QWidget):
                 except ValueError:
                     print("Channel '%s' is not known" % (name))
         self.channelChooserBox.setCurrentIndex(0)
-        print("The chosen channels are ", self.chosenChannels)
 
     def getstate(self, name):
         "Get the self.trigger_state value named name. If mutiple values, return None"
@@ -298,10 +296,9 @@ class TriggerConfig(QtWidgets.QWidget):
             except ValueError:
                 pass
         if len(rx_channums) == 0:
-            print("Could not parse channel list '{}'".format(rx))
+            print("TriggerConfig.changeGroupTrigger: Could not parse channel list '{}'".format(rx))
             return
         sourcenum = self.groupTriggerSource.value()
-        # print("Channel list is {:d}->{}".format(sourcenum, rx_channums))
         state = {"Connections": {sourcenum: rx_channums}}
         request = "SourceControl.AddGroupTriggerCoupling"
         if not add:
@@ -322,7 +319,6 @@ class TriggerConfig(QtWidgets.QWidget):
     def pushedClearDisabled(self):
         changed = self.triggerBlocker.clear()
         assert len(self.triggerBlocker.blocked) == 0
-        print("Cleared disabled trigger list")
         if changed:
             self.updateDisabledList()
 
