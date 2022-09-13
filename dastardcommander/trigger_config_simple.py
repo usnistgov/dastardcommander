@@ -198,8 +198,10 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.client.call("SourceControl.ConfigureTriggers", config)
 
     def channelIndicesSignalOnlyWithExcludes(self):
-        return self.dcom.channelIndicesSignalOnly()
-        # TODO: add exclude list, and maybe a way to auto populate it?
+        sigchan = set(self.dcom.channelIndicesSignalOnly())
+        enabledchan = list(sigchan - set(self.triggerBlocker.blocked))
+        enabledchan.sort()
+        return enabledchan
 
     def handleTriggerMessage(self, d, nmsg):
         """If DASTARD indicates the trigger state has changed, change the UI to say so."""
