@@ -7,7 +7,7 @@ import itertools
 
 # Qt5 imports
 from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 import PyQt5.uic
 
 
@@ -21,7 +21,7 @@ def iter_all_strings():
         size += 1
 
 
-class ExperimentStateIncrementer():
+class ExperimentStateIncrementer:
     def __init__(self, newStateButton, ignoreButton, label, parent):
         self.newStateButton = newStateButton
         self.ignoreButton = ignoreButton
@@ -39,10 +39,9 @@ class ExperimentStateIncrementer():
             return s
 
     def updateLabel(self, stateName):
-        self.label.setText("Current State: {} at {}".format(
-            stateName,
-            time.strftime("%H:%M:%S on %a")
-        ))
+        self.label.setText(
+            "Current State: {} at {}".format(stateName, time.strftime("%H:%M:%S on %a"))
+        )
 
     def handleNewStateButton(self):
         self.sendState(self.nextLabel())
@@ -52,11 +51,13 @@ class ExperimentStateIncrementer():
             "Label": stateName,
             "WaitForError": True,
         }
-        _, err = self.parent.client.call("SourceControl.SetExperimentStateLabel", config)
+        _, err = self.parent.client.call(
+            "SourceControl.SetExperimentStateLabel", config
+        )
         if err:
             return
         self.updateLabel(stateName)
-        self.ignoring = (stateName == "IGNORE")
+        self.ignoring = stateName == "IGNORE"
         if self.ignoring:
             self.ignoreButton.setText('Restart state "%s"' % self.lastValidState)
         else:
@@ -102,14 +103,20 @@ class Observe(QtWidgets.QWidget):
         self.mapfile = ""
         self.ExperimentStateIncrementer = ExperimentStateIncrementer(
             self.pushButton_experimentStateNew,
-            self.pushButton_experimentStateIGNORE, self.label_experimentState, self)
+            self.pushButton_experimentStateIGNORE,
+            self.label_experimentState,
+            self,
+        )
+
+    blocklist_changed = pyqtSignal()
+    block_channel = pyqtSignal(int)
 
     def handleTriggerRateMessage(self, d):
         if self.cols == 0 or self.rows == 0:
-            print("got trigger rate message before status")
+            print("Ignoring trigger rate message that arrived before array status")
             return
         if len(self.channel_names) == 0:
-            print("got trigger rate message before channel names")
+            print("Ignoring trigger rate message that arrived before channel names")
             return
         if self.crm_grid is None:
             self.buildCRM()
@@ -152,7 +159,7 @@ class Observe(QtWidgets.QWidget):
             fracDiff = 0.0
             denom = self.lastTotalRate + totalRate
             if denom > 0:
-                fracDiff = np.abs(self.lastTotalRate-totalRate)/denom
+                fracDiff = np.abs(self.lastTotalRate - totalRate) / denom
             self.lastTotalRate = totalRate
             if fracDiff > 0.2:
                 maxRate = np.amax(countRates)
@@ -181,8 +188,9 @@ class Observe(QtWidgets.QWidget):
         self.deleteCRMMap()
         print("Building CountRateMap with %d cols x %d rows" % (self.cols, self.rows))
         print("len(channel_names", len(self.channel_names))
-        self.crm_map = CountRateMap(self, self.cols, self.rows, self.channel_names,
-                                    xy=self.pixelMap)
+        self.crm_map = CountRateMap(
+            self, self.cols, self.rows, self.channel_names, xy=self.pixelMap
+        )
         # if we build the crm_map before we know the source and know channel_names
         # (eg before a dastard source is started) we will need to rebuild it later
         self.MapTab.layout().addWidget(self.crm_map, 0)
@@ -216,21 +224,26 @@ class Observe(QtWidgets.QWidget):
         self.setArrayCps(0, False, 0)
 
     def handleAutoScaleClicked(self):
-        self.doubleSpinBox_colorScale.setEnabled(not self.pushButton_autoScale.isChecked())
+        self.doubleSpinBox_colorScale.setEnabled(
+            not self.pushButton_autoScale.isChecked()
+        )
         self.lastTotalRate = 0  # make sure auto scale actually happens
 
     def handleLoadMap(self):
         if self.host == "localhost":
             file, _ = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Select a TES map file", self.mapfile,
-                "Maps (*.cfg *.txt)")
+                self, "Select a TES map file", self.mapfile, "Maps (*.cfg *.txt)"
+            )
             if file == "":
                 return
         else:
             file, okay = QtWidgets.QInputDialog.getText(
-                self, "Choose map file",
+                self,
+                "Choose map file",
                 "Enter full path to map file on %s (remote server):" % self.host,
-                QtWidgets.QLineEdit.Normal, self.mapfile)
+                QtWidgets.QLineEdit.Normal,
+                self.mapfile,
+            )
             if not okay or file == "":
                 return
         okay = self.client.call("MapServer.Load", file)
@@ -241,19 +254,21 @@ class Observe(QtWidgets.QWidget):
         self.mapFileLabel.setText("Map File: %s" % tail)
 
     def handleTESMap(self, msg):
-        scale = 1.0/float(msg["Spacing"])
+        scale = 1.0 / float(msg["Spacing"])
         minx = np.min([p["X"] for p in msg["Pixels"]])
         maxy = np.max([p["Y"] for p in msg["Pixels"]])
         print("MinX = ", minx, " MaxY=", maxy)
-        self.pixelMap = [((p["X"]-minx)*scale, (maxy-p["Y"])*scale) for p in msg["Pixels"]]
+        self.pixelMap = [
+            ((p["X"] - minx) * scale, (maxy - p["Y"]) * scale) for p in msg["Pixels"]
+        ]
         print("handleTESMap with spacing ", msg["Spacing"], " scale ", scale)
-        # print(self.pixelMap)
         self.buildCRMMap()
 
     def handleExternalTriggerMessage(self, msg):
         n = msg["NumberObservedInLastSecond"]
         self.label_externalTriggersInLastSecond.setText(
-            "{} external triggers in last second".format(n))
+            "{} external triggers in last second".format(n)
+        )
 
     def handleWritingMessage(self, msg):
         if msg["Active"]:
@@ -261,33 +276,94 @@ class Observe(QtWidgets.QWidget):
             self.ExperimentStateIncrementer.resetStateLabels()
 
 
+_QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
+
+
 class CountRateMap(QtWidgets.QWidget):
     """Provide the UI inside the Triggering tab.
 
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
-    buttonFont = QtGui.QFont("Times", 7, QtGui.QFont.Bold)
+
+    enabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 8, QtGui.QFont.Bold)
+    disabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 16, QtGui.QFont.Bold)
+    disabledColor = "#603810"  # a dark brown
 
     def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
+        self.owner = parent
         self.buttons = []
+        self.named_buttons = {}
         self.cols = cols
         self.rows = rows
         self.channel_names = channel_names
+        self.triggerBlocker = parent.triggerBlocker
         if xy is None:
             self.initButtons(scale=25)
         else:
             self.initButtons(scale=23, xy=xy)
 
-    def addButton(self, x, y, xwidth, ywidth, tooltip):
+    def addButton(self, x, y, xwidth, ywidth, name, tooltip):
         button = QtWidgets.QPushButton(self)
         button.move(x, y)
         button.setFixedSize(xwidth, ywidth)
-        button.setFont(self.buttonFont)
+        button.setFont(self.enabledFont)
         button.setFlat(False)
+        button.chanName = name
+        button.clicked.connect(lambda: self.click_callback(name))
         button.setToolTip(tooltip)
-        # button.setCheckable(True)
+        button.triggers_blocked = False
         self.buttons.append(button)
+        self.named_buttons[name] = button
+        try:
+            chnum = int(name.replace("chan", ""))
+            if chnum in self.triggerBlocker.blocked:
+                self.setButtonDisabled(name)
+        except ValueError:
+            pass
+
+    @pyqtSlot()
+    def click_callback(self, name):
+        chan = int(name.replace("chan", ""))
+        self.triggerBlocker.toggle_channel(chan)
+        if chan in self.triggerBlocker.blocked:
+            print(f"Channel {name} triggering is disabled.")
+            self.setButtonDisabled(name)
+            self.owner.block_channel.emit(chan)
+        else:
+            print(f"Channel {name} triggering is enabled.")
+            self.setButtonEnabled(name)
+        self.owner.blocklist_changed.emit()
+
+    def setButtonDisabled(self, name):
+        button = self.named_buttons.get(name, None)
+        if button is None:
+            return
+        button.triggers_blocked = True
+        button.setFont(self.disabledFont)
+        button.setText("X")
+        colorString = (
+            f"QPushButton {{color: white; background-color : {self.disabledColor};}}"
+        )
+        button.setStyleSheet(colorString)
+        tt = button.toolTip()
+        if "DISABLED" not in tt:
+            tt = "[DISABLED] " + tt
+            button.setToolTip(tt)
+
+    def setButtonEnabled(self, name):
+        button = self.named_buttons.get(name, None)
+        if button is None:
+            return
+        button.triggers_blocked = False
+        button.setFont(self.enabledFont)
+        button.setText("--")
+        colorString = "QPushButton {color: black; background-color : white;}"
+        button.setStyleSheet(colorString)
+        tt = button.toolTip()
+        if "DISABLED" in tt:
+            tt = tt.replace("[DISABLED] ", "")
+            button.setToolTip(tt)
 
     def deleteButtons(self):
         for button in self.buttons:
@@ -306,7 +382,6 @@ class CountRateMap(QtWidgets.QWidget):
     def initButtons(self, scale=25, xy=None):
         MaxPerRow = 32  # no more than this many buttons per row
         self.deleteButtons()
-        print(self.channel_names)
         rowdisp = rownum = coldisp = colnum = i = 0
         # rowdisp means row number on the display
         # rownum means TES's actual row number
@@ -315,13 +390,15 @@ class CountRateMap(QtWidgets.QWidget):
                 self.buttons.append(None)
                 continue
             if xy is None:
-                x = scale*rowdisp
-                y = scale*coldisp
+                x = scale * rowdisp
+                y = scale * coldisp
             else:
-                x = scale*xy[i][0]
-                y = scale*xy[i][1]
-            self.addButton(x, y, scale-1, scale-1,
-                           "{}, row{}col{} (matterchan{})".format(name, rownum, colnum, 2*(self.rows*colnum+rownum)+1))
+                x = scale * xy[i][0]
+                y = scale * xy[i][1]
+            tooltip = "{}, row{}col{} (matterchan{})".format(
+                name, rownum, colnum, 2 * (self.rows * colnum + rownum) + 1
+            )
+            self.addButton(x, y, scale - 1, scale - 1, name, tooltip)
             rowdisp += 1
             rownum += 1
             i += 1
@@ -334,12 +411,12 @@ class CountRateMap(QtWidgets.QWidget):
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
-        assert(len(countRates) == len(self.buttons))
+        assert len(countRates) == len(self.buttons)
         # cmap = cm.get_cmap('YlOrRd')
-        cmap = cm.get_cmap('Wistia')
+        cmap = cm.get_cmap("Wistia")
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
-            if button is None:
+            if button is None or button.triggers_blocked:
                 continue
             if cr < 10:
                 buttonText = "{:.2f}".format(cr)
@@ -349,7 +426,7 @@ class CountRateMap(QtWidgets.QWidget):
                 buttonText = "{:.0f}".format(cr)
             button.setText(buttonText)
 
-            color = cmap(cr/colorScale, bytes=True)
+            color = cmap(cr / colorScale, bytes=True)
             colorString = "rgb({},{},{})".format(color[0], color[1], color[2])
-            colorString = 'QPushButton {background-color: %s;}' % colorString
+            colorString = "QPushButton {background-color: %s;}" % colorString
             button.setStyleSheet(colorString)

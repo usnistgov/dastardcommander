@@ -68,29 +68,19 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QSpinBox" name="pretrigLengthSpinBox">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <item row="0" column="0" colspan="2">
+         <widget class="QLabel" name="label_19">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
           </property>
-          <property name="keyboardTracking">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <number>3</number>
-          </property>
-          <property name="maximum">
-           <number>65536</number>
-          </property>
-          <property name="value">
-           <number>256</number>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLabel" name="pretrigPercentLabel">
           <property name="text">
-           <string>% Pretrigger</string>
+           <string>Record size</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -100,19 +90,6 @@
            <string>Samples per record</string>
           </property>
          </widget>
-        </item>
-        <item row="4" column="0">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item row="1" column="0">
          <widget class="QSpinBox" name="recordLengthSpinBox">
@@ -136,6 +113,32 @@
           </property>
          </widget>
         </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="pretrigPercentLabel">
+          <property name="text">
+           <string>% Pretrigger</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QSpinBox" name="pretrigLengthSpinBox">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
+          <property name="minimum">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <number>65536</number>
+          </property>
+          <property name="value">
+           <number>256</number>
+          </property>
+         </widget>
+        </item>
         <item row="3" column="0">
          <widget class="QDoubleSpinBox" name="pretrigPercentSpinBox">
           <property name="alignment">
@@ -152,21 +155,18 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0" colspan="2">
-         <widget class="QLabel" name="label_19">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
+        <item row="4" column="0">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="text">
-           <string>Record size</string>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -186,83 +186,140 @@
         <number>2</number>
        </property>
        <item>
-        <widget class="QLabel" name="channelsChosenLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QFrame" name="horizontalFrame_2">
+         <property name="frameShape">
+          <enum>QFrame::Panel</enum>
          </property>
-         <property name="text">
-          <string>Channels chosen:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPlainTextEdit" name="channelsChosenEdit">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>160</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>160</height>
-          </size>
-         </property>
-         <property name="sizeIncrement">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>160</width>
-           <height>40</height>
-          </size>
-         </property>
-         <property name="tabChangesFocus">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="channelChooserBox">
-         <property name="toolTip">
-          <string>Fill the channel list (above) with standard groupings</string>
-         </property>
-         <property name="currentIndex">
-          <number>0</number>
-         </property>
-         <item>
-          <property name="text">
-           <string>user defined</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>All channels</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Signal channels</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>TDM error channels</string>
-          </property>
-         </item>
+         <layout class="QGridLayout" name="gridLayout_4" columnstretch="2,1">
+          <item row="1" column="0">
+           <widget class="QPlainTextEdit" name="channelsChosenEdit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+              <horstretch>2</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>160</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>160</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="tabChangesFocus">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPlainTextEdit" name="disabledTextEdit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>100</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Channels not allowed to trigger (toggle single channels in Observe tab)</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="plainText">
+             <string>All channels are enabled</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="channelsChosenLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Channels chosen:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QComboBox" name="channelChooserBox">
+            <property name="toolTip">
+             <string>Fill the channel list (above) with standard groupings</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>user defined</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>All channels</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Signal channels</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>TDM error channels</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QPushButton" name="clearDisabledButton">
+            <property name="toolTip">
+             <string>Clear the list of disabled channels</string>
+            </property>
+            <property name="text">
+             <string>Enable all channels</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="disable_label">
+            <property name="text">
+             <string>Disabled channels (never trigger):</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -821,22 +878,6 @@ the corresponding Error chan (Lancero only).</string>
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>channelChooserBox</sender>
-   <signal>activated(int)</signal>
-   <receiver>triggerConfigTab</receiver>
-   <slot>channelChooserChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>609</x>
-     <y>309</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>461</x>
-     <y>123</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>autoTrigActive</sender>
    <signal>clicked()</signal>

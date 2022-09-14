@@ -42,8 +42,9 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.client = dcom.client
         self.dcom = dcom
         self.settings = QSettings()
-        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__),
-                                      "ui/trigger_config_simple.ui"), self)
+        PyQt5.uic.loadUi(
+            os.path.join(os.path.dirname(__file__), "ui/trigger_config_simple.ui"), self
+        )
 
         self.readSettings()
         self.connect()
@@ -58,10 +59,12 @@ class TriggerConfigSimple(QtWidgets.QWidget):
 
     def connect(self):
         self.spinBox_recordLength.valueChanged.connect(
-            self.handleRecordLengthOrPercentPretrigChange)
+            self.handleRecordLengthOrPercentPretrigChange
+        )
         self.spinBox_pretrigLength.valueChanged.connect(self.handlePretrigLengthChange)
         self.spinBox_percentPretrigger.valueChanged.connect(
-            self.handleRecordLengthOrPercentPretrigChange)
+            self.handleRecordLengthOrPercentPretrigChange
+        )
         self.spinBox_level.valueChanged.connect(self.handleUIChange)
         self.spinBox_nMonotone.valueChanged.connect(self.handleUIChange)
         self.checkBox_disableZeroThreshold.stateChanged.connect(self.handleUIChange)
@@ -74,7 +77,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
     def handleRecordLengthOrPercentPretrigChange(self):
         rl = self.spinBox_recordLength.value()
         percent = self.spinBox_percentPretrigger.value()
-        pt = (rl*percent/100)
+        pt = rl * percent / 100
         self.spinBox_pretrigLength.blockSignals(True)
         self.spinBox_pretrigLength.setValue(pt)
         self.spinBox_pretrigLength.blockSignals(False)
@@ -84,7 +87,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         rl = self.spinBox_recordLength.value()
         pt = self.spinBox_pretrigLength.value()
         self.spinBox_percentPretrigger.blockSignals(True)
-        self.spinBox_percentPretrigger.setValue(100*pt/rl)
+        self.spinBox_percentPretrigger.setValue(100 * pt / rl)
         self.spinBox_percentPretrigger.blockSignals(False)
         self.setPulseSync(Sync.UNKNOWN)
 
@@ -95,7 +98,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.sendRecordLength()
         config = {
             "ChannelIndices": self.channelIndicesSignalOnlyWithExcludes(),
-            "AutoTrigger": True
+            "AutoTrigger": True,
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
         self._lastSentConfig = config
@@ -114,7 +117,8 @@ class TriggerConfigSimple(QtWidgets.QWidget):
             "EdgeMulti": True,
             "EdgeMultiNoise": False,
             "EdgeMultiMakeShortRecords": s == TwoPulseChoice.VARIABLE_LENGTH.to_str(),
-            "EdgeMultiMakeContaminatedRecords": s == TwoPulseChoice.CONTAMINATED.to_str(),
+            "EdgeMultiMakeContaminatedRecords": s
+            == TwoPulseChoice.CONTAMINATED.to_str(),
             "EdgeMultiVerifyNMonotone": self.spinBox_nMonotone.value(),
             "EdgeMultiLevel": self.spinBox_level.value(),
             "EdgeMultiDisableZeroThreshold": self.checkBox_disableZeroThreshold.isChecked(),
@@ -149,7 +153,9 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         s = self.settings
         self.spinBox_recordLength.setValue(int(s.value("record_length", 1024)))
         self.spinBox_pretrigLength.setValue(int(s.value("pretrigger_length", 512)))
-        self.spinBox_percentPretrigger.setValue(float(s.value("percent_pretrigger", 25.0)))
+        self.spinBox_percentPretrigger.setValue(
+            float(s.value("percent_pretrigger", 25.0))
+        )
         self.spinBox_level.setValue(int(s.value("level", 100)))
         self.spinBox_nMonotone.setValue(int(s.value("n_monotone", 5)))
         # apparently QSettings sucks with bools, so use an int for the following
@@ -166,15 +172,22 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         s.setValue("percent_pretrigger", self.spinBox_percentPretrigger.value())
         s.setValue("level", self.spinBox_level.value())
         s.setValue("n_monotone", self.spinBox_nMonotone.value())
-        s.setValue("disable_zero_threshold", int(self.checkBox_disableZeroThreshold.isChecked()))
+        s.setValue(
+            "disable_zero_threshold",
+            int(self.checkBox_disableZeroThreshold.isChecked()),
+        )
         s.setValue("two_triggers", self.comboBox_twoTriggers.currentIndex())
         s.setValue("projectors_file", self.lineEdit_projectors.text())
 
     def sendRecordLength(self):
         self.dcom.triggerTab.blockSignals(True)
-        self.client.call("SourceControl.ConfigurePulseLengths",
-                         {"Nsamp": self.spinBox_recordLength.value(),
-                          "Npre": self.spinBox_pretrigLength.value()})
+        self.client.call(
+            "SourceControl.ConfigurePulseLengths",
+            {
+                "Nsamp": self.spinBox_recordLength.value(),
+                "Npre": self.spinBox_pretrigLength.value(),
+            },
+        )
         time.sleep(0.1)
         self.dcom.triggerTab.blockSignals(False)
 
@@ -185,8 +198,10 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.client.call("SourceControl.ConfigureTriggers", config)
 
     def channelIndicesSignalOnlyWithExcludes(self):
-        return self.dcom.channelIndicesSignalOnly()
-        # TODO: add exclude list, and maybe a way to auto populate it?
+        sigchan = set(self.dcom.channelIndicesSignalOnly())
+        enabledchan = list(sigchan - set(self.triggerBlocker.blocked))
+        enabledchan.sort()
+        return enabledchan
 
     def handleTriggerMessage(self, d, nmsg):
         """If DASTARD indicates the trigger state has changed, change the UI to say so."""
@@ -194,7 +209,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         # has changed the state
         if self._lastSentConfigTime is None:
             return
-        elapsed_s = time.time()-self._lastSentConfigTime
+        elapsed_s = time.time() - self._lastSentConfigTime
         if elapsed_s > 1.5:
             self.setPulseSync(Sync.UNKNOWN)
 
@@ -214,7 +229,9 @@ class TriggerConfigSimple(QtWidgets.QWidget):
 
     def handleSendProjectors(self):
         fileName = self.lineEdit_projectors.text()
-        success = projectors.sendProjectors(self, fileName, self.dcom.channel_names, self.client)
+        success = projectors.sendProjectors(
+            self, fileName, self.dcom.channel_names, self.client
+        )
         print(f"sendprojectors success success = {success}")
         if success:
             self.settings.setValue("projectors_file", self.lineEdit_projectors.text())
