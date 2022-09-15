@@ -223,6 +223,14 @@ class Observe(QtWidgets.QWidget):
             self.crm_grid.setCountRates(np.zeros(len(self.crm_grid.buttons)), 1)
         self.setArrayCps(0, False, 0)
 
+    @pyqtSlot()
+    def pushedClearDisabled(self):
+        """GUI requested the disabled list be cleared."""
+        for map in (self.crm_grid, self.crm_map):
+            if map is None:
+                continue
+            map.enableAllChannels()
+
     def handleAutoScaleClicked(self):
         self.doubleSpinBox_colorScale.setEnabled(
             not self.pushButton_autoScale.isChecked()
@@ -364,6 +372,12 @@ class CountRateMap(QtWidgets.QWidget):
         if "DISABLED" in tt:
             tt = tt.replace("[DISABLED] ", "")
             button.setToolTip(tt)
+
+    def enableAllChannels(self):
+        """The list of blocked channels has been cleared. Enable all GUI elements."""
+        for (name, button) in self.named_buttons.items():
+            if button.triggers_blocked:
+                self.setButtonEnabled(name)
 
     def deleteButtons(self):
         for button in self.buttons:

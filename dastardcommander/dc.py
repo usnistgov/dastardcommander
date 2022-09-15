@@ -137,9 +137,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.triggerTabSimple.triggerBlocker = self.triggerBlocker
         self.observeWindow.triggerBlocker = self.triggerBlocker
         self.observeTab.triggerBlocker = self.triggerBlocker
-        self.triggerTab.clearDisabledButton.clicked.connect(
-            self.triggerTab.pushedClearDisabled
-        )
+        cdb = self.triggerTab.clearDisabledButton
+        for tab in (self.triggerTab, self.observeTab):
+            cdb.clicked.connect(tab.pushedClearDisabled)
         self.observeTab.blocklist_changed.connect(self.triggerTab.updateDisabledList)
         self.observeTab.block_channel.connect(self.triggerTab.blockTriggering)
         self.triggerTab.updateDisabledList()
