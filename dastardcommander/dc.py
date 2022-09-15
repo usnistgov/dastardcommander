@@ -37,6 +37,7 @@ from . import trigger_config_simple
 from . import writing
 from . import projectors
 from . import observe
+from . import workflow
 
 __version__ = "0.2.5"
 
@@ -144,10 +145,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab.block_channel.connect(self.triggerTab.blockTriggering)
         self.triggerTab.updateDisabledList()
 
-        # self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
-        # self.workflowTab.projectorsLoadedSig.connect(
-        #     self.writingTab.checkBox_OFF.setChecked
-        # )
+        self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
+        self.workflowTab.projectorsLoadedSig.connect(
+            self.writingTab.checkBox_OFF.setChecked
+        )
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
@@ -157,8 +158,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab.channel_names = self.channel_names
         self.observeWindow.channel_names = self.channel_names
         self.triggerTab.channel_prefixes = self.channel_prefixes
-        # self.workflowTab.channel_names = self.channel_names
-        # self.workflowTab.channel_prefixes = self.channel_prefixes
+        self.workflowTab.channel_names = self.channel_names
+        self.workflowTab.channel_prefixes = self.channel_prefixes
         self.launchMicroscopeButton.clicked.connect(self.launchMicroscope)
         self.killAllMicroscopesButton.clicked.connect(self.killAllMicroscopes)
         self.tabWidget.setEnabled(False)
@@ -237,7 +238,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.triggerTabSimple.handleNsamplesNpresamplesMessage(
                     d["Nsamples"], d["Npresamp"]
                 )
-                # self.workflowTab.handleStatusUpdate(d)
+                self.workflowTab.handleStatusUpdate(d)
 
                 source = d["SourceName"]
                 nchan = d["Nchannels"]
@@ -278,7 +279,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "WRITING":
                 self.writingTab.handleWritingMessage(d)
-                # self.workflowTab.handleWritingMessage(d)
+                self.workflowTab.handleWritingMessage(d)
                 self.observeTab.handleWritingMessage(d)
 
             elif topic == "TRIANGLE":
