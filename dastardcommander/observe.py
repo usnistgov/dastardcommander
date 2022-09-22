@@ -318,6 +318,7 @@ class CountRateMap(QtWidgets.QWidget):
         button.setFont(self.enabledFont)
         button.setFlat(False)
         button.chanName = name
+        button.chanIndex = len(self.buttons)
         button.clicked.connect(lambda: self.click_callback(name))
         button.setToolTip(tooltip)
         button.triggers_blocked = False
@@ -337,7 +338,6 @@ class CountRateMap(QtWidgets.QWidget):
         if chan in self.triggerBlocker.blocked:
             print(f"Channel {name} triggering is disabled.")
             self.setButtonDisabled(name)
-            self.owner.block_channel.emit(chan)
         else:
             print(f"Channel {name} triggering is enabled.")
             self.setButtonEnabled(name)
@@ -358,6 +358,7 @@ class CountRateMap(QtWidgets.QWidget):
         if "DISABLED" not in tt:
             tt = "[DISABLED] " + tt
             button.setToolTip(tt)
+        self.owner.block_channel.emit(self.chanIndex)
 
     def setButtonEnabled(self, name):
         button = self.named_buttons.get(name, None)
@@ -400,6 +401,7 @@ class CountRateMap(QtWidgets.QWidget):
         # rowdisp means row number on the display
         # rownum means TES's actual row number
         for name in self.channel_names:
+            # No count rate buttons for Lancero error channels, or any others not called "chan*"
             if not name.startswith("chan"):
                 self.buttons.append(None)
                 continue
