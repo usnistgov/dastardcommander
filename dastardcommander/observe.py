@@ -358,7 +358,7 @@ class CountRateMap(QtWidgets.QWidget):
         if "DISABLED" not in tt:
             tt = "[DISABLED] " + tt
             button.setToolTip(tt)
-        self.owner.block_channel.emit(self.chanIndex)
+        self.owner.block_channel.emit(button.chanIndex)
 
     def setButtonEnabled(self, name):
         button = self.named_buttons.get(name, None)
