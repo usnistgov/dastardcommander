@@ -641,6 +641,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__dict__["udpPort%d" % id].setValue(port)
 
     def fillPhaseResetInfo(self, d):
+        self.unwrapBiasCheck.setChecked(d["Bias"])
+        if d["PulseSign"] >= 0:
+            self.phasePosPulses.setChecked(True)
+        else:
+            self.phaseNegPulses.setChecked(True)
         self.phaseResetSamplesBox.setValue(d["ResetAfter"])
         unwrap, dropBits = d["Unwrap"], d["RescaleRaw"]
         if unwrap and dropBits:
