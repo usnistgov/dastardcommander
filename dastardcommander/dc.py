@@ -212,10 +212,12 @@ class MainWindow(QtWidgets.QMainWindow):
         quietTopics = set(
             ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
         )  # add "ALIVE"
-        if topic not in quietTopics or self.nmsg < 15:
+        _suppress_after_number = 20
+        if topic not in quietTopics or self.nmsg <= _suppress_after_number:
             print("%s %5d: %s" % (topic, self.nmsg, d))
-        if self.nmsg == 21:
-            print("After message #20, suppressing {} messages.".format(quietTopics))
+        if self.nmsg == _suppress_after_number + 1:
+            note = f"After message #{_suppress_after_number}, suppressing {quietTopics} messages."
+            print(note)
 
         if topic == "ALIVE":
             self.heartbeat(d)
