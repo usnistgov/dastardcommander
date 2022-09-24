@@ -646,6 +646,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.phasePosPulses.setChecked(True)
         else:
             self.phaseNegPulses.setChecked(True)
+        self.updateBiasText()
         self.phaseResetSamplesBox.setValue(d["ResetAfter"])
         unwrap, dropBits = d["Unwrap"], d["RescaleRaw"]
         if unwrap and dropBits:
