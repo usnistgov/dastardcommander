@@ -364,6 +364,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.observeTab.handleExternalTriggerMessage(d)
                 self.observeWindow.handleExternalTriggerMessage(d)
 
+            elif topic == "STATELABEL":
+                 self.observeTab.ExperimentStateIncrementer.updateLabel(d)
+                 self.observeWindow.ExperimentStateIncrementer.updateLabel(d)
+
+  
             else:
                 print("%s is not a topic we handle yet." % topic)
 
