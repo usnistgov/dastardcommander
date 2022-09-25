@@ -177,7 +177,7 @@ class Observe(QtWidgets.QWidget):
         self.deleteCRMGrid()
         self.crm_grid = CountRateMap(self, self.cols, self.rows, self.channel_names)
         self.GridTab.layout().addWidget(self.crm_grid)
-        self.ui.colorbarLayout.insertWidget(0, self.crm_grid.colorbar)
+        self.colorbarLayout.insertWidget(1, self.crm_grid.colorbar)
 
     def deleteCRMGrid(self):
         if self.crm_grid is not None:
@@ -299,7 +299,7 @@ class CountRateColorBar(QtWidgets.QWidget):
              f = float(i)/Nboxes
              color = self.cmap(f, bytes=True)
              qp.setBrush(QtGui.QColor(*color))
-             qp.drawRect(int(f*w+0.5), 0, float(w)/Nboxes+1, h*0.5)
+             qp.drawRect(int(f*w+0.5), 0, int(float(w)/Nboxes)+1, int(h*1.0))
 
 _QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
 
@@ -332,7 +332,7 @@ class CountRateMap(QtWidgets.QWidget):
             self.initButtons(scale=scale, xy=xy)
 
         self.colorbar = CountRateColorBar(self)
-        self.colorbar.move(0, (self.cols+0.5)*scale)
+        self.colorbar.move(0, int((self.cols+0.5)*scale))
         w = parent.width()
         self.colorbar.resize(w, scale)
         self.colorbar.cmap = self.cmap
@@ -421,7 +421,7 @@ class CountRateMap(QtWidgets.QWidget):
             self.initButtons()
 
     def initButtons(self, scale=25, xy=None):
-        MaxPerRow = 32  # no more than this many buttons per row
+        MaxPerRow = 33  # no more than this many buttons per row
         self.deleteButtons()
         rowdisp = rownum = coldisp = colnum = i = 0
         # rowdisp means row number on the display
@@ -453,6 +453,7 @@ class CountRateMap(QtWidgets.QWidget):
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
+        self.owner.maxRateLabel.setText("Max rate: {:.2f}/sec".format(colorScale))
         assert len(countRates) == len(self.buttons)
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
@@ -466,7 +467,7 @@ class CountRateMap(QtWidgets.QWidget):
                 buttonText = "{:.0f}".format(cr)
             button.setText(buttonText)
 
-            color =self.cmap(cr / colorScale, bytes=True)
+            color = self.cmap(cr / colorScale, bytes=True)
             colorString = "rgb({},{},{})".format(color[0], color[1], color[2])
             colorString = "QPushButton {background-color: %s;}" % colorString
             button.setStyleSheet(colorString)
