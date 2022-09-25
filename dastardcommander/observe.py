@@ -6,7 +6,7 @@ from string import ascii_uppercase
 import itertools
 
 # Qt5 imports
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 import PyQt5.uic
 
@@ -177,6 +177,7 @@ class Observe(QtWidgets.QWidget):
         self.deleteCRMGrid()
         self.crm_grid = CountRateMap(self, self.cols, self.rows, self.channel_names)
         self.GridTab.layout().addWidget(self.crm_grid)
+        self.ui.colorbarLayout.insertWidget(0, self.crm_grid.colorbar)
 
     def deleteCRMGrid(self):
         if self.crm_grid is not None:
@@ -284,6 +285,22 @@ class Observe(QtWidgets.QWidget):
             self.ExperimentStateIncrementer.resetStateLabels()
 
 
+class CountRateColorBar(QtWidgets.QWidget):
+     "Show the event rate color scale as a color bar"
+     def paintEvent(self, event):
+         qp = QtGui.QPainter(self)
+         qp.setPen(QtCore.Qt.NoPen)
+         size = self.size()
+         w = size.width()
+         h = size.height()
+
+         Nboxes = max(50, w//2)
+         for i in range(Nboxes):
+             f = float(i)/Nboxes
+             color = self.cmap(f, bytes=True)
+             qp.setBrush(QtGui.QColor(*color))
+             qp.drawRect(int(f*w+0.5), 0, float(w)/Nboxes+1, h*0.5)
+
 _QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
 
 
@@ -296,6 +313,7 @@ class CountRateMap(QtWidgets.QWidget):
     enabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 8, QtGui.QFont.Bold)
     disabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 16, QtGui.QFont.Bold)
     disabledColor = "#603810"  # a dark brown
+    cmap = cm.get_cmap("Wistia")
 
     def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -307,9 +325,17 @@ class CountRateMap(QtWidgets.QWidget):
         self.channel_names = channel_names
         self.triggerBlocker = parent.triggerBlocker
         if xy is None:
-            self.initButtons(scale=25)
+            scale=25
+            self.initButtons(scale=scale)
         else:
-            self.initButtons(scale=23, xy=xy)
+            scale=23
+            self.initButtons(scale=scale, xy=xy)
+
+        self.colorbar = CountRateColorBar(self)
+        self.colorbar.move(0, (self.cols+0.5)*scale)
+        w = parent.width()
+        self.colorbar.resize(w, scale)
+        self.colorbar.cmap = self.cmap
 
     def addButton(self, x, y, xwidth, ywidth, name, tooltip):
         button = QtWidgets.QPushButton(self)
@@ -428,8 +454,6 @@ class CountRateMap(QtWidgets.QWidget):
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
         assert len(countRates) == len(self.buttons)
-        # cmap = cm.get_cmap('YlOrRd')
-        cmap = cm.get_cmap("Wistia")
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
             if button is None or button.triggers_blocked:
@@ -442,7 +466,7 @@ class CountRateMap(QtWidgets.QWidget):
                 buttonText = "{:.0f}".format(cr)
             button.setText(buttonText)
 
-            color = cmap(cr / colorScale, bytes=True)
+            color =self.cmap(cr / colorScale, bytes=True)
             colorString = "rgb({},{},{})".format(color[0], color[1], color[2])
             colorString = "QPushButton {background-color: %s;}" % colorString
             button.setStyleSheet(colorString)
