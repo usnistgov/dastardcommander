@@ -28,6 +28,7 @@ class TriggerConfig(QtWidgets.QWidget):
         self.pretrigPercentSpinBox.editingFinished.connect(
             self.sendRecordLengthsToServer
         )
+        self.channelChooserBox.activated.connect(self.channelChooserChanged)
         self.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
         self.auto1psModeButton.clicked.connect(self.go1psMode)
         self.noiseModeButton.clicked.connect(self.goNoiseMode)
@@ -108,12 +109,12 @@ class TriggerConfig(QtWidgets.QWidget):
         if idx < 0:
             return
         cctext = self.channelChooserBox.currentText()
+        if cctext.startswith("user"):
+            return
         if cctext.startswith("All"):
             allprefixes = [self.chanbyprefix(p) for p in self.channel_prefixes]
             allprefixes.sort()
             result = "\n".join(allprefixes)
-        elif cctext.startswith("user"):
-            return
         else:
             prefix = cctext.split()[0]
             if prefix == "Signal":
