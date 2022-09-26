@@ -228,7 +228,7 @@ class TriggerConfig(QtWidgets.QWidget):
             self.client.call("SourceControl.ConfigureTriggers", state)
 
     def setstates(self, newstate):
-        "Set the self.trigger_state value named name to newvalue"
+        """Set multiple self.trigger_state values from `newstate`, a dict of state key->value pairs."""
         for state in self.alltriggerstates():
             for name, val in newstate.items():
                 state[name] = val
