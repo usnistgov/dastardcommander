@@ -212,10 +212,12 @@ class MainWindow(QtWidgets.QMainWindow):
         quietTopics = set(
             ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
         )  # add "ALIVE"
-        if topic not in quietTopics or self.nmsg < 15:
+        _suppress_after_number = 20
+        if topic not in quietTopics or self.nmsg <= _suppress_after_number:
             print("%s %5d: %s" % (topic, self.nmsg, d))
-        if self.nmsg == 21:
-            print("After message #20, suppressing {} messages.".format(quietTopics))
+        if self.nmsg == _suppress_after_number + 1:
+            note = f"After message #{_suppress_after_number}, suppressing {quietTopics} messages."
+            print(note)
 
         if topic == "ALIVE":
             self.heartbeat(d)
@@ -639,6 +641,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.__dict__["udpPort%d" % id].setValue(port)
 
     def fillPhaseResetInfo(self, d):
+        self.unwrapBiasCheck.setChecked(d["Bias"])
+        if d["PulseSign"] >= 0:
+            self.phasePosPulses.setChecked(True)
+        else:
+            self.phaseNegPulses.setChecked(True)
+        self.updateBiasText()
         self.phaseResetSamplesBox.setValue(d["ResetAfter"])
         unwrap, dropBits = d["Unwrap"], d["RescaleRaw"]
         if unwrap and dropBits:
