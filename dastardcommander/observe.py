@@ -325,10 +325,10 @@ class CountRateMap(QtWidgets.QWidget):
         self.channel_names = channel_names
         self.triggerBlocker = parent.triggerBlocker
         if xy is None:
-            scale=25
+            scale=24
             self.initButtons(scale=scale)
         else:
-            scale=23
+            scale=24
             self.initButtons(scale=scale, xy=xy)
 
         self.colorbar = CountRateColorBar(self)
@@ -421,9 +421,10 @@ class CountRateMap(QtWidgets.QWidget):
             self.initButtons()
 
     def initButtons(self, scale=25, xy=None):
-        MaxPerRow = 33  # no more than this many buttons per row
+        MaxPerRow = 32  # no more than this many buttons per row
         self.deleteButtons()
         rowdisp = rownum = coldisp = colnum = i = 0
+        wrappedrows = False
         # rowdisp means row number on the display
         # rownum means TES's actual row number
         for name in self.channel_names:
@@ -434,6 +435,8 @@ class CountRateMap(QtWidgets.QWidget):
             if xy is None:
                 x = scale * rowdisp
                 y = scale * coldisp
+                if wrappedrows:
+                    y += int(0.4*scale*colnum)
             else:
                 x = scale * xy[i][0]
                 y = scale * xy[i][1]
@@ -445,11 +448,13 @@ class CountRateMap(QtWidgets.QWidget):
             rownum += 1
             i += 1
             if rownum >= self.rows:
-                rownum = 0
+                rownum = rowdisp = 0
+                coldisp += 1
                 colnum += 1
             elif rowdisp >= MaxPerRow:
-                rowdisp = 2  # Indent "continuation rows"
+                rowdisp = 0
                 coldisp += 1
+                wrappedrows = True
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
