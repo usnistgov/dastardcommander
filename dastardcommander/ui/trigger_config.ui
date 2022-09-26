@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>665</width>
-    <height>679</height>
+    <width>788</width>
+    <height>739</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -478,6 +478,11 @@
           <string>Either</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>(-mixed-)</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="2" column="3" rowspan="2">
@@ -550,7 +555,7 @@
         </item>
         <item>
          <property name="text">
-          <string/>
+          <string>(-mixed-)</string>
          </property>
         </item>
        </widget>
@@ -960,7 +965,7 @@ the corresponding Error chan (Lancero only).</string>
   </connection>
   <connection>
    <sender>edgeRiseFallBoth</sender>
-   <signal>currentIndexChanged(int)</signal>
+   <signal>activated(int)</signal>
    <receiver>triggerConfigTab</receiver>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
@@ -1056,7 +1061,7 @@ the corresponding Error chan (Lancero only).</string>
   </connection>
   <connection>
    <sender>levelRiseFallBoth</sender>
-   <signal>currentIndexChanged(int)</signal>
+   <signal>activated(int)</signal>
    <receiver>triggerConfigTab</receiver>
    <slot>changedLevelTrigConfig()</slot>
    <hints>

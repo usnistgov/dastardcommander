@@ -235,6 +235,7 @@ class TriggerConfig(QtWidgets.QWidget):
     def updateTriggerGUIElements(self):
         """Given the self.chosenChannels, update the various trigger status GUI elements."""
 
+        # Get the check boxes right
         boxes = (
             (self.autoTrigActive, "AutoTrigger"),
             (self.edgeTrigActive, "EdgeTrigger"),
@@ -249,6 +250,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 checkbox.setTristate(False)
                 checkbox.setChecked(state)
 
+        # Get the units right
         levelscale = edgescale = 1.0
         if self.levelVoltsRaw.currentText().startswith("Volts"):
             levelscale = 1.0 / 16384.0
@@ -258,6 +260,8 @@ class TriggerConfig(QtWidgets.QWidget):
         else:
             self.levelUnitsLabel.setText("raw")
             self.edgeUnitsLabel.setText("raw/samp")
+
+        # Get the threshold edit box values right
         edits = (
             (self.autoTimeEdit, "AutoDelay", 1e-6),
             (self.edgeEdit, "EdgeLevel", edgescale),
@@ -270,14 +274,22 @@ class TriggerConfig(QtWidgets.QWidget):
                 continue
             edit.setText("%f" % (state * scale))
 
-        r = self.getstate("EdgeRising")
-        f = self.getstate("EdgeFalling")
-        if r and f:
-            self.edgeRiseFallBoth.setCurrentIndex(2)
-        elif f:
-            self.edgeRiseFallBoth.setCurrentIndex(1)
-        else:
-            self.edgeRiseFallBoth.setCurrentIndex(0)
+        # Get the rising/falling/both/mixed state correct
+        for (riseFallComboBox, rising, falling) in (
+            (self.levelRiseFallBoth, "LevelRising", "LevelFalling"),
+            (self.edgeRiseFallBoth, "EdgeRising", "EdgeFalling"),
+            ):
+            r = self.getstate(rising)
+            f = self.getstate(falling)
+            if r and f:
+                newidx = 2
+            elif r:
+                newidx = 0
+            elif f:
+                newidx = 1
+            else:
+                newidx = 3
+            riseFallComboBox.setCurrentIndex(newidx)
 
     @pyqtSlot()
     def pushedAddGroupTrigger(self):
