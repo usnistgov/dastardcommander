@@ -13,6 +13,8 @@ class TriggerConfig(QtWidgets.QWidget):
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
 
+    changedTriggerStateSig = pyqtSignal()
+
     def __init__(self, parent, client):
         QtWidgets.QWidget.__init__(self, parent)
         self.client = client
@@ -26,6 +28,7 @@ class TriggerConfig(QtWidgets.QWidget):
         self.pretrigPercentSpinBox.editingFinished.connect(
             self.sendRecordLengthsToServer
         )
+        self.channelChooserBox.activated.connect(self.channelChooserChanged)
         self.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
         self.auto1psModeButton.clicked.connect(self.go1psMode)
         self.noiseModeButton.clicked.connect(self.goNoiseMode)
@@ -106,12 +109,12 @@ class TriggerConfig(QtWidgets.QWidget):
         if idx < 0:
             return
         cctext = self.channelChooserBox.currentText()
+        if cctext.startswith("user"):
+            return
         if cctext.startswith("All"):
             allprefixes = [self.chanbyprefix(p) for p in self.channel_prefixes]
             allprefixes.sort()
             result = "\n".join(allprefixes)
-        elif cctext.startswith("user"):
-            return
         else:
             prefix = cctext.split()[0]
             if prefix == "Signal":
@@ -224,15 +227,16 @@ class TriggerConfig(QtWidgets.QWidget):
         for state in self.alltriggerstates():
             self.client.call("SourceControl.ConfigureTriggers", state)
 
-    def setstate(self, name, newvalue):
-        "Set the self.trigger_state value named name to newvalue"
+    def setstates(self, newstate):
+        """Set multiple self.trigger_state values from `newstate`, a dict of state key->value pairs."""
         for state in self.alltriggerstates():
-            state[name] = newvalue
-        return newvalue
+            for name, val in newstate.items():
+                state[name] = val
 
     def updateTriggerGUIElements(self):
         """Given the self.chosenChannels, update the various trigger status GUI elements."""
 
+        # Get the check boxes right
         boxes = (
             (self.autoTrigActive, "AutoTrigger"),
             (self.edgeTrigActive, "EdgeTrigger"),
@@ -247,6 +251,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 checkbox.setTristate(False)
                 checkbox.setChecked(state)
 
+        # Get the units right
         levelscale = edgescale = 1.0
         if self.levelVoltsRaw.currentText().startswith("Volts"):
             levelscale = 1.0 / 16384.0
@@ -256,6 +261,8 @@ class TriggerConfig(QtWidgets.QWidget):
         else:
             self.levelUnitsLabel.setText("raw")
             self.edgeUnitsLabel.setText("raw/samp")
+
+        # Get the threshold edit box values right
         edits = (
             (self.autoTimeEdit, "AutoDelay", 1e-6),
             (self.edgeEdit, "EdgeLevel", edgescale),
@@ -268,14 +275,22 @@ class TriggerConfig(QtWidgets.QWidget):
                 continue
             edit.setText("%f" % (state * scale))
 
-        r = self.getstate("EdgeRising")
-        f = self.getstate("EdgeFalling")
-        if r and f:
-            self.edgeRiseFallBoth.setCurrentIndex(2)
-        elif f:
-            self.edgeRiseFallBoth.setCurrentIndex(1)
-        else:
-            self.edgeRiseFallBoth.setCurrentIndex(0)
+        # Get the rising/falling/both/mixed state correct
+        for (riseFallComboBox, rising, falling) in (
+            (self.levelRiseFallBoth, "LevelRising", "LevelFalling"),
+            (self.edgeRiseFallBoth, "EdgeRising", "EdgeFalling"),
+            ):
+            r = self.getstate(rising)
+            f = self.getstate(falling)
+            if r and f:
+                newidx = 2
+            elif r:
+                newidx = 0
+            elif f:
+                newidx = 1
+            else:
+                newidx = 3
+            riseFallComboBox.setCurrentIndex(newidx)
 
     @pyqtSlot()
     def pushedAddGroupTrigger(self):
@@ -404,8 +419,6 @@ class TriggerConfig(QtWidgets.QWidget):
         self.coupleFBToErrCheckBox.setChecked(fberr)
         self.coupleErrToFBCheckBox.setChecked(errfb)
 
-    changedTriggerStateSig = pyqtSignal()
-
     def changedAllTrigConfig(self):
         "Update all trigger config GUI elements for new configuration"
         self.changedAutoTrigConfig()
@@ -414,35 +427,38 @@ class TriggerConfig(QtWidgets.QWidget):
 
     @pyqtSlot()
     def changedAutoTrigConfig(self):
+        newstate = {}
         auto = self.autoTrigActive.checkState()
         if not auto == Qt.PartiallyChecked:
             self.autoTrigActive.setTristate(False)
-            self.setstate("AutoTrigger", auto == Qt.Checked)
+            newstate["AutoTrigger"] = auto == Qt.Checked
 
         delay = self.autoTimeEdit.text()
         try:
             nsdelay = int(round(float(delay) * 1e6))
-            self.setstate("AutoDelay", nsdelay)
+            newstate["AutoDelay"] = nsdelay
         except ValueError:
             pass
+        self.setstates(newstate)
         self.configureDastardTriggers()
 
     @pyqtSlot()
     def changedEdgeTrigConfig(self):
+        newstate = {}
         edge = self.edgeTrigActive.checkState()
         if not edge == Qt.PartiallyChecked:
             self.edgeTrigActive.setTristate(False)
-            self.setstate("EdgeTrigger", edge == Qt.Checked)
+            newstate["EdgeTrigger"] = edge == Qt.Checked
         rfb = self.edgeRiseFallBoth.currentText()
         if rfb.startswith("Rising"):
-            self.setstate("EdgeRising", True)
-            self.setstate("EdgeFalling", False)
+            newstate["EdgeRising"] = True
+            newstate["EdgeFalling"] = False
         elif rfb.startswith("Falling"):
-            self.setstate("EdgeRising", False)
-            self.setstate("EdgeFalling", True)
+            newstate["EdgeRising"] = False
+            newstate["EdgeFalling"] = True
         elif rfb.startswith("Either"):
-            self.setstate("EdgeRising", True)
-            self.setstate("EdgeFalling", True)
+            newstate["EdgeRising"] = True
+            newstate["EdgeFalling"] = True
 
         edgeraw = self.edgeEdit.text()
         edgescale = 1.0
@@ -451,27 +467,29 @@ class TriggerConfig(QtWidgets.QWidget):
             # TODO: convert samples to ms
         try:
             edgeraw = int(float(edgeraw) / edgescale + 0.5)
-            self.setstate("EdgeLevel", edgeraw)
+            newstate["EdgeLeveL"] = edgeraw
         except ValueError:
             pass
+        self.setstates(newstate)
         self.configureDastardTriggers()
 
     @pyqtSlot()
     def changedLevelTrigConfig(self):
+        newstate = {}
         level = self.levelTrigActive.checkState()
         if not level == Qt.PartiallyChecked:
             self.levelTrigActive.setTristate(False)
-            self.setstate("LevelTrigger", level == Qt.Checked)
+            newstate["LevelTrigger"] = level == Qt.Checked
         rfb = self.levelRiseFallBoth.currentText()
         if rfb.startswith("Rising"):
-            self.setstate("LevelRising", True)
-            self.setstate("LevelFalling", False)
+            newstate["LevelRising"] = True
+            newstate["LevelFalling"] = False
         elif rfb.startswith("Falling"):
-            self.setstate("LevelRising", False)
-            self.setstate("LevelFalling", True)
+            newstate["LevelRising"] = False
+            newstate["LevelFalling"] = True
         elif rfb.startswith("Either"):
-            self.setstate("LevelRising", True)
-            self.setstate("LevelFalling", True)
+            newstate["LevelRising"] = True
+            newstate["LevelFalling"] = True
 
         levelraw = self.levelEdit.text()
         levelscale = 1.0
@@ -479,9 +497,10 @@ class TriggerConfig(QtWidgets.QWidget):
             levelscale = 1.0 / 16384.0
         try:
             levelraw = int(float(levelraw) / levelscale + 0.5)
-            self.setstate("LevelLevel", levelraw)
+            newstate["LevelLevel"] = levelraw
         except ValueError:
             pass
+        self.setstates(newstate)
         self.configureDastardTriggers()
 
     @pyqtSlot()
