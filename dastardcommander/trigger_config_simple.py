@@ -211,12 +211,15 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         if not exclude_blocked:
             return signal_channels
         sigset = set(signal_channels)
-        enabledchan = list(sigset - set(self.triggerBlocker.blocked))
+        blocked_numbers = self.triggerBlocker.blocked
+        blocked_indices = [self.channel_indices[n] for n in blocked_numbers]
+        enabledchan = list(sigset - set(blocked_indices))
         if len(enabledchan) < len(sigset):
             print("{}/{} channels enabled and {} disabled: {}".format(len(enabledchan), 
-                len(sigset), len(sigset)-len(enabledchan), self.triggerBlocker.blocked))
+                len(sigset), len(sigset)-len(enabledchan), blocked_indices))
         else:
-            print("All {} channels are enabled.".format(len(enabledchan)))
+            print("All {} channels are enabled; .".format(len(enabledchan)))
+            print("The disabled list is: ", blocked_indices)
         enabledchan.sort()
         return enabledchan
 
