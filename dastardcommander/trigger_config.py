@@ -223,7 +223,10 @@ class TriggerConfig(QtWidgets.QWidget):
                     self.trigger_state[c] = newstate
         return allstates
 
-    def configureDastardTriggers(self):
+    def configureDastardTriggers(self, singlestate=None):
+        if singlestate is not None:
+            self.client.call("SourceControl.ConfigureTriggers", singlestate)
+            return
         for state in self.alltriggerstates():
             self.client.call("SourceControl.ConfigureTriggers", state)
 
@@ -362,7 +365,8 @@ class TriggerConfig(QtWidgets.QWidget):
         notrig_state["AutoTrigger"] = False
         notrig_state["EdgeTrigger"] = False
         notrig_state["LevelTrigger"] = False
-        self.configureDastardTriggers()
+        notrig_state["EMTState"]={"EdgeMulti": False, "EdgeMultiNoise": False}
+        self.configureDastardTriggers(notrig_state)
 
     def handleGroupTriggerMessage(self, msg):
         """Handle the group trigger state message"""

@@ -274,7 +274,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
-                self.triggerTabSimple.handleTriggerMessage(d, self.nmsg)
+                self.triggerTabSimple.handleTriggerMessage(d)
 
             elif topic == "GROUPTRIGGER":
                 self.triggerTab.handleGroupTriggerMessage(d)

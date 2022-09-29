@@ -200,10 +200,13 @@ class TriggerConfigSimple(QtWidgets.QWidget):
     def channelIndicesSignalOnlyWithExcludes(self):
         sigchan = set(self.dcom.channelIndicesSignalOnly())
         enabledchan = list(sigchan - set(self.triggerBlocker.blocked))
+        if len(enabledchan) < len(sigchan):
+            print("{}/{} channels enabled and {} disabled: {}".format(len(enabledchan), 
+                len(sigchan), len(sigchan)-len(enabledchan), self.triggerBlocker.blocked))
         enabledchan.sort()
         return enabledchan
 
-    def handleTriggerMessage(self, d, nmsg):
+    def handleTriggerMessage(self, d):
         """If DASTARD indicates the trigger state has changed, change the UI to say so."""
         # we assume any TRIGGER message more than 100 ms after this class changed the trigger settings
         # has changed the state
