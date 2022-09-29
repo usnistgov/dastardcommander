@@ -71,6 +71,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.comboBox_twoTriggers.currentIndexChanged.connect(self.handleUIChange)
         self.pushButton_sendPulse.clicked.connect(self.handleSendPulse)
         self.pushButton_sendNoise.clicked.connect(self.handleSendNoise)
+        self.pushButton_sendNone.clicked.connect(self.zeroAllTriggers)
         self.toolButton_chooseProjectors.clicked.connect(self.handleChooseProjectors)
         self.pushButton_sendProjectors.clicked.connect(self.handleSendProjectors)
 
@@ -99,7 +100,9 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         config = {
             "ChannelIndices": self.channelIndicesSignalOnlyWithExcludes(),
             "AutoTrigger": True,
+            "AutoDelay": 0,
         }
+        print("Sending noise! To ", config["ChannelIndices"])
         self.client.call("SourceControl.ConfigureTriggers", config)
         self._lastSentConfig = config
         self._lastSentConfigTime = time.time()
