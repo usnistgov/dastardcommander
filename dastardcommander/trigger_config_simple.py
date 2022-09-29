@@ -98,7 +98,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.zeroAllTriggers()
         self.sendRecordLength()
         config = {
-            "ChannelIndices": self.channelIndicesSignalOnlyWithExcludes(),
+            "ChannelIndices": self.channelIndicesSignalOnly(exclude_blocked=True),
             "AutoTrigger": True,
             "AutoDelay": 0,
         }
@@ -116,7 +116,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         print(s, "\n\n")
 
         config = {
-            "ChannelIndices": self.channelIndicesSignalOnlyWithExcludes(),
+            "ChannelIndices": self.channelIndicesSignalOnly(exclude_blocked=True),
             "EdgeMulti": True,
             "EdgeMultiNoise": False,
             "EdgeMultiMakeShortRecords": s == TwoPulseChoice.VARIABLE_LENGTH.to_str(),
@@ -200,12 +200,23 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
 
-    def channelIndicesSignalOnlyWithExcludes(self):
-        sigchan = set(self.dcom.channelIndicesSignalOnly())
-        enabledchan = list(sigchan - set(self.triggerBlocker.blocked))
-        if len(enabledchan) < len(sigchan):
+    def channelIndicesSignalOnly(self, exclude_blocked=True):
+        """
+        Return a sorted list of the channel indices that correspond to signal channels (i.e., 
+        exclude the TDM error channels).
+        If `exclude_blocked` is true, also exclude any listed in the self.triggerBlocker.blocked
+        list of disabled channels.
+        """
+        signal_channels = self.dcom.channelIndicesSignalOnly()
+        if not exclude_blocked:
+            return signal_channels
+        sigset = set(signal_channels)
+        enabledchan = list(sigset - set(self.triggerBlocker.blocked))
+        if len(enabledchan) < len(sigset):
             print("{}/{} channels enabled and {} disabled: {}".format(len(enabledchan), 
-                len(sigchan), len(sigchan)-len(enabledchan), self.triggerBlocker.blocked))
+                len(sigset), len(sigset)-len(enabledchan), self.triggerBlocker.blocked))
+        else:
+            print("All {} channels are enabled.".format(len(enabledchan)))
         enabledchan.sort()
         return enabledchan
 
