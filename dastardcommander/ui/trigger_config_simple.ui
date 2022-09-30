@@ -254,7 +254,7 @@
      <property name="frameShape">
       <enum>QFrame::Panel</enum>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>2</number>
       </property>
@@ -267,7 +267,7 @@
       <property name="bottomMargin">
        <number>2</number>
       </property>
-      <item>
+      <item row="0" column="0">
        <widget class="QLabel" name="label_20">
         <property name="font">
          <font>
@@ -283,7 +283,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="1">
        <widget class="QPushButton" name="pushButton_sendNoise">
         <property name="minimumSize">
          <size>
@@ -297,6 +297,26 @@
           <height>0</height>
          </size>
         </property>
+        <property name="text">
+         <string>Send</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Turn Off All Triggers&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="textFormat">
+         <enum>Qt::AutoText</enum>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="pushButton_sendNone">
         <property name="text">
          <string>Send</string>
         </property>

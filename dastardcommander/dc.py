@@ -154,6 +154,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.last_messages = defaultdict(str)
         self.channel_names = []
         self.channel_prefixes = set()
+        self.channel_indices = {}  # a map from channel number to index
+        self.triggerTabSimple.channel_indices = self.channel_indices
         self.triggerTab.channel_names = self.channel_names
         self.observeTab.channel_names = self.channel_names
         self.observeWindow.channel_names = self.channel_names
@@ -274,7 +276,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
-                self.triggerTabSimple.handleTriggerMessage(d, self.nmsg)
+                self.triggerTabSimple.handleTriggerMessage(d)
 
             elif topic == "GROUPTRIGGER":
                 self.triggerTab.handleGroupTriggerMessage(d)
@@ -320,10 +322,14 @@ class MainWindow(QtWidgets.QMainWindow):
             elif topic == "CHANNELNAMES":
                 self.channel_names[:] = []  # Careful: don't replace the variable
                 self.channel_prefixes.clear()
-                for name in d:
+                self.channel_indices.clear()  # a map from channel numbers to indices
+                for index, name in enumerate(d):
                     self.channel_names.append(name)
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
+                    if prefix == "chan":
+                        number = int(name[len(prefix):])
+                        self.channel_indices[number] = index
                 print("New channames: ", self.channel_names)
                 if self.sourceIsTDM:
                     self.triggerTab.channelChooserBox.setCurrentIndex(2)

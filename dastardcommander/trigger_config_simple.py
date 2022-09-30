@@ -71,6 +71,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.comboBox_twoTriggers.currentIndexChanged.connect(self.handleUIChange)
         self.pushButton_sendPulse.clicked.connect(self.handleSendPulse)
         self.pushButton_sendNoise.clicked.connect(self.handleSendNoise)
+        self.pushButton_sendNone.clicked.connect(self.zeroAllTriggers)
         self.toolButton_chooseProjectors.clicked.connect(self.handleChooseProjectors)
         self.pushButton_sendProjectors.clicked.connect(self.handleSendProjectors)
 
@@ -97,9 +98,11 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.zeroAllTriggers()
         self.sendRecordLength()
         config = {
-            "ChannelIndices": self.channelIndicesSignalOnlyWithExcludes(),
+            "ChannelIndices": self.channelIndicesSignalOnly(exclude_blocked=True),
             "AutoTrigger": True,
+            "AutoDelay": 0,
         }
+        print("Sending noise! To ", config["ChannelIndices"])
         self.client.call("SourceControl.ConfigureTriggers", config)
         self._lastSentConfig = config
         self._lastSentConfigTime = time.time()
@@ -113,7 +116,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         print(s, "\n\n")
 
         config = {
-            "ChannelIndices": self.channelIndicesSignalOnlyWithExcludes(),
+            "ChannelIndices": self.channelIndicesSignalOnly(exclude_blocked=True),
             "EdgeMulti": True,
             "EdgeMultiNoise": False,
             "EdgeMultiMakeShortRecords": s == TwoPulseChoice.VARIABLE_LENGTH.to_str(),
@@ -197,13 +200,30 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         }
         self.client.call("SourceControl.ConfigureTriggers", config)
 
-    def channelIndicesSignalOnlyWithExcludes(self):
-        sigchan = set(self.dcom.channelIndicesSignalOnly())
-        enabledchan = list(sigchan - set(self.triggerBlocker.blocked))
-        enabledchan.sort()
-        return enabledchan
+    def channelIndicesSignalOnly(self, exclude_blocked=True):
+        """
+        Return a sorted list of the channel indices that correspond to signal channels (i.e., 
+        exclude the TDM error channels).
+        If `exclude_blocked` is true, also exclude any listed in the self.triggerBlocker.blocked
+        list of disabled channels.
+        """
+        signal_indices = self.dcom.channelIndicesSignalOnly()
+        if not exclude_blocked:
+            return signal_indices
+        sigset = set(signal_indices)
+        blocked_numbers = self.triggerBlocker.blocked
+        blocked_indices = [self.channel_indices[n] for n in blocked_numbers]
+        enabled_indices = list(sigset - set(blocked_indices))
+        if len(enabled_indices) < len(sigset):
+            print("{}/{} channels enabled and {} disabled: {}".format(len(enabled_indices), 
+                len(sigset), len(sigset)-len(enabled_indices), blocked_indices))
+        else:
+            print("All {} channels are enabled; .".format(len(enabled_indices)))
+            print("The disabled list is: ", blocked_indices)
+        enabled_indices.sort()
+        return enabled_indices
 
-    def handleTriggerMessage(self, d, nmsg):
+    def handleTriggerMessage(self, d):
         """If DASTARD indicates the trigger state has changed, change the UI to say so."""
         # we assume any TRIGGER message more than 100 ms after this class changed the trigger settings
         # has changed the state

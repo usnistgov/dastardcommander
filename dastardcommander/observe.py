@@ -345,25 +345,29 @@ class CountRateMap(QtWidgets.QWidget):
         button.setFlat(False)
         button.chanName = name
         button.chanIndex = len(self.buttons)
-        button.clicked.connect(lambda: self.click_callback(name))
+        button.chanNumber = None
+        button.clicked.connect(lambda: self.click_callback(button))
         button.setToolTip(tooltip)
         button.triggers_blocked = False
         self.buttons.append(button)
         self.named_buttons[name] = button
         try:
             chnum = int(name.replace("chan", ""))
+            button.chanNumber = chnum
             if chnum in self.triggerBlocker.blocked:
                 self.setButtonDisabled(name)
         except ValueError:
             pass
 
     @pyqtSlot()
-    def click_callback(self, name):
-        chan = int(name.replace("chan", ""))
-        self.triggerBlocker.toggle_channel(chan)
-        if chan in self.triggerBlocker.blocked:
+    def click_callback(self, button):
+        name = button.chanName
+        cnum = button.chanNumber
+        self.triggerBlocker.toggle_channel(cnum)
+        if cnum in self.triggerBlocker.blocked:
             print(f"Channel {name} triggering is disabled.")
             self.setButtonDisabled(name)
+            self.owner.block_channel.emit(button.chanIndex)
         else:
             print(f"Channel {name} triggering is enabled.")
             self.setButtonEnabled(name)
@@ -384,7 +388,6 @@ class CountRateMap(QtWidgets.QWidget):
         if "DISABLED" not in tt:
             tt = "[DISABLED] " + tt
             button.setToolTip(tt)
-        self.owner.block_channel.emit(button.chanIndex)
 
     def setButtonEnabled(self, name):
         button = self.named_buttons.get(name, None)
