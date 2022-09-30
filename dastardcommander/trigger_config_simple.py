@@ -207,21 +207,21 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         If `exclude_blocked` is true, also exclude any listed in the self.triggerBlocker.blocked
         list of disabled channels.
         """
-        signal_channels = self.dcom.channelIndicesSignalOnly()
+        signal_indices = self.dcom.channelIndicesSignalOnly()
         if not exclude_blocked:
-            return signal_channels
-        sigset = set(signal_channels)
+            return signal_indices
+        sigset = set(signal_indices)
         blocked_numbers = self.triggerBlocker.blocked
         blocked_indices = [self.channel_indices[n] for n in blocked_numbers]
-        enabledchan = list(sigset - set(blocked_indices))
-        if len(enabledchan) < len(sigset):
-            print("{}/{} channels enabled and {} disabled: {}".format(len(enabledchan), 
-                len(sigset), len(sigset)-len(enabledchan), blocked_indices))
+        enabled_indices = list(sigset - set(blocked_indices))
+        if len(enabled_indices) < len(sigset):
+            print("{}/{} channels enabled and {} disabled: {}".format(len(enabled_indices), 
+                len(sigset), len(sigset)-len(enabled_indices), blocked_indices))
         else:
-            print("All {} channels are enabled; .".format(len(enabledchan)))
+            print("All {} channels are enabled; .".format(len(enabled_indices)))
             print("The disabled list is: ", blocked_indices)
-        enabledchan.sort()
-        return enabledchan
+        enabled_indices.sort()
+        return enabled_indices
 
     def handleTriggerMessage(self, d):
         """If DASTARD indicates the trigger state has changed, change the UI to say so."""
