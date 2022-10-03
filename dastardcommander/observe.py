@@ -311,9 +311,10 @@ class CountRateMap(QtWidgets.QWidget):
     class is new."""
 
     enabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 8, QtGui.QFont.Bold)
-    disabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 16, QtGui.QFont.Bold)
-    disabledColor = "#603810"  # a dark brown
+    disabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 12, QtGui.QFont.Bold)
+    disabledColor = "black"
     cmap = cm.get_cmap("Wistia")
+    cmap_disabled = cm.get_cmap("hot")
 
     def __init__(self, parent, cols, rows, channel_names, xy=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -465,7 +466,7 @@ class CountRateMap(QtWidgets.QWidget):
         assert len(countRates) == len(self.buttons)
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
-            if button is None or button.triggers_blocked:
+            if button is None:
                 continue
             if cr < 10:
                 buttonText = "{:.2f}".format(cr)
@@ -475,7 +476,10 @@ class CountRateMap(QtWidgets.QWidget):
                 buttonText = "{:.0f}".format(cr)
             button.setText(buttonText)
 
-            color = self.cmap(cr / colorScale, bytes=True)
+            if button.triggers_blocked:
+                color = self.cmap_disabled(0.5*cr / colorScale, bytes=True)
+            else:
+                color = self.cmap(cr / colorScale, bytes=True)
             colorString = "rgb({},{},{})".format(color[0], color[1], color[2])
             colorString = "QPushButton {background-color: %s;}" % colorString
             button.setStyleSheet(colorString)
