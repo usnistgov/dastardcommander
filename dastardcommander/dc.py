@@ -267,8 +267,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     groups_info = None
                 self.updateStatusBar(is_running, source, groups_info)
-                # self.observeTab.handleStatusUpdate(is_running, source, ngroups, nrow)
-                # self.observeWindow.handleStatusUpdate(is_running, source, ngroups, nrow)
+                self.observeTab.handleStatusUpdate(is_running, source, groups_info)
+                self.observeWindow.handleStatusUpdate(is_running, source, groups_info)
 
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
