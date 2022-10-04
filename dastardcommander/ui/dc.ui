@@ -1848,7 +1848,7 @@
     <addaction name="actionLoad_Mix"/>
     <addaction name="actionPop_out_Observe"/>
     <addaction name="actionTDM_Autotune"/>
-    <addaction name="actionAdvanced_Triggering"/>
+    <addaction name="actionConfigure_Level_Trigs"/>
    </widget>
    <addaction name="menuConnection"/>
    <addaction name="menuExpert"/>
@@ -1887,6 +1887,11 @@
   <action name="actionAdvanced_Triggering">
    <property name="text">
     <string>Advanced Triggering</string>
+   </property>
+  </action>
+  <action name="actionConfigure_Level_Trigs">
+   <property name="text">
+    <string>Configure Level Trigs</string>
    </property>
   </action>
  </widget>

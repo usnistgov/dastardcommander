@@ -29,6 +29,7 @@ from PyQt5.QtCore import QSettings, pyqtSlot, QCoreApplication
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
+from . import configure_level_triggers
 from . import rpc_client
 from . import status_monitor
 from . import trigger_blocker
@@ -85,9 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Mix.triggered.connect(self.loadMix)
         self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
         self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
-        self.actionAdvanced_Triggering.triggered.connect(
-            lambda: self.setTriggerTabVisible(False)
-        )
+        self.actionConfigure_Level_Trigs.triggered.connect(self.configLevelTrigs)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(
@@ -339,7 +338,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TRIGCOUPLING":
                 self.triggerTab.handleTrigCoupling(d)
-                self.triggerTabSimple.handleTriggerMessage(d, self.nmsg)
 
             elif topic == "NUMBERWRITTEN":
                 self.writingTab.handleNumberWritten(d)
@@ -376,7 +374,7 @@ class MainWindow(QtWidgets.QMainWindow):
                  self.observeTab.ExperimentStateIncrementer.updateLabel(d)
                  self.observeWindow.ExperimentStateIncrementer.updateLabel(d)
 
-  
+
             else:
                 print("%s is not a topic we handle yet." % topic)
 
@@ -1191,6 +1189,14 @@ class MainWindow(QtWidgets.QMainWindow):
         return [
             i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")
         ]
+
+    def configLevelTrigs(self):
+        configLevelDialog = configure_level_triggers.LevelTrigConfig(self)
+        configLevelDialog.show()
+        # host, port = d.run()
+        # # None, None indicates user cancelled the dialog.
+        print("Running the procedure to configure level triggers")
+
 
 
 class HostPortDialog(QtWidgets.QDialog):
