@@ -311,7 +311,9 @@ class CountRateMap(QtWidgets.QWidget):
     class is new."""
 
     enabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 8, QtGui.QFont.Bold)
-    disabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 12, QtGui.QFont.Bold)
+    disabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 8, QtGui.QFont.Bold)
+    enabledForeground = "black"
+    disabledForeground = "white"
     disabledColor = "black"
     cmap = cm.get_cmap("Wistia")
     cmap_disabled = cm.get_cmap("hot")
@@ -382,7 +384,7 @@ class CountRateMap(QtWidgets.QWidget):
         button.setFont(self.disabledFont)
         button.setText("X")
         colorString = (
-            f"QPushButton {{color: white; background-color : {self.disabledColor};}}"
+            f"QPushButton {{color: {self.disabledForeground}; background-color : {self.disabledColor};}}"
         )
         button.setStyleSheet(colorString)
         tt = button.toolTip()
@@ -397,7 +399,7 @@ class CountRateMap(QtWidgets.QWidget):
         button.triggers_blocked = False
         button.setFont(self.enabledFont)
         button.setText("--")
-        colorString = "QPushButton {color: black; background-color : white;}"
+        colorString = f"QPushButton {{color: {self.enabledForeground}; background-color : white;}}"
         button.setStyleSheet(colorString)
         tt = button.toolTip()
         if "DISABLED" in tt:
@@ -477,9 +479,12 @@ class CountRateMap(QtWidgets.QWidget):
             button.setText(buttonText)
 
             if button.triggers_blocked:
-                color = self.cmap_disabled(0.5*cr / colorScale, bytes=True)
+                textcolor = self.disabledForeground
+                scaledrate = min(0.5*cr/colorScale, 1)
+                bgcolor = self.cmap_disabled(scaledrate, bytes=True)
             else:
-                color = self.cmap(cr / colorScale, bytes=True)
-            colorString = "rgb({},{},{})".format(color[0], color[1], color[2])
-            colorString = "QPushButton {background-color: %s;}" % colorString
+                textcolor = self.enabledForeground
+                bgcolor = self.cmap(cr / colorScale, bytes=True)
+            colorString = "rgb({},{},{})".format(bgcolor[0], bgcolor[1], bgcolor[2])
+            colorString = f"QPushButton {{color: {textcolor}; background-color: {colorString};}}"
             button.setStyleSheet(colorString)
