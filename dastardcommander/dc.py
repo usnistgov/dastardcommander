@@ -86,7 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Mix.triggered.connect(self.loadMix)
         self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
         self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
-        self.actionConfigure_Level_Trigs.triggered.connect(self.configLevelTrigs)
+        self.actionLevel_Trig_Configure.triggered.connect(self.configLevelTrigs)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(
