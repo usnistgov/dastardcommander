@@ -52,7 +52,7 @@
      <item row="0" column="2">
       <widget class="QSpinBox" name="levelSpinBox">
        <property name="toolTip">
-        <string>Level threshold target value</string>
+        <string>Level threshold target value (abs value)</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

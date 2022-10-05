@@ -115,3 +115,11 @@ class LevelTrigConfig(QtWidgets.QDialog):
         except Exception as e:
             print("Error processing pulse record is: %s" % e)
             return
+
+
+class BaselineFinder():
+    def __init__(self):
+        pass
+
+    def newValues(self, data):
+        pass
