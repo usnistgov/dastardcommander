@@ -39,7 +39,7 @@ from . import projectors
 from . import observe
 from . import workflow
 
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -93,7 +93,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pushButton_sendExperimentStateLabel.clicked.connect(
             self.sendExperimentStateLabel
         )
-        self.pushButton_pauseExperimental.clicked.connect(self.handlePauseExperimental)
+        self.pushButton_pauseExperimental.clicked.connect(
+            self.handlePauseExperimental)
         self.pushButton_unpauseExperimental.clicked.connect(
             self.handleUnpauseExperimental
         )
@@ -263,16 +264,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.dataSource.setCurrentIndex(4)
                 if is_running:
                     groups_info = d["ChanGroups"]
-                    ngroups = len(groups_info)
-                    # in principle chan per group can vary, we ignore that until it happens
-                    nrow = groups_info[0]["Nchan"]
                 else:
                     groups_info = None
-                    ngroups = None
-                    nrow = None
-                self.updateStatusBar(is_running, source, ngroups, nrow)
-                self.observeTab.handleStatusUpdate(is_running, source, ngroups, nrow)
-                self.observeWindow.handleStatusUpdate(is_running, source, ngroups, nrow)
+                self.updateStatusBar(is_running, source, groups_info)
+                self.observeTab.handleStatusUpdate(is_running, source, groups_info)
+                self.observeWindow.handleStatusUpdate(is_running, source, groups_info)
 
             elif topic == "TRIGGER":
                 self.triggerTab.handleTriggerMessage(d)
@@ -320,7 +316,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.fillPhaseResetInfo(d)
 
             elif topic == "CHANNELNAMES":
-                self.channel_names[:] = []  # Careful: don't replace the variable
+                # Careful: don't replace the variable
+                self.channel_names[:] = []
                 self.channel_prefixes.clear()
                 self.channel_indices.clear()  # a map from channel numbers to indices
                 for index, name in enumerate(d):
@@ -373,10 +370,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.observeWindow.handleExternalTriggerMessage(d)
 
             elif topic == "STATELABEL":
-                 self.observeTab.ExperimentStateIncrementer.updateLabel(d)
-                 self.observeWindow.ExperimentStateIncrementer.updateLabel(d)
+                self.observeTab.ExperimentStateIncrementer.updateLabel(d)
+                self.observeWindow.ExperimentStateIncrementer.updateLabel(d)
 
-  
             else:
                 print("%s is not a topic we handle yet." % topic)
 
@@ -401,21 +397,28 @@ class MainWindow(QtWidgets.QMainWindow):
         sb.addWidget(self.statusMainLabel)
         sb.addWidget(self.statusFreshLabel)
 
-    def updateStatusBar(self, is_running, source_name, ngroups, nrows):
+    def updateStatusBar(self, is_running, source_name, group_info):
 
         if is_running:
             sp = self.samplePeriod
             if sp < 1000:
-                per = f"{sp} ns"
+                period = f"{sp} ns"
             elif sp < 10000:
-                per = "{:.3f} µs".format(sp / 1000)
+                period = "{:.3f} µs".format(sp / 1000)
             elif sp < 100000:
-                per = "{:.2f} µs".format(sp / 1000)
+                period = "{:.2f} µs".format(sp / 1000)
             elif sp < 1000000:
-                per = "{:.1f} µs".format(sp / 1000)
+                period = "{:.1f} µs".format(sp / 1000)
             else:
-                per = "{:.3f} ms".format(sp / 1e6)
-            status = f"{source_name} active: sample period {per}, {ngroups} groups x {nrows} chans per group."
+                period = "{:.3f} ms".format(sp / 1e6)
+
+            ngroups = len(group_info)
+            nc_group0 = group_info[0]["Nchan"]
+            nchan = np.sum([v["Nchan"] for v in group_info])
+            if np.all([v["Nchan"] == nc_group0 for v in group_info]):
+                status = f"{source_name} active: sample period {period}.  {ngroups} groups x {nc_group0} chans = {nchan} channels."
+            else:
+                status = f"{source_name} active: sample period {period}.  {ngroups} groups with {nchan} total channels."
         else:
             status = "Data source stopped."
         self.statusMainLabel.setText(status)
