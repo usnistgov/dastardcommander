@@ -186,7 +186,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.zmqlistener.moveToThread(self.zmqthread)
         self.zmqthread.started.connect(request_status)
-        self.zmqthread.started.connect(self.zmqlistener.loop)
+        self.zmqthread.started.connect(self.zmqlistener.status_monitor_loop)
         QtCore.QTimer.singleShot(0, self.zmqthread.start)
 
         # A timer to monitor for the heartbeat. If this ever times out, it's because
