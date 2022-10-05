@@ -93,7 +93,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
         config = {
             "ChannelIndices": ids,
             "AutoTrigger": True,
-            "AutoDelay": 50,
+            "AutoDelay": 50000000,
         }
         self.dcom.client.call("SourceControl.ConfigureTriggers", config)
         return True
