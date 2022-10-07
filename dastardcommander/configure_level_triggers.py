@@ -6,13 +6,15 @@ import numpy as np
 import struct
 import PyQt5
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import pyqtSlot, QCoreApplication
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from dastardcommander import rpc_client, status_monitor
 
 class LevelTrigConfig(QtWidgets.QDialog):
 
     header_fmt = "<HBBIIffQQ"
     data_fmt = ["b", "B", "<h", "<H", "<i", "<I", "<q", "<Q"]
+
+    dataComplete = pyqtSignal()
 
     def __init__(self, parent=None):
         self.dcom = parent
@@ -25,6 +27,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
         self.zmqlistener = None
         self.zmqthread = None
         self.startButton.clicked.connect(self.startConfiguration)
+        self.dataComplete.connect(self.finishConfiguration)
 
     @pyqtSlot()
     def startConfiguration(self):
@@ -37,7 +40,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
         threshold = self.levelSpinBox.value()
 
         self.cursor = self.textBrowser.textCursor()
-        self.cursor.insertText(f"Configuring level triggers at {threshold:+d}...\n")
+        self.cursor.insertText(f"Configuring level triggers at (baseline{threshold:+d}) ...\n")
 
         self.cursor.insertText("1) Stopping all triggers.\n")
         prev_trig_state = self.dcom.triggerTab.trigger_state.copy()
@@ -51,16 +54,14 @@ class LevelTrigConfig(QtWidgets.QDialog):
             return
 
         # 3) Collect baseline level data
-        self.cursor.insertText("3) Collecting baseline data.\n")
+        self.cursor.insertText("3) Collecting baseline data (may take several seconds).\n")
         self.launchRecordMonitor()
 
-        # 3) Collect baseline level data
-        # 4) Return triggers to previous state (maybe zero them first?)
-        self.cursor.insertText("4) Done with baseline data.\n")
-        self.cursor.insertText("Done! You may close this window.\n")
-
     def launchRecordMonitor(self):
-        self.channels_seen = {}
+        self.channels_seen = {
+            id:BaselineFinder() for id in self.dcom.channelIndicesSignalOnly()
+        }
+        self.nchanIncomplete = len(self.channels_seen)
         self.zmqthread = QtCore.QThread()
         self.zmqlistener = status_monitor.ZMQListener(self.dcom.host, 1+self.dcom.port)
         self.zmqlistener.pulserecord.connect(self.updateReceived)
@@ -68,6 +69,30 @@ class LevelTrigConfig(QtWidgets.QDialog):
         self.zmqlistener.moveToThread(self.zmqthread)
         self.zmqthread.started.connect(self.zmqlistener.data_monitor_loop)
         QtCore.QTimer.singleShot(0, self.zmqthread.start)
+
+    @pyqtSlot()
+    def finishConfiguration(self):
+        # 4) Return triggers to previous state (maybe zero them first?)
+        self.cursor.insertText("4) Done with baseline data.  Stopping all triggers\n")
+        self.zeroTriggers()
+
+        self.cursor.insertText("5) Sending all level triggers\n")
+        self.zeroTriggers()
+        positive = self.positivePulseButton.isChecked()
+        threshold = self.levelSpinBox.value()
+        for idx,blf in self.channels_seen.items():
+            level = int(0.5 + blf.baseline() + threshold)
+            ts = {
+                "ChannelIndices": [idx],
+                "AutoTrigger": False,
+                "EdgeTrigger": False,
+                "LevelTrigger": True,
+                "LevelRising": positive,
+                "LevelLevel": level,
+                }
+            self.dcom.client.call("SourceControl.ConfigureTriggers", ts)
+            time.sleep(0.01)
+        self.cursor.insertText("Done! You may close this window.\n")
 
     @pyqtSlot()
     def done(self, dialogCode):
@@ -106,13 +131,19 @@ class LevelTrigConfig(QtWidgets.QDialog):
         try:
             values = struct.unpack(self.header_fmt, header)
             chanidx = values[0]
+            blf = self.channels_seen[chanidx]
+            if blf.completed:
+                return
+
             typecode = values[2]
             data_fmt = self.data_fmt[typecode]
             nsamp = values[4]
             data = np.frombuffer(data_message, dtype=data_fmt)
-            if chanidx not in self.channels_seen:
-                self.channels_seen[chanidx] = True
-                print("Data from chan {:4d}: {}".format(chanidx, data[:10]))
+            blf.newValues(data)
+            if blf.completed:
+                self.nchanIncomplete -= 1
+            if self.nchanIncomplete <= 0:
+                self.dataComplete.emit()
 
         except Exception as e:
             print("Error processing pulse record is: %s" % e)
@@ -126,7 +157,7 @@ class BaselineFinder():
     Call `B=bf.baseline()` to estimate the baseline and return it.
     Check `bf.completed` to see if a sufficient amount of data has been acquired.
     """
-    def __init__(self, recordsRequired=100):
+    def __init__(self, recordsRequired=40):
         self.recordsRequired = recordsRequired
         self.medians = []
         self.completed = False
