@@ -49,7 +49,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
         self.cursor.insertText("1) Stopping all triggers.\n")
         prev_trig_state = self.dcom.triggerTab.trigger_state.copy()
-        if not self.zeroTriggers():
+        if not self.zeroAllTriggers():
             self.cursor.insertText("X  Failed: no channels known.\n")
             return
 
@@ -81,7 +81,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
     def finishConfiguration(self):
         # 4) Return triggers to previous state (maybe zero them first?)
         self.cursor.insertText("4) Done with baseline data.  Stopping all triggers.\n")
-        self.zeroTriggers()
+        self.zeroAllTriggers()
         self.cursor.insertText("5) Sending all level triggers\n")
         positive = self.positivePulseButton.isChecked()
         threshold = self.levelSpinBox.value()
@@ -118,7 +118,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
             self.zmqthread.wait()
         super().done(dialogCode)
 
-    def zeroTriggers(self):
+    def zeroAllTriggers(self):
         ids = self.dcom.channelIndicesAll()
         if len(ids) == 0:
             return False
