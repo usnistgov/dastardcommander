@@ -38,6 +38,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
         positive = self.positivePulseButton.isChecked()
         threshold = self.levelSpinBox.value()
+        self.recordsPerChan = 40
 
         self.cursor = self.textBrowser.textCursor()
         self.cursor.insertText(f"Configuring level triggers at (baseline{threshold:+d}) ...\n")
@@ -59,9 +60,10 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
     def launchRecordMonitor(self):
         self.channels_seen = {
-            id:BaselineFinder() for id in self.dcom.channelIndicesSignalOnly()
+            id:BaselineFinder(self.recordsPerChan) for id in self.dcom.channelIndicesSignalOnly()
         }
         self.nchanIncomplete = len(self.channels_seen)
+        self.progressBar.setMaximum(self.recordsPerChan*self.nchanIncomplete)
         self.zmqthread = QtCore.QThread()
         self.zmqlistener = status_monitor.ZMQListener(self.dcom.host, 1+self.dcom.port)
         self.zmqlistener.pulserecord.connect(self.updateReceived)
@@ -73,11 +75,11 @@ class LevelTrigConfig(QtWidgets.QDialog):
     @pyqtSlot()
     def finishConfiguration(self):
         # 4) Return triggers to previous state (maybe zero them first?)
-        self.cursor.insertText("4) Done with baseline data.  Stopping all triggers\n")
+        self.cursor.insertText("4) Done with baseline data.  Stopping all triggers.\n")
         self.zeroTriggers()
+        time.sleep(0.5)
 
         self.cursor.insertText("5) Sending all level triggers\n")
-        self.zeroTriggers()
         positive = self.positivePulseButton.isChecked()
         threshold = self.levelSpinBox.value()
         for idx,blf in self.channels_seen.items():
@@ -140,6 +142,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
             nsamp = values[4]
             data = np.frombuffer(data_message, dtype=data_fmt)
             blf.newValues(data)
+            self.progressBar.setValue(self.progressBar.value()+1)
             if blf.completed:
                 self.nchanIncomplete -= 1
             if self.nchanIncomplete <= 0:
