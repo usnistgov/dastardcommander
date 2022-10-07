@@ -42,6 +42,10 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
         self.cursor = self.textBrowser.textCursor()
         self.cursor.insertText(f"Configuring level triggers at (baseline{threshold:+d}) ...\n")
+        self.save_quiet = "TRIGGER" in self.dcom.quietTopics
+        if not self.save_quiet:
+            self.dcom.quietTopics.add("TRIGGER")
+            print("Will suppress printing of TRIGGER status until level triggers are configured.")
 
         self.cursor.insertText("1) Stopping all triggers.\n")
         prev_trig_state = self.dcom.triggerTab.trigger_state.copy()
@@ -77,8 +81,6 @@ class LevelTrigConfig(QtWidgets.QDialog):
         # 4) Return triggers to previous state (maybe zero them first?)
         self.cursor.insertText("4) Done with baseline data.  Stopping all triggers.\n")
         self.zeroTriggers()
-        time.sleep(0.5)
-
         self.cursor.insertText("5) Sending all level triggers\n")
         positive = self.positivePulseButton.isChecked()
         threshold = self.levelSpinBox.value()
@@ -94,7 +96,16 @@ class LevelTrigConfig(QtWidgets.QDialog):
                 }
             self.dcom.client.call("SourceControl.ConfigureTriggers", ts)
             time.sleep(0.01)
+
+        if not self.save_quiet:
+            delay = 5000 # ms
+            QtCore.QTimer.singleShot(delay, self.endSilentTRIGGER)
         self.cursor.insertText("Done! You may close this window.\n")
+
+    @pyqtSlot()
+    def endSilentTRIGGER(self):
+        if not self.save_quiet:
+            self.dcom.quietTopics.remove("TRIGGER")
 
     @pyqtSlot()
     def done(self, dialogCode):

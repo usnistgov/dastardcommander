@@ -174,6 +174,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.phaseNegPulses.clicked.connect(self.updateBiasText)
         self.unwrapBiasCheck.clicked.connect(self.updateBiasText)
 
+        self.quietTopics = set(
+            ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
+        )  # TODO: add "ALIVE"?
+
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
         self.zmqthread = QtCore.QThread()
@@ -211,14 +215,11 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Error is: %s" % e)
             return
 
-        quietTopics = set(
-            ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
-        )  # add "ALIVE"
         _suppress_after_number = 20
-        if topic not in quietTopics or self.nmsg <= _suppress_after_number:
+        if topic not in self.quietTopics or self.nmsg <= _suppress_after_number:
             print("%s %5d: %s" % (topic, self.nmsg, d))
         if self.nmsg == _suppress_after_number + 1:
-            note = f"After message #{_suppress_after_number}, suppressing {quietTopics} messages."
+            note = f"After message #{_suppress_after_number}, suppressing {self.quietTopics} messages."
             print(note)
 
         if topic == "ALIVE":
