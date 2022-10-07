@@ -54,20 +54,21 @@ class LevelTrigConfig(QtWidgets.QDialog):
             return
 
         self.cursor.insertText("2) Turning on 50 ms autotriggers.\n")
-        if not self.autoTriggers():
+        channels_to_configure = self.dcom.triggerTabSimple.channelIndicesSignalOnly(exclude_blocked=True)
+        if not self.startAutoTriggers(channels_to_configure):
             self.cursor.insertText("X  Failed: no channels known.\n")
             return
 
         # 3) Collect baseline level data
         self.cursor.insertText("3) Collecting baseline data (may take several seconds).\n")
-        self.launchRecordMonitor()
+        self.launchRecordMonitor(channels_to_configure)
 
-    def launchRecordMonitor(self):
+    def launchRecordMonitor(self, channels_to_configure):
         positive = self.positivePulseButton.isChecked()
         self.channels_seen = {
-            id:BaselineFinder(self.recordsPerChan, positive) for id in self.dcom.channelIndicesSignalOnly()
+            id:BaselineFinder(positive, self.recordsPerChan) for id in channels_to_configure
         }
-        self.nchanIncomplete = len(self.channels_seen)
+        self.nchanIncomplete = len(channels_to_configure)
         self.progressBar.setMaximum(self.recordsPerChan*self.nchanIncomplete)
         self.zmqthread = QtCore.QThread()
         self.zmqlistener = status_monitor.ZMQListener(self.dcom.host, 1+self.dcom.port)
@@ -128,12 +129,11 @@ class LevelTrigConfig(QtWidgets.QDialog):
         self.dcom.client.call("SourceControl.ConfigureTriggers", config)
         return True
 
-    def autoTriggers(self):
-        ids = self.dcom.channelIndicesAll()
-        if len(ids) == 0:
+    def startAutoTriggers(self, channels_to_configure):
+        if len(channels_to_configure) == 0:
             return False
         config = {
-            "ChannelIndices": ids,
+            "ChannelIndices": channels_to_configure,
             "AutoTrigger": True,
             "AutoDelay": 50000000,
         }
