@@ -63,8 +63,9 @@ class LevelTrigConfig(QtWidgets.QDialog):
         self.launchRecordMonitor()
 
     def launchRecordMonitor(self):
+        positive = self.positivePulseButton.isChecked()
         self.channels_seen = {
-            id:BaselineFinder(self.recordsPerChan) for id in self.dcom.channelIndicesSignalOnly()
+            id:BaselineFinder(self.recordsPerChan, positive) for id in self.dcom.channelIndicesSignalOnly()
         }
         self.nchanIncomplete = len(self.channels_seen)
         self.progressBar.setMaximum(self.recordsPerChan*self.nchanIncomplete)
@@ -167,11 +168,29 @@ class LevelTrigConfig(QtWidgets.QDialog):
 class BaselineFinder():
     """
     An object to estimate the baseline of a channel's data.
-    Call `bf.newValues(data)` to add a new data record `data` to the history.
-    Call `B=bf.baseline()` to estimate the baseline and return it.
-    Check `bf.completed` to see if a sufficient amount of data has been acquired.
+
+    Usage:
+    * Call `bf=BaseLineFinder(positivePulses=True)` to set up a finder for positive-going pulses,
+        or with the argument False for negative-going pulses.
+    * Call `bf.newValues(data)` to add a new data record `data` to the history.
+    * Call `B=bf.baseline()` to estimate the baseline and return it.
+    * Check `bf.completed` to see if a sufficient amount of data has been acquired.
+
+    Algorithm:
+        For each record, store the median data value. When we have enough (set by the constructor's
+    `recordsRequired` optional argument), the answer is the lowest or highest median seen so far
+    for positive- or negative-going pulses, respectively.
+
+        There might be a lot of room to improve this, but it seems like a sensible starting point.
+    I want it to work well when we are able to stop pulses, but still work okay even when we aren't.
+    My thinking is that if there are no pulses, min(median) will be only slightly biased to low values
+    by use of the minimum operation, because the median fluctuates only slightly. While if there
+    ARE pulses, the minimum will allow us to turn immediately to the records with no residual pulse
+    energy, or as close as we can get.
     """
-    def __init__(self, recordsRequired=40):
+
+    def __init__(self, positivePulses=True, recordsRequired=40):
+        self.positivePulses = positivePulses
         self.recordsRequired = recordsRequired
         self.medians = []
         self.completed = False
@@ -182,4 +201,6 @@ class BaselineFinder():
             self.completed = True
 
     def baseline(self):
-        return np.min(self.medians)
+        if self.positivePulses:
+            return np.min(self.medians)
+        return np.max(self.medians)
