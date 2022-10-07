@@ -50,10 +50,13 @@ class LevelTrigConfig(QtWidgets.QDialog):
             self.cursor.insertText("X  Failed: no channels known.\n")
             return
 
+        # 3) Collect baseline level data
+        self.cursor.insertText("3) Collecting baseline data.\n")
         self.launchRecordMonitor()
 
         # 3) Collect baseline level data
         # 4) Return triggers to previous state (maybe zero them first?)
+        self.cursor.insertText("4) Done with baseline data.\n")
         self.cursor.insertText("Done! You may close this window.\n")
 
     def launchRecordMonitor(self):
@@ -106,7 +109,6 @@ class LevelTrigConfig(QtWidgets.QDialog):
             typecode = values[2]
             data_fmt = self.data_fmt[typecode]
             nsamp = values[4]
-            # data = struct.unpack(data_fmt, data_message)
             data = np.frombuffer(data_message, dtype=data_fmt)
             if chanidx not in self.channels_seen:
                 self.channels_seen[chanidx] = True
@@ -118,8 +120,21 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
 
 class BaselineFinder():
-    def __init__(self):
-        pass
+    """
+    An object to estimate the baseline of a channel's data.
+    Call `bf.newValues(data)` to add a new data record `data` to the history.
+    Call `B=bf.baseline()` to estimate the baseline and return it.
+    Check `bf.completed` to see if a sufficient amount of data has been acquired.
+    """
+    def __init__(self, recordsRequired=100):
+        self.recordsRequired = recordsRequired
+        self.medians = []
+        self.completed = False
 
     def newValues(self, data):
-        pass
+        self.medians.append(np.median(data))
+        if len(self.medians) >= self.recordsRequired:
+            self.completed = True
+
+    def baseline(self):
+        return np.min(self.medians)
