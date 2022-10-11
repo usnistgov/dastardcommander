@@ -29,6 +29,7 @@ from PyQt5.QtCore import QSettings, pyqtSlot, QCoreApplication
 from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
+from . import configure_level_triggers
 from . import rpc_client
 from . import status_monitor
 from . import trigger_blocker
@@ -85,9 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionLoad_Mix.triggered.connect(self.loadMix)
         self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
         self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
-        self.actionAdvanced_Triggering.triggered.connect(
-            lambda: self.setTriggerTabVisible(False)
-        )
+        self.actionLevel_Trig_Configure.triggered.connect(self.configLevelTrigs)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(
@@ -175,6 +174,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.phaseNegPulses.clicked.connect(self.updateBiasText)
         self.unwrapBiasCheck.clicked.connect(self.updateBiasText)
 
+        self.quietTopics = set(
+            ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
+        )  # TODO: add "ALIVE"?
+
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
         self.zmqthread = QtCore.QThread()
@@ -188,7 +191,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.zmqlistener.moveToThread(self.zmqthread)
         self.zmqthread.started.connect(request_status)
-        self.zmqthread.started.connect(self.zmqlistener.loop)
+        self.zmqthread.started.connect(self.zmqlistener.status_monitor_loop)
         QtCore.QTimer.singleShot(0, self.zmqthread.start)
 
         # A timer to monitor for the heartbeat. If this ever times out, it's because
@@ -212,14 +215,11 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Error is: %s" % e)
             return
 
-        quietTopics = set(
-            ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
-        )  # add "ALIVE"
         _suppress_after_number = 20
-        if topic not in quietTopics or self.nmsg <= _suppress_after_number:
+        if topic not in self.quietTopics or self.nmsg <= _suppress_after_number:
             print("%s %5d: %s" % (topic, self.nmsg, d))
         if self.nmsg == _suppress_after_number + 1:
-            note = f"After message #{_suppress_after_number}, suppressing {quietTopics} messages."
+            note = f"After message #{_suppress_after_number}, suppressing {self.quietTopics} messages."
             print(note)
 
         if topic == "ALIVE":
@@ -336,7 +336,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
             elif topic == "TRIGCOUPLING":
                 self.triggerTab.handleTrigCoupling(d)
-                self.triggerTabSimple.handleTriggerMessage(d, self.nmsg)
 
             elif topic == "NUMBERWRITTEN":
                 self.writingTab.handleNumberWritten(d)
@@ -1194,6 +1193,14 @@ class MainWindow(QtWidgets.QMainWindow):
         return [
             i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")
         ]
+
+    def configLevelTrigs(self):
+        configLevelDialog = configure_level_triggers.LevelTrigConfig(self)
+        configLevelDialog.show()
+        # host, port = d.run()
+        # # None, None indicates user cancelled the dialog.
+        print("Running the procedure to configure level triggers")
+
 
 
 class HostPortDialog(QtWidgets.QDialog):
