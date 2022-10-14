@@ -197,7 +197,13 @@ class BaselineFinder():
 
     def newValues(self, data):
         data = np.asarray(data, dtype=np.uint16)
-        self.medians.append(np.median(data))
+        median = np.median(data)
+
+        if median > 65535 or median < 0:
+            median = median%65536
+        assert median >= 0
+
+        self.medians.append(median)
         if len(self.medians) >= self.recordsRequired:
             self.completed = True
 
