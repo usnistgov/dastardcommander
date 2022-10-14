@@ -58,10 +58,13 @@
          </property>
          <item>
           <widget class="QScrollArea" name="gridScrollArea">
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOn</enum>
+           </property>
            <property name="widgetResizable">
             <bool>true</bool>
            </property>
-           <widget class="QWidget" name="gridScrollAreaWidgetContents">
+           <widget class="QWidget" name="gridScrollAreaContents">
             <property name="geometry">
              <rect>
               <x>0</x>
