@@ -67,7 +67,7 @@
               <x>0</x>
               <y>0</y>
               <width>728</width>
-              <height>256</height>
+              <height>252</height>
              </rect>
             </property>
             <layout class="QGridLayout" name="gridScrollLayout"/>
@@ -178,6 +178,19 @@
         <string>Min rate: 0</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QLabel" name="maxRateLabel">

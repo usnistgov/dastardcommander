@@ -177,6 +177,10 @@ class Observe(QtWidgets.QWidget):
         self.deleteCRMGrid()
         self.crm_grid = CountRateMap(self, self.ngroups, self.chan_per_group, self.channel_names)
         self.gridScrollLayout.addWidget(self.crm_grid)
+
+        # Remove the prior colorbar (or the Horizontal Spacer, if this is the first call)
+        prevCB = self.colorbarLayout.itemAt(1)
+        self.colorbarLayout.removeItem(prevCB)
         self.colorbarLayout.insertWidget(1, self.crm_grid.colorbar)
 
     def deleteCRMGrid(self):
