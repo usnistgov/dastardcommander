@@ -176,7 +176,7 @@ class Observe(QtWidgets.QWidget):
     def buildCRM(self):
         self.deleteCRMGrid()
         self.crm_grid = CountRateMap(self, self.ngroups, self.chan_per_group, self.channel_names)
-        self.GridTab.layout().addWidget(self.crm_grid)
+        self.gridScrollLayout.addWidget(self.crm_grid)
         self.colorbarLayout.insertWidget(1, self.crm_grid.colorbar)
 
     def deleteCRMGrid(self):
