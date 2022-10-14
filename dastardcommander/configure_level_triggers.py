@@ -196,6 +196,7 @@ class BaselineFinder():
         self.completed = False
 
     def newValues(self, data):
+        data = np.asarray(data, dtype=np.uint16)
         self.medians.append(np.median(data))
         if len(self.medians) >= self.recordsRequired:
             self.completed = True
