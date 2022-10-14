@@ -86,6 +86,8 @@ class LevelTrigConfig(QtWidgets.QDialog):
         self.cursor.insertText("5) Sending all level triggers\n")
         positive = self.positivePulseButton.isChecked()
         threshold = self.levelSpinBox.value()
+        if not positive:
+            threshold = -threshold
         for idx,blf in self.channels_seen.items():
             level = int(0.5 + blf.baseline() + threshold)
             ts = {
