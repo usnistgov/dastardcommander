@@ -7,7 +7,7 @@ import itertools
 
 # Qt5 imports
 from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
 import PyQt5.uic
 
 
@@ -176,7 +176,7 @@ class Observe(QtWidgets.QWidget):
     def buildCRM(self):
         self.deleteCRMGrid()
         self.crm_grid = CountRateMap(self, self.ngroups, self.chan_per_group, self.channel_names)
-        self.gridScrollLayout.addWidget(self.crm_grid)
+        self.GridTab.layout().addWidget(self.crm_grid)
         self.colorbarLayout.insertWidget(1, self.crm_grid.colorbar)
 
     def deleteCRMGrid(self):
@@ -304,7 +304,7 @@ class CountRateColorBar(QtWidgets.QWidget):
 _QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
 
 
-class CountRateMap(QtWidgets.QWidget):
+class CountRateMap(QtWidgets.QScrollArea):
     """Provide the UI inside the Triggering tab.
 
     Most of the UI is copied from MATTER, but the Python implementation in this
@@ -319,8 +319,15 @@ class CountRateMap(QtWidgets.QWidget):
     cmap_disabled = cm.get_cmap("hot")
 
     def __init__(self, parent, ngroups, chan_per_group, channel_names, xy=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        QtWidgets.QScrollArea.__init__(self, parent)
         self.owner = parent
+        self.widget = QtWidgets.QWidget()
+        self.setWidget(self.widget)
+        self.gridbox = QtWidgets.QGridLayout()
+        self.widget.setLayout(self.gridbox)
+        self.setWidgetResizable(True)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+
         self.buttons = []
         self.named_buttons = {}
         self.ngroups = ngroups
@@ -340,9 +347,9 @@ class CountRateMap(QtWidgets.QWidget):
         self.colorbar.resize(w, scale)
         self.colorbar.cmap = self.cmap
 
-    def addButton(self, x, y, xwidth, ywidth, name, tooltip):
-        button = QtWidgets.QPushButton(self)
-        button.move(x, y)
+    def addButton(self, col, row, xwidth, ywidth, name, tooltip):
+        button = QtWidgets.QPushButton()
+        # button.move(x, y)
         button.setFixedSize(xwidth, ywidth)
         button.setFont(self.enabledFont)
         button.setFlat(False)
@@ -352,6 +359,7 @@ class CountRateMap(QtWidgets.QWidget):
         button.clicked.connect(lambda: self.click_callback(button))
         button.setToolTip(tooltip)
         button.triggers_blocked = False
+        self.gridbox.addWidget(button, row, col)
         self.buttons.append(button)
         self.named_buttons[name] = button
         try:
@@ -434,21 +442,25 @@ class CountRateMap(QtWidgets.QWidget):
         # groupnum means the TES's group number (actual column number in TDM)
         # chnum means TES's channel number within the group (actual row number in TDM)
 
+        max_h = 0
         for name in self.channel_names:
             # No count rate buttons for Lancero error channels, or any others not called "chan*"
             if not name.startswith("chan"):
                 self.buttons.append(None)
                 continue
-            if xy is None:
-                x = scale * horizdisp
-                y = scale * vertdisp
-                if wrappedrows:
-                    y += int(0.4*scale*groupnum)
-            else:
-                x = scale * xy[i][0]
-                y = scale * xy[i][1]
+            # if xy is None:
+            #     x = scale * horizdisp
+            #     y = scale * vertdisp
+            #     if wrappedrows:
+            #         y += int(0.4*scale*groupnum)
+            # else:
+            #     x = scale * xy[i][0]
+            #     y = scale * xy[i][1]
             tooltip = "{}, ({} of grp {})".format(name, chnum, groupnum)
-            self.addButton(x, y, scale - 1, scale - 1, name, tooltip)
+            # self.addButton(x, y, scale - 1, scale - 1, name, tooltip)
+            self.addButton(horizdisp, vertdisp, scale - 1, scale - 1, name, tooltip)
+            if horizdisp > max_h:
+                max_h = horizdisp
             horizdisp += 1
             chnum += 1
             i += 1
@@ -459,6 +471,8 @@ class CountRateMap(QtWidgets.QWidget):
             elif horizdisp >= MaxPerRow:
                 horizdisp = 0
                 vertdisp += 1
+        hspacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridbox.addItem(hspacer, 0, max_h+1)
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
