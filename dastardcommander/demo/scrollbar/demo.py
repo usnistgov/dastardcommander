@@ -1,3 +1,14 @@
+"""
+scrollbar/demo.py
+
+Demonstrate how to get a Qt5 scrollbar to appear.
+
+Uses a QScrollArea object to scroll through lots of buttons, by adding them to the QScrollArea's
+contents widget's layout. Whew!
+
+The point is that this can be a model for objects like the grid of count rate buttons on the Observe Tab.
+"""
+
 import os
 import sys
 
