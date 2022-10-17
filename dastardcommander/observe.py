@@ -307,8 +307,9 @@ _QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
 class CountRateMap(QtWidgets.QScrollArea):
     """Provide the UI inside the Triggering tab.
 
-    Most of the UI is copied from MATTER, but the Python implementation in this
-    class is new."""
+    This is a scroll area, so buttons need to be added not to self but to the QGridLayout
+    known as self.gridbox.
+    """
 
     enabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 8, QtGui.QFont.Bold)
     disabledFont = QtGui.QFont(_QT_DEFAULT_FONT, 8, QtGui.QFont.Bold)
@@ -325,8 +326,9 @@ class CountRateMap(QtWidgets.QScrollArea):
         self.setWidget(self.widget)
         self.gridbox = QtWidgets.QGridLayout()
         self.widget.setLayout(self.gridbox)
-        self.setWidgetResizable(True)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.setWidgetResizable(True)  # This is critical; without it, no buttons are drawn!
+        # The following would leave the vertical scroll always on. Seems unneccessary?
+        # self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
         self.buttons = []
         self.named_buttons = {}
@@ -335,16 +337,16 @@ class CountRateMap(QtWidgets.QScrollArea):
         self.channel_names = channel_names
         self.triggerBlocker = parent.triggerBlocker
         if xy is None:
-            scale=24
-            self.initButtons(scale=scale)
+            size=22
+            self.initButtons(size=size)
         else:
-            scale=24
-            self.initButtons(scale=scale, xy=xy)
+            size=22
+            self.initButtons(size=size, xy=xy)
 
         self.colorbar = CountRateColorBar(self)
-        # self.colorbar.move(0, int((self.ngroups+0.5)*scale))
+        # self.colorbar.move(0, int((self.ngroups+0.5)*size))
         w = parent.width()
-        self.colorbar.resize(w, scale)
+        self.colorbar.resize(w, size)
         self.colorbar.cmap = self.cmap
 
     def addButton(self, col, row, xwidth, ywidth, name, tooltip):
@@ -434,11 +436,11 @@ class CountRateMap(QtWidgets.QScrollArea):
             self.chan_per_group = chan_per_group
             self.initButtons()
 
-    def initButtons(self, scale=25, xy=None):
+    def initButtons(self, size=22, xy=None):
         MaxPerRow = 32  # no more than this many buttons per row
         self.deleteButtons()
         horizdisp = chnum = vertdisp = groupnum = i = 0
-        wrappedrows = np.any([n > MaxPerRow for n in self.chan_per_group])
+        # wrappedrows = np.any([n > MaxPerRow for n in self.chan_per_group])
         # groupnum means the TES's group number (actual column number in TDM)
         # chnum means TES's channel number within the group (actual row number in TDM)
 
@@ -448,17 +450,9 @@ class CountRateMap(QtWidgets.QScrollArea):
             if not name.startswith("chan"):
                 self.buttons.append(None)
                 continue
-            # if xy is None:
-            #     x = scale * horizdisp
-            #     y = scale * vertdisp
-            #     if wrappedrows:
-            #         y += int(0.4*scale*groupnum)
-            # else:
-            #     x = scale * xy[i][0]
-            #     y = scale * xy[i][1]
+
             tooltip = "{}, ({} of grp {})".format(name, chnum, groupnum)
-            # self.addButton(x, y, scale - 1, scale - 1, name, tooltip)
-            self.addButton(horizdisp, vertdisp, scale - 1, scale - 1, name, tooltip)
+            self.addButton(horizdisp, vertdisp, size, size, name, tooltip)
             if horizdisp > max_h:
                 max_h = horizdisp
             horizdisp += 1
