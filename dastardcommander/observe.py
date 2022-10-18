@@ -448,7 +448,7 @@ class CountRateMap(QtWidgets.QScrollArea):
         # groupnum means the TES's group number (actual column number in TDM)
         # chnum means TES's channel number within the group (actual row number in TDM)
 
-        max_h = 0
+        max_h = max_v = 0
         for name in self.channel_names:
             # No count rate buttons for Lancero error channels, or any others not called "chan*"
             if not name.startswith("chan"):
@@ -459,6 +459,8 @@ class CountRateMap(QtWidgets.QScrollArea):
             self.addButton(horizdisp, vertdisp, size, size, name, tooltip)
             if horizdisp > max_h:
                 max_h = horizdisp
+            if vertdisp > max_v:
+                max_v = vertdisp
             horizdisp += 1
             chnum += 1
             i += 1
@@ -471,6 +473,8 @@ class CountRateMap(QtWidgets.QScrollArea):
                 vertdisp += 1
         hspacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridbox.addItem(hspacer, 0, max_h+1)
+        vspacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.gridbox.addItem(vspacer, max_v+1, 0)
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
