@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>718</width>
-    <height>596</height>
+    <height>609</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1830,7 +1830,7 @@
      <x>0</x>
      <y>0</y>
      <width>718</width>
-     <height>24</height>
+     <height>37</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnection">
@@ -1849,6 +1849,7 @@
     <addaction name="actionPop_out_Observe"/>
     <addaction name="actionTDM_Autotune"/>
     <addaction name="actionLevel_Trig_Configure"/>
+    <addaction name="actionDisable_Hyperactive_Chans"/>
    </widget>
    <addaction name="menuConnection"/>
    <addaction name="menuExpert"/>
@@ -1884,14 +1885,14 @@
     <string>TDM Autotune</string>
    </property>
   </action>
-  <action name="actionAdvanced_Triggering">
-   <property name="text">
-    <string>Advanced Triggering</string>
-   </property>
-  </action>
   <action name="actionLevel_Trig_Configure">
    <property name="text">
     <string>Level Trig Configure</string>
+   </property>
+  </action>
+  <action name="actionDisable_Hyperactive_Chans">
+   <property name="text">
+    <string>Disable Hyperactive Chans</string>
    </property>
   </action>
  </widget>

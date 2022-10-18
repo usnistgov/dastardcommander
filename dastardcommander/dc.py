@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import QFileDialog
 
 # User code imports
 from . import configure_level_triggers
+from . import disable_hyperactive
 from . import rpc_client
 from . import status_monitor
 from . import trigger_blocker
@@ -87,6 +88,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionPop_out_Observe.triggered.connect(self.popOutObserve)
         self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
         self.actionLevel_Trig_Configure.triggered.connect(self.configLevelTrigs)
+        self.actionDisable_Hyperactive_Chans.triggered.connect(self.disableHyperactive)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(
@@ -1200,6 +1202,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # host, port = d.run()
         # # None, None indicates user cancelled the dialog.
         print("Running the procedure to configure level triggers")
+
+    def disableHyperactive(self):
+        disableHyperDialog = disable_hyperactive.DisableHyperDialog(self)
+        disableHyperDialog.show()
+        print("Running the procedure to disable hyperactive channels")
+
 
 
 
