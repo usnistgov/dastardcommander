@@ -42,7 +42,7 @@
      <item row="0" column="1">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Level threshold:</string>
+        <string>Edge threshold:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -64,7 +64,7 @@
         <number>65535</number>
        </property>
        <property name="value">
-        <number>50</number>
+        <number>100</number>
        </property>
       </widget>
      </item>

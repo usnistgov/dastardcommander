@@ -23,42 +23,44 @@ class DisableHyperDialog(QtWidgets.QDialog):
         self.textBrowser.setReadOnly(True)
         self.zmqlistener = None
         self.zmqthread = None
-#         self.startButton.clicked.connect(self.startConfiguration)
+        self.startButton.clicked.connect(self.startConfiguration)
 #         self.dataComplete.connect(self.finishConfiguration)
 
-#     @pyqtSlot()
-#     def startConfiguration(self):
-#         self.positivePulseButton.setDisabled(True)
-#         self.negativePulseButton.setDisabled(True)
-#         self.levelSpinBox.setDisabled(True)
-#         self.startButton.setDisabled(True)
+    @pyqtSlot()
+    def startConfiguration(self):
+        self.positivePulseButton.setDisabled(True)
+        self.negativePulseButton.setDisabled(True)
+        self.levelSpinBox.setDisabled(True)
+        self.startButton.setDisabled(True)
 
-#         positive = self.positivePulseButton.isChecked()
-#         threshold = self.levelSpinBox.value()
-#         self.recordsPerChan = 40
+        positive = self.positivePulseButton.isChecked()
+        signmessage = "falling"
+        if positive:
+            signmessage = "rising"
+        threshold = self.levelSpinBox.value()
+        self.recordsPerChan = 40
 
-#         self.cursor = self.textBrowser.textCursor()
-#         self.cursor.insertText(f"Configuring level triggers at (baseline{threshold:+d}) ...\n")
-#         self.save_quiet = "TRIGGER" in self.dcom.quietTopics
-#         if not self.save_quiet:
-#             self.dcom.quietTopics.add("TRIGGER")
-#             print("Will suppress printing of TRIGGER status until level triggers are configured.")
+        self.cursor = self.textBrowser.textCursor()
+        self.cursor.insertText(f"Configuring {signmessage} edge triggers at  {threshold} ...\n")
+        self.save_quiet = "TRIGGER" in self.dcom.quietTopics
+        if not self.save_quiet:
+            self.dcom.quietTopics.add("TRIGGER")
+            print("Will suppress printing of TRIGGER status until disabling hyperactive channels is complete.")
 
-#         self.cursor.insertText("1) Stopping all triggers.\n")
-#         prev_trig_state = self.dcom.triggerTab.trigger_state.copy()
-#         if not self.zeroAllTriggers():
-#             self.cursor.insertText("X  Failed: no channels known.\n")
-#             return
+        self.cursor.insertText("1) Stopping all triggers.\n")
+        if not self.zeroAllTriggers():
+            self.cursor.insertText("X  Failed: no channels known.\n")
+            return
 
-#         self.cursor.insertText("2) Turning on 50 ms autotriggers.\n")
-#         channels_to_configure = self.dcom.triggerTabSimple.channelIndicesSignalOnly(exclude_blocked=True)
-#         if not self.startAutoTriggers(channels_to_configure):
-#             self.cursor.insertText("X  Failed: no channels known.\n")
-#             return
+        self.cursor.insertText("2) Turning on edge triggers.\n")
+        channels_to_configure = self.dcom.triggerTabSimple.channelIndicesSignalOnly(exclude_blocked=True)
+        if not self.startEdgeTriggers(channels_to_configure):
+            self.cursor.insertText("X  Failed: no channels known.\n")
+            return
 
-#         # 3) Collect baseline level data
-#         self.cursor.insertText("3) Collecting baseline data (may take several seconds).\n")
-#         self.launchRecordMonitor(channels_to_configure)
+        # 3) Collect trigger rate data
+        self.cursor.insertText("3) Collecting trigger rate data (may take several seconds).\n")
+        # self.launchRecordMonitor(channels_to_configure)
 
 #     def launchRecordMonitor(self, channels_to_configure):
 #         positive = self.positivePulseButton.isChecked()
@@ -103,41 +105,45 @@ class DisableHyperDialog(QtWidgets.QDialog):
 #             QtCore.QTimer.singleShot(delay, self.endSilentTRIGGER)
 #         self.cursor.insertText("Done! You may close this window.\n")
 
-#     @pyqtSlot()
-#     def endSilentTRIGGER(self):
-#         if not self.save_quiet:
-#             self.dcom.quietTopics.remove("TRIGGER")
+    @pyqtSlot()
+    def endSilentTRIGGER(self):
+        if not self.save_quiet:
+            self.dcom.quietTopics.remove("TRIGGER")
 
-#     @pyqtSlot()
-#     def done(self, dialogCode):
-#         """Cleanly close the zmqlistener before closing the dialog."""
-#         if self.zmqlistener is not None:
-#             self.zmqlistener.running = False
-#         if self.zmqthread is not None:
-#             self.zmqthread.quit()
-#             self.zmqthread.wait()
-#         super().done(dialogCode)
+    @pyqtSlot()
+    def done(self, dialogCode):
+        """Cleanly close the zmqlistener before closing the dialog."""
+        if self.zmqlistener is not None:
+            self.zmqlistener.running = False
+        if self.zmqthread is not None:
+            self.zmqthread.quit()
+            self.zmqthread.wait()
+        super().done(dialogCode)
 
-#     def zeroAllTriggers(self):
-#         ids = self.dcom.channelIndicesAll()
-#         if len(ids) == 0:
-#             return False
-#         config = {
-#             "ChannelIndices": ids,
-#         }
-#         self.dcom.client.call("SourceControl.ConfigureTriggers", config)
-#         return True
+    def zeroAllTriggers(self):
+        ids = self.dcom.channelIndicesAll()
+        if len(ids) == 0:
+            return False
+        config = {
+            "ChannelIndices": ids,
+        }
+        self.dcom.client.call("SourceControl.ConfigureTriggers", config)
+        return True
 
-#     def startAutoTriggers(self, channels_to_configure):
-#         if len(channels_to_configure) == 0:
-#             return False
-#         config = {
-#             "ChannelIndices": channels_to_configure,
-#             "AutoTrigger": True,
-#             "AutoDelay": 50000000,
-#         }
-#         self.dcom.client.call("SourceControl.ConfigureTriggers", config)
-#         return True
+    def startEdgeTriggers(self, channels_to_configure):
+        if len(channels_to_configure) == 0:
+            return False
+        positive = self.positivePulseButton.isChecked()
+        threshold = self.levelSpinBox.value()
+        config = {
+            "ChannelIndices": channels_to_configure,
+            "EdgeTrigger": True,
+            "EdgeRising": positive,
+            "EdgeFalling": not positive,
+            "EdgeLevel": threshold,
+        }
+        self.dcom.client.call("SourceControl.ConfigureTriggers", config)
+        return True
 
 #     @pyqtSlot(bytes, bytes)
 #     def updateReceived(self, header, data_message):
