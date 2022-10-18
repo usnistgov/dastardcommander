@@ -146,6 +146,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab.blocklist_changed.connect(self.triggerTab.updateDisabledList)
         self.observeTab.block_channel.connect(self.triggerTab.blockTriggering)
         self.triggerTab.updateDisabledList()
+        self.lastTriggerRateMessage = (-1, {})
 
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
         self.workflowTab.projectorsLoadedSig.connect(
@@ -233,6 +234,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif topic == "TRIGGERRATE":
             self.observeTab.handleTriggerRateMessage(d)
             self.observeWindow.handleTriggerRateMessage(d)
+            self.lastTriggerRateMessage = (self.nmsg, d)
 
         # All other messages are ignored if they haven't changed
         elif not self.last_messages[topic] == message:
