@@ -1,12 +1,13 @@
 """
 scrollbar/demo.py
 
-Demonstrate how to get a Qt5 scrollbar to appear.
+Demonstrate one way to get a Qt5 scrollbar to appear (using a Qt Designer *.ui file).
 
 Uses a QScrollArea object to scroll through lots of buttons, by adding them to the QScrollArea's
 contents widget's layout. Whew!
 
-The point is that this can be a model for objects like the grid of count rate buttons on the Observe Tab.
+The point is that this can be a model for objects like the grid of count rate buttons on the Observe Tab,
+though in the end I made that work using code, not the UI designer.
 """
 
 import os
