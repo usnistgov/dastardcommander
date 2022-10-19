@@ -131,8 +131,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeWindow = observe.Observe(parent=None, host=host, client=self.client)
         self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
         self.tabObserve.layout().addWidget(self.observeTab)
-        for widget in (self.observeTab, self.observeWindow):
-            self.triggerTab.changedTriggerStateSig.connect(widget.resetIntegration)
 
         # Create a TriggerBlocker and let the relevant tabs/windows share access to it.
         self.triggerBlocker = trigger_blocker.TriggerBlocker()
