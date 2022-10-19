@@ -41,12 +41,15 @@ class DisableHyperDialog(QtWidgets.QDialog):
         self.progressBar.setMaximum(messages)
         self.worker = DisableHyperWorker(self.dcom, positive, threshold, messages)
         self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.run)
+
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.finished.connect(self.dcom.triggerTab.updateDisabledList)
         self.worker.message.connect(self.displaySteps)
         self.worker.progress.connect(self.updateProgress)
+
+        self.thread.started.connect(self.worker.run)
+        self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 
     @pyqtSlot(str)
@@ -120,7 +123,7 @@ class DisableHyperWorker(QtCore.QObject):
 
             if time.time() - t0 > integration_time:
                 break
-
+        
         duration /= 1e9  # convert ns to seconds
         if duration <= 0:
             self.message.emit(f"X  Failed: no trigger rate messages were received in {integration_time} seconds.")
@@ -155,7 +158,6 @@ class DisableHyperWorker(QtCore.QObject):
                     cnum = int(name[4:])
                     disabled_channums.append(cnum)
             self.dcom.triggerBlocker.block_channels(disabled_channums)
-            self.dcom.triggerTab.updateDisabledList()
 
         if len(enable) > 0:
             ts = {
