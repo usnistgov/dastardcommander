@@ -37,30 +37,39 @@ class DisableHyperDialog(QtWidgets.QDialog):
         self.thread = QtCore.QThread()
         positive = self.positivePulseButton.isChecked()
         threshold = self.levelSpinBox.value()
-        self.worker = DisableHyperWorker(self.dcom, positive, threshold)
+        messages = 5
+        self.progressBar.setMaximum(messages)
+        self.worker = DisableHyperWorker(self.dcom, positive, threshold, messages)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
-        self.worker.message.connect(self.reportProgress)
+        self.worker.message.connect(self.displaySteps)
+        self.worker.progress.connect(self.updateProgress)
         self.thread.start()
 
     @pyqtSlot(str)
-    def reportProgress(self, message):
+    def displaySteps(self, message):
         self.cursor.insertText(message)
+
+    @pyqtSlot()
+    def updateProgress(self):
+        self.progressBar.setValue(self.progressBar.value()+1)
 
 
 class DisableHyperWorker(QtCore.QObject):
     """QObject that can run in a QThread to keep GUI (main) thread responsive."""
 
     finished = pyqtSignal()
+    progress = pyqtSignal()
     message = pyqtSignal(str)
 
-    def __init__(self, dcom, positive, threshold):
+    def __init__(self, dcom, positive, threshold, messages_expected):
         self.dcom = dcom
         self.positive = positive
         self.threshold = threshold
+        self.messages_expected = messages_expected
         super().__init__()
 
     def run(self):
@@ -92,17 +101,22 @@ class DisableHyperWorker(QtCore.QObject):
         trigcounts = np.zeros(len(msg["CountsSeen"]), dtype=np.int)
         duration = 0.0
         t0 = time.time()
-        integration_time = 5.0
-        self.message.emit(f"3) Collecting trigger rate data (takes ~{integration_time} seconds).\n")
+        integration_time = 10.0
+        self.message.emit(f"3) Collecting trigger rate data (takes up to {integration_time} seconds).\n")
 
+        progress_counter = 0
         while True:
             time.sleep(0.25)
             triggerRateMessageID, msg = self.dcom.lastTriggerRateMessage
             if triggerRateMessageID != staleTriggerRateMessageID:
                 triggerRateMessageID = staleTriggerRateMessageID
                 if "CountsSeen" in msg and "Duration" in msg:
+                    self.progress.emit()
                     trigcounts += msg["CountsSeen"]
                     duration += msg["Duration"]
+                    progress_counter += 1
+                    if progress_counter >= self.messages_expected:
+                        break
 
             if time.time() - t0 > integration_time:
                 break
@@ -113,6 +127,7 @@ class DisableHyperWorker(QtCore.QObject):
             self.finished.emit()
             return
 
+        self.message.emit(f"** {duration:.1f} seconds of trigger counts accumulated with {trigcounts.sum()} triggers.\n")
         rates = trigcounts / duration
         disable = []
         enable = []
