@@ -76,6 +76,12 @@ class DisableHyperWorker(QtCore.QObject):
         super().__init__()
 
     def run(self):
+        channels_to_configure = self.dcom.triggerTabSimple.channelIndicesSignalOnly(exclude_blocked=True)
+        if len(channels_to_configure) == 0:
+            self.message.emit("ERROR: Could not configure edge triggers; no channels are enabled for triggering.")
+            self.finished.emit()
+            return
+
         signmessage = "falling"
         if self.positive:
             signmessage = "rising"
@@ -88,14 +94,13 @@ class DisableHyperWorker(QtCore.QObject):
 
         self.message.emit("1) Stopping all triggers.\n")
         if not self.zeroAllTriggers():
-            self.message.emit("X  Failed: no channels known.\n")
+            self.message.emit("ERROR: no channels known.\n")
             self.finished.emit()
             return
 
         self.message.emit("2) Turning on edge triggers.\n")
-        channels_to_configure = self.dcom.triggerTabSimple.channelIndicesSignalOnly(exclude_blocked=True)
         if not self.startEdgeTriggers(channels_to_configure):
-            self.message.emit("X  Failed: no channels known.\n")
+            self.message.emit("ERROR: no channels known.\n")
             self.finished.emit()
             return
 
@@ -126,7 +131,7 @@ class DisableHyperWorker(QtCore.QObject):
         
         duration /= 1e9  # convert ns to seconds
         if duration <= 0:
-            self.message.emit(f"X  Failed: no trigger rate messages were received in {integration_time} seconds.")
+            self.message.emit(f"ERROR: no trigger rate messages were received in {integration_time} seconds.")
             self.finished.emit()
             return
 
@@ -174,7 +179,7 @@ class DisableHyperWorker(QtCore.QObject):
         if not self.save_quiet:
             delay = 5000 # ms
             QtCore.QTimer.singleShot(delay, self.endSilentTRIGGER)
-        self.message.emit("Done! You may close this window.\n")
+        self.message.emit("Hyperactive channels are disabled. You may close this window.\n")
         self.finished.emit()
 
     @pyqtSlot()
