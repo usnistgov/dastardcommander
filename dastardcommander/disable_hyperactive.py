@@ -113,9 +113,7 @@ class DisableHyperWorker(QtCore.QObject):
             self.finished.emit()
             return
 
-        print("counts: ", trigcounts)
         rates = trigcounts / duration
-        print("rates: ", rates)
         disable = []
         enable = []
         too_many_triggers = 1.0  # i.e. 1.0 triggers per second or more is bad when x rays are off
@@ -135,6 +133,15 @@ class DisableHyperWorker(QtCore.QObject):
                 "LevelTrigger": False,
                 }
             self.dcom.client.call("SourceControl.ConfigureTriggers", ts)
+            disabled_channums = []
+            for idx in disable:
+                name = self.dcom.channel_names[idx]
+                if name.startswith("chan"):
+                    cnum = int(name[4:])
+                    disabled_channums.append(cnum)
+            self.dcom.triggerBlocker.block_channels(disabled_channums)
+            self.dcom.triggerTab.updateDisabledList()
+
         if len(enable) > 0:
             ts = {
                 "ChannelIndices": enable,
