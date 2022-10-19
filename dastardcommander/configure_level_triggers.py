@@ -10,6 +10,16 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from dastardcommander import rpc_client, status_monitor
 
 class LevelTrigConfig(QtWidgets.QDialog):
+    """
+    A QDialog box that helps the user to configure level trigger settings for each channel.
+
+    First the user says whether pulses are positive- or negative-going and how far from the
+    baseline the trigger should be set.
+
+    Then after user pushes "Start", auto triggers are turned on, the baseline levels for each
+    channel are estimated, and then auto triggers are turned off and the level triggers are 
+    turned on.
+    """
 
     header_fmt = "<HBBIIffQQ"
     data_fmt = ["b", "B", "<h", "<H", "<i", "<I", "<q", "<Q"]
@@ -31,6 +41,10 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
     @pyqtSlot()
     def startConfiguration(self):
+        """The Start button causes this to run.
+
+        It starts auto triggering (50 ms delay) and launches a thread to monitor the data records 
+        being generated."""
         self.positivePulseButton.setDisabled(True)
         self.negativePulseButton.setDisabled(True)
         self.levelSpinBox.setDisabled(True)
@@ -49,7 +63,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
         self.cursor.insertText("1) Stopping all triggers.\n")
         prev_trig_state = self.dcom.triggerTab.trigger_state.copy()
-        if not self.zeroAllTriggers():
+        if not self.turnOffAllTriggers():
             self.cursor.insertText("X  Failed: no channels known.\n")
             return
 
@@ -80,9 +94,14 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
     @pyqtSlot()
     def finishConfiguration(self):
-        # 4) Return triggers to previous state (maybe zero them first?)
+        """This slot is called when enough data has been collected to estimate all baselines.
+        
+        It computes the per-channel baseline level and then sets each channel's level appropriately.
+        """
+
+        # 4) Set level triggers (but turn them off first)
         self.cursor.insertText("4) Done with baseline data.  Stopping all triggers.\n")
-        self.zeroAllTriggers()
+        self.turnOffAllTriggers()
         self.cursor.insertText("5) Sending all level triggers\n")
         positive = self.positivePulseButton.isChecked()
         threshold = self.levelSpinBox.value()
@@ -108,8 +127,8 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
     @pyqtSlot()
     def endSilentTRIGGER(self):
-        if not self.save_quiet:
-            self.dcom.quietTopics.remove("TRIGGER")
+        """Make TRIGGER messages non-quiet again (slot to run after a delay)."""
+        self.dcom.quietTopics.remove("TRIGGER")
 
     @pyqtSlot()
     def done(self, dialogCode):
@@ -121,7 +140,8 @@ class LevelTrigConfig(QtWidgets.QDialog):
             self.zmqthread.wait()
         super().done(dialogCode)
 
-    def zeroAllTriggers(self):
+    def turnOffAllTriggers(self):
+        """Configure all triggers to be completely off."""
         ids = self.dcom.channelIndicesAll()
         if len(ids) == 0:
             return False
@@ -132,6 +152,10 @@ class LevelTrigConfig(QtWidgets.QDialog):
         return True
 
     def startAutoTriggers(self, channels_to_configure):
+        """
+        Start 50 ms autotriggers for the specified channels (these are channel indices). 
+        All other triggers are turned off.
+        """
         if len(channels_to_configure) == 0:
             return False
         config = {
@@ -144,6 +168,11 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
     @pyqtSlot(bytes, bytes)
     def updateReceived(self, header, data_message):
+        """
+        Slot to handle one data record for one channel.
+        
+        It ingests the data and feeds it to the BaselineFinder object for the channel.
+        """
         try:
             values = struct.unpack(self.header_fmt, header)
             chanidx = values[0]
