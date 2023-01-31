@@ -65,8 +65,13 @@ class WritingControl(QtWidgets.QWidget):
             self.updatePath(result)
 
     def handleNumberWritten(self, d):
+        Nwritten = np.sum(d["NumberWritten"])
         self.label_numberWritten.setText("Number Written Total: {}\nNumber Written by Channel: {}".format(
-            np.sum(d["NumberWritten"]), d["NumberWritten"]))
+            Nwritten, d["NumberWritten"]))
+        if self.stopAtNRecords.isEnabled():
+            Nmax = self.stopAtNRecords.value()
+            if Nmax > 0 and Nwritten >= Nmax and self.writing:
+                self.stop()
 
     def start(self):
         if self.writing:
