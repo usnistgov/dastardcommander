@@ -443,6 +443,18 @@ class TriggerConfig(QtWidgets.QWidget):
             newstate["AutoDelay"] = nsdelay
         except ValueError:
             pass
+
+        # Check the auto veto level spin box. Turn text black if 0, red otherwise.
+        if self.autoVetoRange.value() == 0:
+            color = "black"
+            prefix = "Veto off:  "
+        else:
+            color = "red"
+            prefix = "Veto on:  "
+        ss = f"QSpinBox {{ color : {color}; }}"
+        self.autoVetoRange.setStyleSheet(ss)
+        self.autoVetoRange.setPrefix(prefix)
+
         self.setstates(newstate)
         self.configureDastardTriggers()
 

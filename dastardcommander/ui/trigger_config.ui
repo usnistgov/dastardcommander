@@ -648,6 +648,22 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="2">
+       <widget class="QSpinBox" name="autoVetoRange">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Veto auto trigger records when [max-min] larger than this (or 0 to never veto).&lt;/p&gt;&lt;p&gt;Use non-zero values for recording pulse-free noise data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="prefix">
+         <string>Veto off:  </string>
+        </property>
+        <property name="maximum">
+         <number>65535</number>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -890,8 +906,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedAutoTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>382</y>
+     <x>161</x>
+     <y>370</y>
     </hint>
     <hint type="destinationlabel">
      <x>138</x>
@@ -906,8 +922,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedAutoTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>496</x>
-     <y>382</y>
+     <x>660</x>
+     <y>370</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -922,8 +938,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>408</y>
+     <x>161</x>
+     <y>399</y>
     </hint>
     <hint type="destinationlabel">
      <x>106</x>
@@ -938,8 +954,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>496</x>
-     <y>409</y>
+     <x>660</x>
+     <y>399</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -954,8 +970,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>496</x>
-     <y>441</y>
+     <x>660</x>
+     <y>434</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -970,8 +986,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>289</x>
-     <y>445</y>
+     <x>299</x>
+     <y>441</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -986,8 +1002,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>432</y>
+     <x>161</x>
+     <y>425</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1002,8 +1018,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>163</x>
-     <y>451</y>
+     <x>161</x>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1018,8 +1034,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedRecordLength(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>86</x>
-     <y>54</y>
+     <x>81</x>
+     <y>51</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1066,8 +1082,8 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>289</x>
-     <y>412</y>
+     <x>299</x>
+     <y>406</y>
     </hint>
     <hint type="destinationlabel">
      <x>308</x>
@@ -1082,12 +1098,28 @@ the corresponding Error chan (Lancero only).</string>
    <slot>changedLevelUnits()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>559</x>
-     <y>471</y>
+     <x>778</x>
+     <y>347</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
      <y>484</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoVetoRange</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>triggerConfigTab</receiver>
+   <slot>changedAutoTrigConfig()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>239</x>
+     <y>364</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>217</x>
+     <y>305</y>
     </hint>
    </hints>
   </connection>
