@@ -1578,13 +1578,13 @@
       </widget>
       <widget class="QWidget" name="tabTriggeringSimple">
        <attribute name="title">
-        <string>Legacy Triggering</string>
+        <string>New Triggering</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_9"/>
       </widget>
       <widget class="QWidget" name="tabTriggering">
        <attribute name="title">
-        <string>New Triggering</string>
+        <string>Classic Triggering</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_9"/>
       </widget>
