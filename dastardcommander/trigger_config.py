@@ -278,6 +278,11 @@ class TriggerConfig(QtWidgets.QWidget):
                 continue
             edit.setText("%f" % (state * scale))
 
+        # Get the Auto Veto Level right
+        avr = self.getstate("AutoVetoRange")
+        if avr is not None:
+            self.autoVetoRange.setValue(avr)
+
         # Get the rising/falling/both/mixed state correct
         for (riseFallComboBox, rising, falling) in (
             (self.levelRiseFallBoth, "LevelRising", "LevelFalling"),
@@ -443,6 +448,20 @@ class TriggerConfig(QtWidgets.QWidget):
             newstate["AutoDelay"] = nsdelay
         except ValueError:
             pass
+
+        # Check the auto veto level spin box. Turn text black if 0, red otherwise.
+        avr = self.autoVetoRange.value()
+        newstate["autoVetoRange"] = avr
+        if avr == 0:
+            color = "black"
+            prefix = "Veto off:  "
+        else:
+            color = "red"
+            prefix = "Veto on:  "
+        ss = f"QSpinBox {{ color : {color}; }}"
+        self.autoVetoRange.setStyleSheet(ss)
+        self.autoVetoRange.setPrefix(prefix)
+
         self.setstates(newstate)
         self.configureDastardTriggers()
 
