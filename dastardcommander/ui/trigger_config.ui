@@ -651,7 +651,7 @@
       <item row="1" column="2">
        <widget class="QSpinBox" name="autoVetoRange">
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Veto auto trigger records when [max-min] larger than this (or 0 to never veto).&lt;/p&gt;&lt;p&gt;Use non-zero values for recording pulse-free noise data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Veto auto trigger records when [max-min] larger than this (or set 0 to never veto).&lt;/p&gt;&lt;p&gt;Use non-zero values to record pulse-free noise data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
