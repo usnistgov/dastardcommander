@@ -1,5 +1,6 @@
 # Qt5 imports
 import PyQt5.uic
+from PyQt5.QtCore import pyqtSlot
 from PyQt5 import QtWidgets
 
 # other non  user imports
@@ -12,6 +13,9 @@ class WritingControl(QtWidgets.QWidget):
 
     Most of the UI is copied from MATTER, but the Python implementation in this
     class is new."""
+
+    maraschino = "#ff2600"
+    moss = "#008f00"
 
     def __init__(self, parent, host, client):
         QtWidgets.QWidget.__init__(self, parent)
@@ -27,6 +31,9 @@ class WritingControl(QtWidgets.QWidget):
         self.writingStartButton.pressed.connect(self.startstop)
         self.writingCommentsButton.pressed.connect(self.comment)
         self.writingPauseButton.clicked.connect(self.pause)
+        self.checkBox_LJH22.clicked.connect(self.updateWritingActiveMessages)
+        self.checkBox_OFF.clicked.connect(self.updateWritingActiveMessages)
+
         cbd = self.changeBaseDirectoryButton
         if host == "localhost" or host == "127.0.0.1":
             cbd.pressed.connect(self.pathSelect)
@@ -65,8 +72,16 @@ class WritingControl(QtWidgets.QWidget):
             self.updatePath(result)
 
     def handleNumberWritten(self, d):
+        Nwritten = np.sum(d["NumberWritten"])
+        written_message = f"{Nwritten}"
+        if self.stopAtNRecords.isEnabled():
+            Nmax = self.stopAtNRecords.value()
+            pct = Nwritten*100.0/Nmax
+            written_message += f" ({pct:.2f}% of the automatic shutoff value)"
+            if Nmax > 0 and Nwritten >= Nmax and self.writing:
+                self.stop()
         self.label_numberWritten.setText("Number Written Total: {}\nNumber Written by Channel: {}".format(
-            np.sum(d["NumberWritten"]), d["NumberWritten"]))
+            written_message, d["NumberWritten"]))
 
     def start(self):
         if self.writing:
@@ -102,6 +117,7 @@ class WritingControl(QtWidgets.QWidget):
         self.fileNameExampleEdit.setText("-")
         self.writingCommentsButton.setEnabled(False)
         self.writingPauseButton.setEnabled(False)
+        self.updateWritingActiveMessages()
 
     def startedWriting(self, exampleFilename):
         print("STARTED WRITING")
@@ -110,6 +126,21 @@ class WritingControl(QtWidgets.QWidget):
         self.fileNameExampleEdit.setText(exampleFilename)
         self.writingCommentsButton.setEnabled(True)
         self.writingPauseButton.setEnabled(True)
+        self.updateWritingActiveMessages()
+
+    @pyqtSlot()
+    def updateWritingActiveMessages(self):
+        labels = (self.label_LJH22, self.label_OFF)
+        checks = (self.checkBox_LJH22, self.checkBox_OFF)
+        for (label, check) in zip(labels, checks):
+            if self.writing and check.isChecked():
+                label.setText("Writing active")
+                color = self.moss
+            else:
+                label.setText("Not writing")
+                color = self.maraschino
+            ss = f"QLabel {{ color : {color}; }}"
+            label.setStyleSheet(ss)
 
     def pause(self, paused):
         request = "Pause"

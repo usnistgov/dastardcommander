@@ -1578,13 +1578,13 @@
       </widget>
       <widget class="QWidget" name="tabTriggeringSimple">
        <attribute name="title">
-        <string>Triggering</string>
+        <string>New Triggering</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_9"/>
       </widget>
       <widget class="QWidget" name="tabTriggering">
        <attribute name="title">
-        <string>Advanced Triggering</string>
+        <string>Classic Triggering</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_9"/>
       </widget>
@@ -1830,7 +1830,7 @@
      <x>0</x>
      <y>0</y>
      <width>718</width>
-     <height>37</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnection">
