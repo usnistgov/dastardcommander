@@ -73,12 +73,15 @@ class WritingControl(QtWidgets.QWidget):
 
     def handleNumberWritten(self, d):
         Nwritten = np.sum(d["NumberWritten"])
-        self.label_numberWritten.setText("Number Written Total: {}\nNumber Written by Channel: {}".format(
-            Nwritten, d["NumberWritten"]))
+        written_message = f"{Nwritten}"
         if self.stopAtNRecords.isEnabled():
             Nmax = self.stopAtNRecords.value()
+            pct = Nwritten*100.0/Nmax
+            written_message += f" ({pct:.2f}% of the automatic shutoff value)"
             if Nmax > 0 and Nwritten >= Nmax and self.writing:
                 self.stop()
+        self.label_numberWritten.setText("Number Written Total: {}\nNumber Written by Channel: {}".format(
+            written_message, d["NumberWritten"]))
 
     def start(self):
         if self.writing:
