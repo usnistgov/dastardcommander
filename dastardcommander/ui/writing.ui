@@ -119,8 +119,11 @@
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="1">
       <widget class="QCheckBox" name="checkBox_LJH22">
+       <property name="toolTip">
+        <string>Should we write LJH (pulse record) files?</string>
+       </property>
        <property name="text">
-        <string>LJH22</string>
+        <string>LJH2.2 files</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -136,8 +139,11 @@
      </item>
      <item row="2" column="1">
       <widget class="QCheckBox" name="checkBox_OFF">
+       <property name="toolTip">
+        <string>Should we write Optimally Filtered Format files?</string>
+       </property>
        <property name="text">
-        <string>OFF </string>
+        <string>OFF files</string>
        </property>
       </widget>
      </item>
@@ -153,8 +159,11 @@
        <property name="enabled">
         <bool>false</bool>
        </property>
+       <property name="toolTip">
+        <string>Should we write LJH version 3 files? [not yet possible]</string>
+       </property>
        <property name="text">
-        <string>LJH3</string>
+        <string>LJH3 files</string>
        </property>
       </widget>
      </item>
