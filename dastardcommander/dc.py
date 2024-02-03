@@ -337,6 +337,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.updateAbacoCardChoices(d["AvailableCards"])
                 self.activateUDPsources(d["HostPortUDP"])
                 self.fillPhaseResetInfo(d)
+                invertedChannels = csv2int_array(d["InvertChan"], normalize=True)
+                invertText = ", ".join([str(c) for c in invertedChannels])
+                self.invertedChanTextEdit.setPlainText(invertText)
+                self.actionChange_Inverted_Chans.setChecked(False)
 
             elif topic == "CHANNELNAMES":
                 # Careful: don't replace the variable
