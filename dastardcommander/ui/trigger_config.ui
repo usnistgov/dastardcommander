@@ -220,7 +220,7 @@
             <property name="baseSize">
              <size>
               <width>160</width>
-              <height>20</height>
+              <height>10</height>
              </size>
             </property>
             <property name="tabChangesFocus">
@@ -245,7 +245,7 @@
             <property name="baseSize">
              <size>
               <width>100</width>
-              <height>20</height>
+              <height>10</height>
              </size>
             </property>
             <property name="toolTip">
