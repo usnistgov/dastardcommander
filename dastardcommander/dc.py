@@ -337,6 +337,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.updateAbacoCardChoices(d["AvailableCards"])
                 self.activateUDPsources(d["HostPortUDP"])
                 self.fillPhaseResetInfo(d)
+                print("Invert Chan message: ", d['InvertChan'])
                 if d["InvertChan"] is None:
                     invertText = ""
                 else:
