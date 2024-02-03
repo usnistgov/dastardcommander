@@ -41,7 +41,29 @@ from . import projectors
 from . import observe
 from . import workflow
 
-__version__ = "0.2.7"
+__version__ = "0.2.8"
+
+
+def csv2int_array(text, normalize=False):
+    """Convert a string of numerical values separated by whitespace and/or commas to a list of int.
+    Any words that cannot be converted will be ignored.
+    
+    If `normalize`, remove duplicates and sort the list numerically.
+    """
+    array = []
+    words = text.replace(",", " ").split()
+    for w in words:
+        try:
+            array.append(int(w))
+        except ValueError:
+            pass
+    
+    if normalize:
+        array = list(set(array))
+        array.sort()
+    
+    return array
+
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -57,7 +79,6 @@ __version__ = "0.2.7"
 QCoreApplication.setOrganizationName("Quantum Sensors Group")
 QCoreApplication.setOrganizationDomain("nist.gov")
 QCoreApplication.setApplicationName("DastardCommander")
-
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, host, port, settings, parent=None):
@@ -974,6 +995,12 @@ class MainWindow(QtWidgets.QMainWindow):
         for k, v in list(self.abacoCheckBoxes.items()):
             if v.isChecked():
                 activate.append(k)
+        
+        # Read the invertedChan list. Normalize it by making the list contain only unique and sorted values.
+        # Update the GUI with the normalized list
+        invertedChannels = csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True)
+        invertText = ", ".join([str(c) for c in invertedChannels])
+        self.invertedChanTextEdit.setPlainText(invertText)
 
         if self.phasePosPulses.isChecked():
             pulsesign = +1
@@ -999,6 +1026,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "PulseSign": pulsesign,
             "Bias": unwrapBias,
             "RescaleRaw": dropBits,
+            "InvertChan": invertedChannels,
         }
 
         for id in (1, 2, 3, 4):
