@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 import os
+import yaml
 import zmq
 
 from collections import defaultdict
@@ -1249,7 +1250,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Load the lists of channels that are disabled and inverted (Abaco-only) from a file."""
         filename, _filter = QFileDialog.getOpenFileName(self,
             "Open Inverted/Disabled channel list", ".",                                        
-            "JSON settings (*.json)")
+            "Settings (*.yaml *.yml *.json)")
         if filename == "":
             print("No file requested")
             return
@@ -1257,7 +1258,10 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Reading inverted/disabled channel list from ", filename)
         try:
             with open(filename, "r") as fp:
-                obj = json.load(fp)
+                if filename.endswith("json"):
+                    obj = json.load(fp)
+                else:
+                    obj = yaml.safe_load(fp)
             invertText = ""
             if len(obj["inverted"]) > 0:
                 invertText = ", ".join([str(c) for c in obj["inverted"]])
@@ -1272,7 +1276,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """Save the lists of channels that are disabled and inverted (Abaco-only) to a file."""
         filename, _filter = QFileDialog.getSaveFileName(self,
             "Save Inverted/Disabled channel list", ".",                                        
-            "JSON settings (*.json)")
+            "Settings (*.yaml *.yml *.json)")
         if filename == "":
             print("No file requested")
             return
@@ -1283,7 +1287,10 @@ class MainWindow(QtWidgets.QMainWindow):
             "disabled": self.triggerBlocker.special
         }
         with open(filename, "w") as fp:
-            json.dump(obj, fp)
+            if filename.endswith("json"):
+                json.dump(obj, fp)
+            else:
+                yaml.dump(obj, fp)
 
 
 
