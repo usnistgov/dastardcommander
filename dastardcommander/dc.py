@@ -110,6 +110,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
         self.actionLevel_Trig_Configure.triggered.connect(self.configLevelTrigs)
         self.actionDisable_Hyperactive_Chans.triggered.connect(self.disableHyperactive)
+        self.actionLoad_Disabled_Invert_Chan.triggered.connect(self.loadSpecialChanList)
+        self.actionSave_Disabled_Invert_Chan.triggered.connect(self.saveSpecialChanList)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(
@@ -1242,7 +1244,46 @@ class MainWindow(QtWidgets.QMainWindow):
         disableHyperDialog = disable_hyperactive.DisableHyperDialog(self)
         disableHyperDialog.show()
         print("Running the procedure to disable hyperactive channels")
+    
+    def loadSpecialChanList(self):
+        """Load the lists of channels that are disabled and inverted (Abaco-only) from a file."""
+        filename, _filter = QFileDialog.getOpenFileName(self,
+            "Open Inverted/Disabled channel list", ".",                                        
+            "JSON settings (*.json)")
+        if filename == "":
+            print("No file requested")
+            return
+        
+        print("Reading inverted/disabled channel list from ", filename)
+        try:
+            with open(filename, "r") as fp:
+                obj = json.load(fp)
+            invertText = ""
+            if len(obj["inverted"]) > 0:
+                invertText = ", ".join([str(c) for c in obj["inverted"]])
+            self.invertedChanTextEdit.setPlainText(invertText)
+            self.triggerBlocker.special = obj["disabled"]
+            self.triggerTab.updateDisabledList()
+        except Exception as e:
+            print("Failed to parse inverted/disabled channel list from ", filename)
+            print(e)
 
+    def saveSpecialChanList(self):
+        """Save the lists of channels that are disabled and inverted (Abaco-only) to a file."""
+        filename, _filter = QFileDialog.getSaveFileName(self,
+            "Save Inverted/Disabled channel list", ".",                                        
+            "JSON settings (*.json)")
+        if filename == "":
+            print("No file requested")
+            return
+
+        print("Writing inverted/disabled channel list to ", filename)
+        obj = {
+            "inverted": csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True),
+            "disabled": self.triggerBlocker.special
+        }
+        with open(filename, "w") as fp:
+            json.dump(obj, fp)
 
 
 

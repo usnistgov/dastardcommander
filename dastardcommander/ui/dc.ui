@@ -1866,8 +1866,11 @@
     <addaction name="actionPop_out_Observe"/>
     <addaction name="actionTDM_Autotune"/>
     <addaction name="actionLevel_Trig_Configure"/>
+    <addaction name="separator"/>
     <addaction name="actionDisable_Hyperactive_Chans"/>
     <addaction name="actionChange_Inverted_Chans"/>
+    <addaction name="actionLoad_Disabled_Invert_Chan"/>
+    <addaction name="actionSave_Disabled_Invert_Chan"/>
    </widget>
    <addaction name="menuConnection"/>
    <addaction name="menuExpert"/>
@@ -1922,6 +1925,16 @@
    </property>
    <property name="toolTip">
     <string>Allow user to change the Inverted Channels text box</string>
+   </property>
+  </action>
+  <action name="actionLoad_Disabled_Invert_Chan">
+   <property name="text">
+    <string>Load Disabled/Invert Chan</string>
+   </property>
+  </action>
+  <action name="actionSave_Disabled_Invert_Chan">
+   <property name="text">
+    <string>Save Disabled/Invert Chan</string>
    </property>
   </action>
  </widget>
