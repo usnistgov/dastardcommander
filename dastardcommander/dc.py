@@ -33,7 +33,7 @@ from . import configure_level_triggers
 from . import disable_hyperactive
 from . import rpc_client
 from . import status_monitor
-from . import trigger_blocker
+from . import special_channels
 from . import trigger_config
 from . import trigger_config_simple
 from . import writing
@@ -153,8 +153,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
         self.tabObserve.layout().addWidget(self.observeTab)
 
-        # Create a TriggerBlocker and let the relevant tabs/windows share access to it.
-        self.triggerBlocker = trigger_blocker.TriggerBlocker()
+        # Create a SpecialChannels object; let the relevant tabs/windows share access to it.
+        self.triggerBlocker = special_channels.SpecialChannels(configName="blocked_channels")
         self.triggerTab.triggerBlocker = self.triggerBlocker
         self.triggerTabSimple.triggerBlocker = self.triggerBlocker
         self.observeWindow.triggerBlocker = self.triggerBlocker

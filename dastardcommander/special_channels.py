@@ -2,7 +2,7 @@ import json
 import os
 
 
-class TriggerBlocker:
+class SpecialChannels:
     """
     Handle a more-or-less permanent list of channels that are considered "bad" and should be
     blocked from triggering no matter what the user asks for. That is, any "all channels" settings
@@ -12,8 +12,9 @@ class TriggerBlocker:
     including a history of the last several lists.
 
     Usage:
+    >>> import tempfile
     >>> backingfile = tempfile.mkstemp(suffix=".json")[1]
-    >>> tb = TriggerBlocker(backingfile)
+    >>> tb = SpecialChannels(backingfile)
     >>> print(tb.blocked)
     []
     >>> tb.block_channels(6,4,2)
@@ -47,7 +48,7 @@ class TriggerBlocker:
     []
     >>> tb.block_channels(6,4,2)
     True
-    >>> tb2 = TriggerBlocker(backingfile)
+    >>> tb2 = SpecialChannels(backingfile)
     >>> print(tb2.blocked)
     [2, 4, 6]
     """
@@ -55,9 +56,10 @@ class TriggerBlocker:
     FIELDS_TO_MEMO = ("blocked", "blocked_history")
     HISTORY_LENGTH = 10
 
-    def __init__(self, configfile=None):
+    def __init__(self, configfile=None, configName=None):
         if configfile is None:
-            configfile = "~/.dastard/blocked_channels.json"
+            assert configName is not None
+            configfile = f"~/.dastard/{configName}.json"
         self.config = os.path.expanduser(configfile)
         self.blocked = []
         self.blocked_history = []
@@ -154,6 +156,4 @@ class TriggerBlocker:
 
 if __name__ == "__main__":
     import doctest
-    import tempfile
-
     doctest.testmod()
