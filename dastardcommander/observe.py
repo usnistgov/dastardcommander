@@ -371,7 +371,7 @@ class CountRateMap(QtWidgets.QScrollArea):
         try:
             chnum = int(name.replace("chan", ""))
             button.chanNumber = chnum
-            if chnum in self.triggerBlocker.blocked:
+            if chnum in self.triggerBlocker.special:
                 self.setButtonDisabled(name)
         except ValueError:
             pass
@@ -381,7 +381,7 @@ class CountRateMap(QtWidgets.QScrollArea):
         name = button.chanName
         cnum = button.chanNumber
         self.triggerBlocker.toggle_channel(cnum)
-        if cnum in self.triggerBlocker.blocked:
+        if cnum in self.triggerBlocker.special:
             print(f"Channel {name} triggering is disabled.")
             self.setButtonDisabled(name)
             self.owner.block_channel.emit(button.chanIndex)

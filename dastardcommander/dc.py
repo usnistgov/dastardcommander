@@ -153,7 +153,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
         self.tabObserve.layout().addWidget(self.observeTab)
 
-        # Create a SpecialChannels object; let the relevant tabs/windows share access to it.
+        # Create a SpecialChannels object for trigger blocker; let the relevant tabs/windows share access to it.
         self.triggerBlocker = special_channels.SpecialChannels(configName="blocked_channels")
         self.triggerTab.triggerBlocker = self.triggerBlocker
         self.triggerTabSimple.triggerBlocker = self.triggerBlocker
@@ -342,7 +342,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 else:
                     invertText = ", ".join([str(c) for c in d["InvertChan"]])
                 self.invertedChanTextEdit.setPlainText(invertText)
-                # Always disable the expert ability to change inverted channels
+                # Always start out DISABLING the expert ability to change inverted channels
                 self.actionChange_Inverted_Chans.setChecked(False)
 
             elif topic == "CHANNELNAMES":

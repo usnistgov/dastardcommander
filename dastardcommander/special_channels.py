@@ -4,56 +4,57 @@ import os
 
 class SpecialChannels:
     """
-    Handle a more-or-less permanent list of channels that are considered "bad" and should be
-    blocked from triggering no matter what the user asks for. That is, any "all channels" settings
+    Handle a more-or-less permanent list of channels that are considered "special" and should be
+    remembered. For instance, a list of channels that should be blocked from triggering no matter
+    what the user asks for. That is, any "all channels" settings
     will not allow triggering of these channels.
 
-    Values are stored to and read from a config file (default: ~/.dastard/blocked_channels.json),
+    Values are stored to and read from a config file (default: ~/.dastard/{configName}.json),
     including a history of the last several lists.
 
     Usage:
     >>> import tempfile
     >>> backingfile = tempfile.mkstemp(suffix=".json")[1]
     >>> tb = SpecialChannels(backingfile)
-    >>> print(tb.blocked)
+    >>> print(tb.special)
     []
-    >>> tb.block_channels(6,4,2)
+    >>> tb.add_chan_to_list(6,4,2)
     True
-    >>> print(tb.blocked)
+    >>> print(tb.special)
     [2, 4, 6]
-    >>> tb.block_channels(8,6,[4,2],4,6,8)
+    >>> tb.add_chan_to_list(8,6,[4,2],4,6,8)
     True
-    >>> print(tb.blocked)
+    >>> print(tb.special)
     [2, 4, 6, 8]
     >>> tb.toggle_channel(3)
     True
-    >>> print(tb.blocked)
+    >>> print(tb.special)
     [2, 3, 4, 6, 8]
     >>> tb.toggle_channel(3)
     True
-    >>> print(tb.blocked)
+    >>> print(tb.special)
     [2, 4, 6, 8]
-    >>> tb.unblock_channels(4)
+    >>> tb.remove_chan_from_list(4)
     True
-    >>> print(tb.blocked)
+    >>> print(tb.special)
     [2, 6, 8]
-    >>> tb.unblock_channels(4)
+    >>> tb.remove_chan_from_list(4)
     False
     >>> tb.revert_prev()
-    >>> print(tb.blocked)
+    >>> print(tb.special)
     [2, 4, 6, 8]
     >>> tb.clear()
     True
-    >>> print(tb.blocked)
+    >>> print(tb.special)
     []
-    >>> tb.block_channels(6,4,2)
+    >>> tb.add_chan_to_list(6,4,2)
     True
     >>> tb2 = SpecialChannels(backingfile)
-    >>> print(tb2.blocked)
+    >>> print(tb2.special)
     [2, 4, 6]
     """
 
-    FIELDS_TO_MEMO = ("blocked", "blocked_history")
+    FIELDS_TO_MEMO = ("special", "special_history")
     HISTORY_LENGTH = 10
 
     def __init__(self, configfile=None, configName=None):
@@ -61,8 +62,8 @@ class SpecialChannels:
             assert configName is not None
             configfile = f"~/.dastard/{configName}.json"
         self.config = os.path.expanduser(configfile)
-        self.blocked = []
-        self.blocked_history = []
+        self.special = []
+        self.special_history = []
         self.read_config()
 
     def read_config(self):
@@ -81,8 +82,8 @@ class SpecialChannels:
             json.dump(obj, fp)
             fp.write("\n")  # ensure \n at EOF
 
-    def block_channels(self, *args):
-        """Add 1 or more `channels` to the blocked channels.
+    def add_chan_to_list(self, *args):
+        """Add 1 or more `channels` to the special channels.
         Each chan can be an int or an iterable of them."""
         # Convert a mix of int and list-of-int args to a single list
         channels = []
@@ -91,11 +92,11 @@ class SpecialChannels:
                 channels.extend(a)
             else:
                 channels.append(a)
-        any_changed = self._change_channels(channels, block=True)
+        any_changed = self._change_channels(channels, special=True)
         return any_changed
 
-    def unblock_channels(self, *args):
-        """Remove 1 or more `channels` from the blocked channels.
+    def remove_chan_from_list(self, *args):
+        """Remove 1 or more `channels` from the special channels.
         Each chan can be an int or an iterable of them."""
         # Convert a mix of int and list-of-int args to a single list
         channels = []
@@ -104,52 +105,52 @@ class SpecialChannels:
                 channels.extend(a)
             else:
                 channels.append(a)
-        any_changed = self._change_channels(channels, block=False)
+        any_changed = self._change_channels(channels, special=False)
         return any_changed
 
     def toggle_channel(self, channel):
-        """Add channel to the block list, or remove it, as appropriate."""
-        toblock = channel not in self.blocked
-        return self._change_channels(channel, toblock)
+        """Add channel to the special list, or remove it, as appropriate."""
+        tospecial = channel not in self.special
+        return self._change_channels(channel, tospecial)
 
-    def _change_channels(self, channels, block=True):
+    def _change_channels(self, channels, special=True):
         if isinstance(channels, int):
             channels = [channels]
 
         # Use python sets to simplify the logic.
-        blockedch = set(self.blocked)
+        specialch = set(self.special)
         arguments = set(channels)
-        if block:
-            blockedch.update(arguments)
+        if special:
+            specialch.update(arguments)
         else:
-            blockedch -= arguments
+            specialch -= arguments
 
         # Then convert back to a sorted list of channels and notify any connected Qt slots
-        any_changed = not (blockedch == set(self.blocked))
+        any_changed = not (specialch == set(self.special))
         if any_changed:
             self.save_history()
-            self.blocked = list(blockedch)
-            self.blocked.sort()
+            self.special = list(specialch)
+            self.special.sort()
         self.write_config()
         return any_changed
 
     def revert_prev(self):
         try:
-            self.blocked = self.blocked_history.pop()
+            self.special = self.special_history.pop()
         except IndexError:
-            self.blocked = []
+            self.special = []
         self.write_config()
 
     def save_history(self):
-        self.blocked_history.append(self.blocked)
-        if len(self.blocked_history) >= self.HISTORY_LENGTH:
-            self.blocked_history = self.blocked_history[-self.HISTORY_LENGTH:]
+        self.special_history.append(self.special)
+        if len(self.special_history) >= self.HISTORY_LENGTH:
+            self.special_history = self.special_history[-self.HISTORY_LENGTH:]
 
     def clear(self):
-        if len(self.blocked) == 0:
+        if len(self.special) == 0:
             return False
         self.save_history()
-        self.blocked = []
+        self.special = []
         self.write_config()
         return True
 

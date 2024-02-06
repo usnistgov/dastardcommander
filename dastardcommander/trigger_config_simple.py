@@ -204,14 +204,14 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         """
         Return a sorted list of the channel indices that correspond to signal channels (i.e., 
         exclude the TDM error channels).
-        If `exclude_blocked` is true, also exclude any listed in the self.triggerBlocker.blocked
+        If `exclude_blocked` is true, also exclude any listed in the self.triggerBlocker.special
         list of disabled channels.
         """
         signal_indices = self.dcom.channelIndicesSignalOnly()
         if not exclude_blocked:
             return signal_indices
         sigset = set(signal_indices)
-        blocked_numbers = self.triggerBlocker.blocked
+        blocked_numbers = self.triggerBlocker.special
         blocked_indices = [self.channel_indices[n] for n in blocked_numbers]
         enabled_indices = list(sigset - set(blocked_indices))
         if len(enabled_indices) < len(sigset):
