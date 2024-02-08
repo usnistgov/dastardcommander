@@ -17,6 +17,7 @@ import socket
 import subprocess
 import sys
 import os
+import yaml
 import zmq
 
 from collections import defaultdict
@@ -33,7 +34,7 @@ from . import configure_level_triggers
 from . import disable_hyperactive
 from . import rpc_client
 from . import status_monitor
-from . import trigger_blocker
+from . import special_channels
 from . import trigger_config
 from . import trigger_config_simple
 from . import writing
@@ -41,7 +42,29 @@ from . import projectors
 from . import observe
 from . import workflow
 
-__version__ = "0.2.7"
+__version__ = "0.2.8"
+
+
+def csv2int_array(text, normalize=False):
+    """Convert a string of numerical values separated by whitespace and/or commas to a list of int.
+    Any words that cannot be converted will be ignored.
+    
+    If `normalize`, remove duplicates and sort the list numerically.
+    """
+    array = []
+    words = text.replace(",", " ").split()
+    for w in words:
+        try:
+            array.append(int(w))
+        except ValueError:
+            pass
+    
+    if normalize:
+        array = list(set(array))
+        array.sort()
+    
+    return array
+
 
 # Here is how you try to import compiled UI files and fall back to processing them
 # at load time via PyQt5.uic. But for now, with frequent changes, let's process all
@@ -57,7 +80,6 @@ __version__ = "0.2.7"
 QCoreApplication.setOrganizationName("Quantum Sensors Group")
 QCoreApplication.setOrganizationDomain("nist.gov")
 QCoreApplication.setApplicationName("DastardCommander")
-
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, host, port, settings, parent=None):
@@ -89,6 +111,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTDM_Autotune.triggered.connect(self.crateStartAndAutotune)
         self.actionLevel_Trig_Configure.triggered.connect(self.configLevelTrigs)
         self.actionDisable_Hyperactive_Chans.triggered.connect(self.disableHyperactive)
+        self.actionLoad_Disabled_Invert_Chan.triggered.connect(self.loadSpecialChanList)
+        self.actionSave_Disabled_Invert_Chan.triggered.connect(self.saveSpecialChanList)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
         self.pushButton_sendExperimentStateLabel.clicked.connect(
@@ -132,8 +156,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
         self.tabObserve.layout().addWidget(self.observeTab)
 
-        # Create a TriggerBlocker and let the relevant tabs/windows share access to it.
-        self.triggerBlocker = trigger_blocker.TriggerBlocker()
+        # Create a SpecialChannels object for trigger blocker; let the relevant tabs/windows share access to it.
+        self.triggerBlocker = special_channels.SpecialChannels(configName="blocked_channels")
         self.triggerTab.triggerBlocker = self.triggerBlocker
         self.triggerTabSimple.triggerBlocker = self.triggerBlocker
         self.observeWindow.triggerBlocker = self.triggerBlocker
@@ -316,6 +340,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.updateAbacoCardChoices(d["AvailableCards"])
                 self.activateUDPsources(d["HostPortUDP"])
                 self.fillPhaseResetInfo(d)
+                if d["InvertChan"] is None:
+                    invertText = ""
+                else:
+                    invertText = ", ".join([str(c) for c in d["InvertChan"]])
+                self.invertedChanTextEdit.setPlainText(invertText)
+                # Always start out DISABLING the expert ability to change inverted channels
+                self.actionChange_Inverted_Chans.setChecked(False)
 
             elif topic == "CHANNELNAMES":
                 # Careful: don't replace the variable
@@ -974,6 +1005,12 @@ class MainWindow(QtWidgets.QMainWindow):
         for k, v in list(self.abacoCheckBoxes.items()):
             if v.isChecked():
                 activate.append(k)
+        
+        # Read the invertedChan list. Normalize it by making the list contain only unique and sorted values.
+        # Update the GUI with the normalized list
+        invertedChannels = csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True)
+        invertText = ", ".join([str(c) for c in invertedChannels])
+        self.invertedChanTextEdit.setPlainText(invertText)
 
         if self.phasePosPulses.isChecked():
             pulsesign = +1
@@ -999,6 +1036,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "PulseSign": pulsesign,
             "Bias": unwrapBias,
             "RescaleRaw": dropBits,
+            "InvertChan": invertedChannels,
         }
 
         for id in (1, 2, 3, 4):
@@ -1207,7 +1245,52 @@ class MainWindow(QtWidgets.QMainWindow):
         disableHyperDialog = disable_hyperactive.DisableHyperDialog(self)
         disableHyperDialog.show()
         print("Running the procedure to disable hyperactive channels")
+    
+    def loadSpecialChanList(self):
+        """Load the lists of channels that are disabled and inverted (Abaco-only) from a file."""
+        filename, _filter = QFileDialog.getOpenFileName(self,
+            "Open Inverted/Disabled channel list", ".",                                        
+            "Settings (*.yaml *.yml *.json)")
+        if filename == "":
+            print("No file requested")
+            return
+        
+        print("Reading inverted/disabled channel list from ", filename)
+        try:
+            with open(filename, "r") as fp:
+                if filename.endswith("json"):
+                    obj = json.load(fp)
+                else:
+                    obj = yaml.safe_load(fp)
+            invertText = ""
+            if len(obj["inverted"]) > 0:
+                invertText = ", ".join([str(c) for c in obj["inverted"]])
+            self.invertedChanTextEdit.setPlainText(invertText)
+            self.triggerBlocker.special = obj["disabled"]
+            self.triggerTab.updateDisabledList()
+        except Exception as e:
+            print("Failed to parse inverted/disabled channel list from ", filename)
+            print(e)
 
+    def saveSpecialChanList(self):
+        """Save the lists of channels that are disabled and inverted (Abaco-only) to a file."""
+        filename, _filter = QFileDialog.getSaveFileName(self,
+            "Save Inverted/Disabled channel list", ".",                                        
+            "Settings (*.yaml *.yml *.json)")
+        if filename == "":
+            print("No file requested")
+            return
+
+        print("Writing inverted/disabled channel list to ", filename)
+        obj = {
+            "inverted": csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True),
+            "disabled": self.triggerBlocker.special
+        }
+        with open(filename, "w") as fp:
+            if filename.endswith("json"):
+                json.dump(obj, fp)
+            else:
+                yaml.dump(obj, fp)
 
 
 

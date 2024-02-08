@@ -133,7 +133,7 @@ class TriggerConfig(QtWidgets.QWidget):
         for p in self.channel_names:
             if p.startswith(prefix):
                 num = p.lstrip(prefix)
-                if int(num) not in self.triggerBlocker.blocked:
+                if int(num) not in self.triggerBlocker.special:
                     unblocked_chan.append(num)
         cnum = ",".join(unblocked_chan)
         return "%s:%s" % (prefix, cnum)
@@ -342,20 +342,20 @@ class TriggerConfig(QtWidgets.QWidget):
     @pyqtSlot()
     def pushedClearDisabled(self):
         changed = self.triggerBlocker.clear()
-        assert len(self.triggerBlocker.blocked) == 0
+        assert len(self.triggerBlocker.special) == 0
         if changed:
             self.updateDisabledList()
 
     @pyqtSlot()
     def updateDisabledList(self):
-        ndisabled = len(self.triggerBlocker.blocked)
+        ndisabled = len(self.triggerBlocker.special)
         if ndisabled == 0:
             msg = "All channels are enabled"
         elif ndisabled == 1:
-            msg = "One channel is disabled: {}".format(self.triggerBlocker.blocked[0])
+            msg = "One channel is disabled: {}".format(self.triggerBlocker.special[0])
         else:
             msg = "{} channels are disabled: {}".format(
-                ndisabled, ",".join(map(str, self.triggerBlocker.blocked))
+                ndisabled, ",".join(map(str, self.triggerBlocker.special))
             )
         self.disabledTextEdit.setPlainText(msg)
         self.channelChooserChanged()  # update that text box

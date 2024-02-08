@@ -162,7 +162,7 @@ class DisableHyperWorker(QtCore.QObject):
                 if name.startswith("chan"):
                     cnum = int(name[4:])
                     disabled_channums.append(cnum)
-            self.dcom.triggerBlocker.block_channels(disabled_channums)
+            self.dcom.triggerBlocker.add_chan_to_list(disabled_channums)
 
         if len(enable) > 0:
             ts = {
