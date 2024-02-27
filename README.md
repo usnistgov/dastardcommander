@@ -1,5 +1,5 @@
 # Dastard Commander
-Dastard Commander is a GUI for operating [DASTARD](https://github.com/usnistgov/dastard) (the Data Acquisition System for Triggering And Recording Data), a microcalorimeter DAQ system. Dastard Commander is a GUI front-end only based on Qt5. It communicates with a running Dastard system via JSON-RPC calls, as well as by monitoring certain ports for ZMQ messages. It requires Python version 3.5 or higher.
+Dastard Commander is a GUI for operating [DASTARD](https://github.com/usnistgov/dastard) (the Data Acquisition System for Triggering And Recording Data), a microcalorimeter DAQ system. Dastard Commander is a GUI front-end only based on Qt5. It communicates with a running Dastard system via JSON-RPC calls, as well as by monitoring certain ports for ZMQ messages. It requires Python 3.8 or later versions (Python 3.7 and all earlier versions are past their [end-of-life-date](https://devguide.python.org/versions/)).
 
 ## Installation
 
