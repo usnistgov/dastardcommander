@@ -48,7 +48,7 @@ __version__ = "0.2.8"
 def csv2int_array(text, normalize=False):
     """Convert a string of numerical values separated by whitespace and/or commas to a list of int.
     Any words that cannot be converted will be ignored.
-    
+
     If `normalize`, remove duplicates and sort the list numerically.
     """
     array = []
@@ -58,11 +58,11 @@ def csv2int_array(text, normalize=False):
             array.append(int(w))
         except ValueError:
             pass
-    
+
     if normalize:
         array = list(set(array))
         array.sort()
-    
+
     return array
 
 
@@ -80,6 +80,7 @@ def csv2int_array(text, normalize=False):
 QCoreApplication.setOrganizationName("Quantum Sensors Group")
 QCoreApplication.setOrganizationDomain("nist.gov")
 QCoreApplication.setApplicationName("DastardCommander")
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, rpc_client, host, port, settings, parent=None):
@@ -670,12 +671,14 @@ class MainWindow(QtWidgets.QMainWindow):
             for id in unperturbed_guis:
                 guihost = self.__dict__["udpHost%d" % id].text()
                 guiport = self.__dict__["udpPort%d" % id].value()
+                guihost = squeeze_whitespace(guihost)
                 if guiport != port:
                     continue
                 if guihost == host or (
                     guihost in localsynonyms and host in localsynonyms
                 ):
                     self.__dict__["udpActive%d" % id].setChecked(True)
+                    self.__dict__["udpHost%d" % id].setText(guihost)
                     found = True
                     unperturbed_guis.remove(id)
                     break
@@ -830,7 +833,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self._setGuiRunning(True)
 
     def _stop(self):
-        okay, error = self.client.call("SourceControl.Stop", "")
+        okay, _error = self.client.call("SourceControl.Stop", "")
         if not okay:
             print("Could not Stop data")
             return False
@@ -888,11 +891,11 @@ class MainWindow(QtWidgets.QMainWindow):
             "Max": self.triangleMaximum.value(),
             "Min": self.triangleMinimum.value(),
         }
-        okay, error = self.client.call("SourceControl.ConfigureTriangleSource", config)
+        okay, _error = self.client.call("SourceControl.ConfigureTriangleSource", config)
         if not okay:
             print("Could not ConfigureTriangleSource")
             return False
-        okay, error = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
+        okay, _error = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
         if not okay:
             print("Could not Start Triangle ")
             return False
@@ -909,11 +912,11 @@ class MainWindow(QtWidgets.QMainWindow):
             "Pedestal": self.simPulseBaseline.value(),
             "Nsamp": self.simPulseSamplesPerPulse.value(),
         }
-        okay, error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
+        okay, _error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
         if not okay:
             print("Could not ConfigureSimPulseSource")
             return False
-        okay, error = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
+        okay, _error = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
         if not okay:
             print("Could not Start SimPulse")
             return False
@@ -961,12 +964,12 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         print("START LANCERO CONFIG")
         print(config)
-        okay, error = self.client.call(
+        okay, _error = self.client.call(
             "SourceControl.ConfigureLanceroSource", config, errorBox=True
         )
         if not okay:
             return False
-        okay, error = self.client.call(
+        okay, _error = self.client.call(
             "SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False
         )
         if not okay:
@@ -985,15 +988,17 @@ class MainWindow(QtWidgets.QMainWindow):
             ipwidget = self.__dict__["roachIPLineEdit_%d" % id]
             portwidget = self.__dict__["roachPortSpinBox_%d" % id]
             ratewidget = self.__dict__["roachFrameRateDoubleSpinBox_%d" % id]
-            hostport = "%s:%d" % (ipwidget.text(), portwidget.value())
+            host = squeeze_whitespace(ipwidget.text())
+            ipwidget.setText(host)
+            hostport = "%s:%d" % (host, portwidget.value())
             rate = ratewidget.value()
             config["HostPort"].append(hostport)
             config["Rates"].append(rate)
-        okay, error = self.client.call("SourceControl.ConfigureRoachSource", config)
+        okay, _error = self.client.call("SourceControl.ConfigureRoachSource", config)
         if not okay:
             print("Could not ConfigureRoachSource")
             return False
-        okay, error = self.client.call("SourceControl.Start", "ROACHSOURCE")
+        okay, _error = self.client.call("SourceControl.Start", "ROACHSOURCE")
         if not okay:
             print("Could not Start ROACH")
             return False
@@ -1005,7 +1010,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for k, v in list(self.abacoCheckBoxes.items()):
             if v.isChecked():
                 activate.append(k)
-        
+
         # Read the invertedChan list. Normalize it by making the list contain only unique and sorted values.
         # Update the GUI with the normalized list
         invertedChannels = csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True)
@@ -1044,14 +1049,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 continue
             ipwidget = self.__dict__["udpHost%d" % id]
             portwidget = self.__dict__["udpPort%d" % id]
-            hostport = "%s:%d" % (ipwidget.text(), portwidget.value())
+            host = squeeze_whitespace(ipwidget.text())
+            ipwidget.setText(host)
+            hostport = "%s:%d" % (host, portwidget.value())
             config["HostPortUDP"].append(hostport)
 
-        okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
+        okay, _error = self.client.call("SourceControl.ConfigureAbacoSource", config)
         if not okay:
             print("Could not ConfigureAbacoSource")
             return False
-        okay, error = self.client.call("SourceControl.Start", "ABACOSOURCE")
+        okay, _error = self.client.call("SourceControl.Start", "ABACOSOURCE")
         if not okay:
             print("Could not Start Abaco")
             return False
@@ -1104,7 +1111,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 "ChannelIndices": np.arange(1, mixFractions.size * 2, 2).tolist(),
                 "MixFractions": mixFractions.flatten().tolist(),
             }
-            okay, error = self.client.call(
+            _okay, _error = self.client.call(
                 "SourceControl.ConfigureMixFraction",
                 config,
                 verbose=True,
@@ -1245,16 +1252,17 @@ class MainWindow(QtWidgets.QMainWindow):
         disableHyperDialog = disable_hyperactive.DisableHyperDialog(self)
         disableHyperDialog.show()
         print("Running the procedure to disable hyperactive channels")
-    
+
     def loadSpecialChanList(self):
         """Load the lists of channels that are disabled and inverted (Abaco-only) from a file."""
-        filename, _filter = QFileDialog.getOpenFileName(self,
-            "Open Inverted/Disabled channel list", ".",                                        
+        filename, _filter = QFileDialog.getOpenFileName(
+            self,
+            "Open Inverted/Disabled channel list", ".",
             "Settings (*.yaml *.yml *.json)")
         if filename == "":
             print("No file requested")
             return
-        
+
         print("Reading inverted/disabled channel list from ", filename)
         try:
             with open(filename, "r") as fp:
@@ -1274,8 +1282,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def saveSpecialChanList(self):
         """Save the lists of channels that are disabled and inverted (Abaco-only) to a file."""
-        filename, _filter = QFileDialog.getSaveFileName(self,
-            "Save Inverted/Disabled channel list", ".",                                        
+        filename, _filter = QFileDialog.getSaveFileName(
+            self,
+            "Save Inverted/Disabled channel list", ".",
             "Settings (*.yaml *.yml *.json)")
         if filename == "":
             print("No file requested")
@@ -1291,7 +1300,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 json.dump(obj, fp)
             else:
                 yaml.dump(obj, fp)
-
 
 
 class HostPortDialog(QtWidgets.QDialog):
@@ -1317,10 +1325,16 @@ class HostPortDialog(QtWidgets.QDialog):
             return (None, None)
 
         host = self.hostName.text()
+        host = squeeze_whitespace(host)
         port = self.basePortSpin.value()
         self.settings.setValue("host", host)
         self.settings.setValue("port", int(port))
         return (host, port)
+
+
+def squeeze_whitespace(s):
+    "Return a copy of s, but with all whitespace squeezed out."
+    return "".join(s.split())
 
 
 def main():
@@ -1352,6 +1366,7 @@ def main():
                 "Could not start dcom (Dastard Commander) without a valid host:port selection."
             )
             return
+
         try:
             client = rpc_client.JSONClient((host, port))
         except socket.error:
