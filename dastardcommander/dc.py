@@ -833,7 +833,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self._setGuiRunning(True)
 
     def _stop(self):
-        okay, error = self.client.call("SourceControl.Stop", "")
+        okay, _error = self.client.call("SourceControl.Stop", "")
         if not okay:
             print("Could not Stop data")
             return False
@@ -891,11 +891,11 @@ class MainWindow(QtWidgets.QMainWindow):
             "Max": self.triangleMaximum.value(),
             "Min": self.triangleMinimum.value(),
         }
-        okay, error = self.client.call("SourceControl.ConfigureTriangleSource", config)
+        okay, _error = self.client.call("SourceControl.ConfigureTriangleSource", config)
         if not okay:
             print("Could not ConfigureTriangleSource")
             return False
-        okay, error = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
+        okay, _error = self.client.call("SourceControl.Start", "TRIANGLESOURCE")
         if not okay:
             print("Could not Start Triangle ")
             return False
@@ -912,11 +912,11 @@ class MainWindow(QtWidgets.QMainWindow):
             "Pedestal": self.simPulseBaseline.value(),
             "Nsamp": self.simPulseSamplesPerPulse.value(),
         }
-        okay, error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
+        okay, _error = self.client.call("SourceControl.ConfigureSimPulseSource", config)
         if not okay:
             print("Could not ConfigureSimPulseSource")
             return False
-        okay, error = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
+        okay, _error = self.client.call("SourceControl.Start", "SIMPULSESOURCE")
         if not okay:
             print("Could not Start SimPulse")
             return False
@@ -964,12 +964,12 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         print("START LANCERO CONFIG")
         print(config)
-        okay, error = self.client.call(
+        okay, _error = self.client.call(
             "SourceControl.ConfigureLanceroSource", config, errorBox=True
         )
         if not okay:
             return False
-        okay, error = self.client.call(
+        okay, _error = self.client.call(
             "SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False
         )
         if not okay:
@@ -994,11 +994,11 @@ class MainWindow(QtWidgets.QMainWindow):
             rate = ratewidget.value()
             config["HostPort"].append(hostport)
             config["Rates"].append(rate)
-        okay, error = self.client.call("SourceControl.ConfigureRoachSource", config)
+        okay, _error = self.client.call("SourceControl.ConfigureRoachSource", config)
         if not okay:
             print("Could not ConfigureRoachSource")
             return False
-        okay, error = self.client.call("SourceControl.Start", "ROACHSOURCE")
+        okay, _error = self.client.call("SourceControl.Start", "ROACHSOURCE")
         if not okay:
             print("Could not Start ROACH")
             return False
@@ -1054,11 +1054,11 @@ class MainWindow(QtWidgets.QMainWindow):
             hostport = "%s:%d" % (host, portwidget.value())
             config["HostPortUDP"].append(hostport)
 
-        okay, error = self.client.call("SourceControl.ConfigureAbacoSource", config)
+        okay, _error = self.client.call("SourceControl.ConfigureAbacoSource", config)
         if not okay:
             print("Could not ConfigureAbacoSource")
             return False
-        okay, error = self.client.call("SourceControl.Start", "ABACOSOURCE")
+        okay, _error = self.client.call("SourceControl.Start", "ABACOSOURCE")
         if not okay:
             print("Could not Start Abaco")
             return False
@@ -1111,7 +1111,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 "ChannelIndices": np.arange(1, mixFractions.size * 2, 2).tolist(),
                 "MixFractions": mixFractions.flatten().tolist(),
             }
-            okay, error = self.client.call(
+            _okay, _error = self.client.call(
                 "SourceControl.ConfigureMixFraction",
                 config,
                 verbose=True,
@@ -1255,9 +1255,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def loadSpecialChanList(self):
         """Load the lists of channels that are disabled and inverted (Abaco-only) from a file."""
-        filename, _filter = QFileDialog.getOpenFileName(self,
-                                                        "Open Inverted/Disabled channel list", ".",
-                                                        "Settings (*.yaml *.yml *.json)")
+        filename, _filter = QFileDialog.getOpenFileName(
+            self,
+            "Open Inverted/Disabled channel list", ".",
+            "Settings (*.yaml *.yml *.json)")
         if filename == "":
             print("No file requested")
             return
