@@ -263,7 +263,7 @@ class Observe(QtWidgets.QWidget):
 
     def handleTESMapFile(self, filename):
         self.mapfile = filename
-        head, tail = os.path.split(filename)
+        _head, tail = os.path.split(filename)
         self.mapFileLabel.setText("Map File: %s" % tail)
 
     def handleTESMap(self, msg):

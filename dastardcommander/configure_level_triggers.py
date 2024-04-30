@@ -5,7 +5,8 @@ import struct
 import PyQt5
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from dastardcommander import status_monitor
+from . import status_monitor
+
 
 class LevelTrigConfig(QtWidgets.QDialog):
     """
@@ -15,7 +16,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
     baseline the trigger should be set.
 
     Then after user pushes "Start", auto triggers are turned on, the baseline levels for each
-    channel are estimated, and then auto triggers are turned off and the level triggers are 
+    channel are estimated, and then auto triggers are turned off and the level triggers are
     turned on.
     """
 
@@ -41,14 +42,13 @@ class LevelTrigConfig(QtWidgets.QDialog):
     def startConfiguration(self):
         """The Start button causes this to run.
 
-        It starts auto triggering (50 ms delay) and launches a thread to monitor the data records 
+        It starts auto triggering (50 ms delay) and launches a thread to monitor the data records
         being generated."""
         self.positivePulseButton.setDisabled(True)
         self.negativePulseButton.setDisabled(True)
         self.levelSpinBox.setDisabled(True)
         self.startButton.setDisabled(True)
 
-        positive = self.positivePulseButton.isChecked()
         threshold = self.levelSpinBox.value()
         self.recordsPerChan = 40
 
@@ -60,7 +60,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
             print("Will suppress printing of TRIGGER status until level triggers are configured.")
 
         self.cursor.insertText("1) Stopping all triggers.\n")
-        prev_trig_state = self.dcom.triggerTab.trigger_state.copy()
+        # prev_trig_state = self.dcom.triggerTab.trigger_state.copy()
         if not self.turnOffAllTriggers():
             self.cursor.insertText("X  Failed: no channels known.\n")
             return
@@ -78,7 +78,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
     def launchRecordMonitor(self, channels_to_configure):
         positive = self.positivePulseButton.isChecked()
         self.channels_seen = {
-            id:BaselineFinder(positive, self.recordsPerChan) for id in channels_to_configure
+            id: BaselineFinder(positive, self.recordsPerChan) for id in channels_to_configure
         }
         self.nchanIncomplete = len(channels_to_configure)
         self.progressBar.setMaximum(self.recordsPerChan*self.nchanIncomplete)
@@ -93,7 +93,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
     @pyqtSlot()
     def finishConfiguration(self):
         """This slot is called when enough data has been collected to estimate all baselines.
-        
+
         It computes the per-channel baseline level and then sets each channel's level appropriately.
         """
 
@@ -105,7 +105,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
         threshold = self.levelSpinBox.value()
         if not positive:
             threshold = -threshold
-        for idx,blf in self.channels_seen.items():
+        for idx, blf in self.channels_seen.items():
             level = int(0.5 + blf.baseline() + threshold)
             ts = {
                 "ChannelIndices": [idx],
@@ -114,12 +114,12 @@ class LevelTrigConfig(QtWidgets.QDialog):
                 "LevelTrigger": True,
                 "LevelRising": positive,
                 "LevelLevel": level,
-                }
+            }
             self.dcom.client.call("SourceControl.ConfigureTriggers", ts)
             time.sleep(0.01)
 
         if not self.save_quiet:
-            delay = 5000 # ms
+            delay = 5000  # ms
             QtCore.QTimer.singleShot(delay, self.endSilentTRIGGER)
         self.cursor.insertText("Done! You may close this window.\n")
 
@@ -151,7 +151,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
     def startAutoTriggers(self, channels_to_configure):
         """
-        Start 50 ms autotriggers for the specified channels (these are channel indices). 
+        Start 50 ms autotriggers for the specified channels (these are channel indices).
         All other triggers are turned off.
         """
         if len(channels_to_configure) == 0:
@@ -168,7 +168,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
     def updateReceived(self, header, data_message):
         """
         Slot to handle one data record for one channel.
-        
+
         It ingests the data and feeds it to the BaselineFinder object for the channel.
         """
         try:
@@ -180,7 +180,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
             typecode = values[2]
             data_fmt = self.data_fmt[typecode]
-            nsamp = values[4]
+            # nsamp = values[4]
             data = np.frombuffer(data_message, dtype=data_fmt)
             blf.newValues(data)
             self.progressBar.setValue(self.progressBar.value()+1)
@@ -229,7 +229,7 @@ class BaselineFinder():
         median = np.median(data)
 
         if median > 65535 or median < 0:
-            median = median%65536
+            median = median % 65536
         assert median >= 0
 
         self.medians.append(median)

@@ -17,6 +17,7 @@ import sys
 import PyQt5.uic
 from PyQt5 import QtGui, QtWidgets
 
+
 class DemoDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
@@ -33,14 +34,13 @@ class DemoDialog(QtWidgets.QDialog):
 
                 self.scrollAreaWidgetContents_2.layout().addWidget(button, row, col)
 
+
 def main():
     app = QtWidgets.QApplication(sys.argv)
     dd = DemoDialog()
     dd.show()
-    retval = app.exec_()
-    # print("Return: ", retval)
+    app.exec_()
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
