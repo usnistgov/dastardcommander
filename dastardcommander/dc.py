@@ -1336,7 +1336,15 @@ def squeeze_whitespace(s):
 
 
 def main():
-    print(f"This is Dastard Commander version {__version__}")
+    msg = f"This is Dastard Commander version {__version__}"
+    try:
+        gitdesc = subprocess.check_output(["git", "describe", "--always"],
+                                          cwd=os.path.dirname(os.path.abspath(__file__))).strip().decode()
+        msg += f" (git tag-commits-hash: {gitdesc})."
+    except subprocess.CalledProcessError:
+        msg += " (git info not found)."
+    print(msg)
+
     if sys.version_info.major <= 2:
         print(
             "WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***"
