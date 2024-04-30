@@ -117,9 +117,9 @@ def getFileNameWithDialog(qtparent, startdir):
 
 
 def sendProjectors(qtparent, fileName, channel_names, client):
-    print("sendProjectors: opening: {}".format(fileName))
+    print(f"sendProjectors: opening: {fileName}")
     configs = getConfigs(fileName, channel_names)
-    print("sendProjectors: Sending model for {} chans".format(len(configs)))
+    print(f"sendProjectors: Sending model for {len(configs)} chans")
     success_chans = []
     failures = OrderedDict()
     # n_expected = np.sum([s.startswith("chan") for s in channel_names])
@@ -134,8 +134,8 @@ def sendProjectors(qtparent, fileName, channel_names, client):
             failures[channelIndex] = error
 
     success = len(failures) == 0
-    result = "success on channelIndices (not channelName): {}\n".format(
-        sorted(success_chans)) + "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+    result = f"success on channelIndices (not channelName): {sorted(success_chans)}\n" + \
+        "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
     if not success:
         resultBox = QtWidgets.QMessageBox(qtparent)
         resultBox.setText(result)

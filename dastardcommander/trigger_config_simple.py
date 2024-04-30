@@ -215,10 +215,10 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         blocked_indices = [self.channel_indices[n] for n in blocked_numbers]
         enabled_indices = list(sigset - set(blocked_indices))
         if len(enabled_indices) < len(sigset):
-            print("{}/{} channels enabled and {} disabled: {}".format(
-                len(enabled_indices), len(sigset), len(sigset) - len(enabled_indices), blocked_indices))
+            print(f"{len(enabled_indices)}/{len(sigset)} channels enabled and "
+                  f"{len(sigset) - len(enabled_indices)} disabled: {blocked_indices}")
         else:
-            print("All {} channels are enabled; .".format(len(enabled_indices)))
+            print(f"All {len(enabled_indices)} channels are enabled.")
             print("The disabled list is: ", blocked_indices)
         enabled_indices.sort()
         return enabled_indices

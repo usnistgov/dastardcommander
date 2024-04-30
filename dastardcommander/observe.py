@@ -140,7 +140,7 @@ class Observe(QtWidgets.QWidget):
                 # so we check here
                 print("rebuding CRMMap due to len(buttons)==0")
                 self.buildCRMMap()
-                print("now have len(buttons)={}".format(len(self.crm_map.buttons)))
+                print(f"now have len(buttons)={len(self.crm_map.buttons)}")
             self.crm_map.setCountRates(countRates, colorScale)
         integrationComplete = len(self.countsSeens) == integrationTime
         arrayCps = 0
@@ -167,10 +167,10 @@ class Observe(QtWidgets.QWidget):
         return self.doubleSpinBox_colorScale.value()
 
     def setArrayCps(self, arrayCps, integrationComplete, auxCps):
-        s = "{:.2f} cps/array".format(arrayCps)
+        s = f"{arrayCps:.2f} cps/array"
         self.label_arrayCps.setText(s)
         self.label_arrayCps.setEnabled(integrationComplete)
-        sAux = "{:.2f} aux cps".format(auxCps)
+        sAux = f"{auxCps:.2f} aux cps"
         self.label_auxCps.setText(sAux)
 
     def buildCRM(self):
@@ -280,7 +280,7 @@ class Observe(QtWidgets.QWidget):
     def handleExternalTriggerMessage(self, msg):
         n = msg["NumberObservedInLastSecond"]
         self.label_externalTriggersInLastSecond.setText(
-            "{} external triggers in last second".format(n)
+            f"{n} external triggers in last second"
         )
 
     def handleWritingMessage(self, msg):
@@ -457,7 +457,7 @@ class CountRateMap(QtWidgets.QScrollArea):
                 self.buttons.append(None)
                 continue
 
-            tooltip = "{}, ({} of grp {})".format(name, chnum, groupnum)
+            tooltip = f"{name}, ({chnum} of grp {groupnum})"
             self.addButton(horizdisp, vertdisp, size, size, name, tooltip)
             if horizdisp > max_h:
                 max_h = horizdisp
@@ -480,18 +480,18 @@ class CountRateMap(QtWidgets.QScrollArea):
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
-        self.owner.maxRateLabel.setText("Max rate: {:.2f}/sec".format(colorScale))
+        self.owner.maxRateLabel.setText(f"Max rate: {colorScale:.2f}/sec")
         assert len(countRates) == len(self.buttons)
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
             if button is None:
                 continue
             if cr < 10:
-                buttonText = "{:.2f}".format(cr)
+                buttonText = f"{cr:.2f}"
             elif cr < 100:
-                buttonText = "{:.1f}".format(cr)
+                buttonText = f"{cr:.1f}"
             else:
-                buttonText = "{:.0f}".format(cr)
+                buttonText = f"{cr:.0f}"
             button.setText(buttonText)
 
             if button.triggers_blocked:
@@ -501,6 +501,6 @@ class CountRateMap(QtWidgets.QScrollArea):
             else:
                 textcolor = self.enabledForeground
                 bgcolor = self.cmap(cr / colorScale, bytes=True)
-            colorString = "rgb({},{},{})".format(bgcolor[0], bgcolor[1], bgcolor[2])
+            colorString = f"rgb({bgcolor[0]},{bgcolor[1]},{bgcolor[2]})"
             colorString = f"QPushButton {{color: {textcolor}; background-color: {colorString};}}"
             button.setStyleSheet(colorString)

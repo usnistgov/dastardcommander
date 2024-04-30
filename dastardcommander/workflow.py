@@ -134,7 +134,7 @@ class Workflow(QtWidgets.QWidget):
             # remember filenames
             self.noiseFilename = self.dc.writingTab.fileNameExampleEdit.text()
             self.label_noiseFile.setText(f"noise data: {self.noiseFilename}")
-            progressBar.setLabelText("noise, {} records".format(self.numberWritten))
+            progressBar.setLabelText(f"noise, {self.numberWritten} records")
             progressBar.setValue(i)
             QtWidgets.QApplication.processEvents()  # process gui events
             if progressBar.wasCanceled():
@@ -177,7 +177,7 @@ class Workflow(QtWidgets.QWidget):
             self.pulseFilename = self.dc.writingTab.fileNameExampleEdit.text()
             self.label_pulseFile.setText(f"pulse data: {self.pulseFilename}")
             progressBar.setLabelText(
-                "pulses, {}/{} records".format(self.numberWritten, RECORDS_TOTAL))
+                f"pulses, {self.numberWritten}/{RECORDS_TOTAL} records")
             progressBar.setValue(self.numberWritten)
             QtWidgets.QApplication.processEvents()  # process gui events
             if progressBar.wasCanceled():
@@ -193,7 +193,7 @@ class Workflow(QtWidgets.QWidget):
 
     def openPdf(self, path):
         if not path.endswith(".pdf"):
-            raise Exception("path should end with .pdf, got {}".format(path))
+            raise Exception(f"path should end with .pdf, got {path}")
         print(sys.platform)
         print(self.noisePlotFilename)
         if sys.platform.startswith('darwin'):
@@ -201,7 +201,7 @@ class Workflow(QtWidgets.QWidget):
         elif sys.platform.startswith('linux'):
             cmd = ["evince", path]
         else:
-            raise Exception("pdf view not implement for platform = {}".format(sys.platform))
+            raise Exception(f"pdf view not implement for platform = {sys.platform}")
         print(repr(cmd) + "\n")
         subprocess.Popen(cmd)
 
@@ -211,22 +211,22 @@ class Workflow(QtWidgets.QWidget):
         plotName = self.pulseFilename[:-9] + "model_plots.pdf"
         g = glob.glob(self.pulseFilename)
         if len(g) == 0:
-            raise Exception("could not find any files matching {}".format(self.pulseFilename))
+            raise Exception(f"could not find any files matching {self.pulseFilename}")
         pulseFile = g[0]
         gn = glob.glob(self.noiseFilename)
         if len(g) == 0:
-            raise Exception("could not find any files matching {}".format(self.noiseFilename))
+            raise Exception(f"could not find any files matching {self.noiseFilename}")
         noiseFile = gn[0]
         print(outName, pulseFile, noiseFile)
         if os.path.isfile(outName):
-            print("{} exists, skipping make_projectors".format(outName))
+            print(f"{outName} exists, skipping make_projectors")
         else:
             try:
                 self.pcaller.createBasis(pulseFile, noiseFile,
                                          self.checkBox_invertPulses.isChecked())
             except OSError as e:
                 dialog = QtWidgets.QMessageBox()
-                dialog.setText("Create Projectors failed: {}".format(e))
+                dialog.setText(f"Create Projectors failed: {e}")
                 dialog.exec_()
                 return
 
@@ -247,7 +247,7 @@ class Workflow(QtWidgets.QWidget):
             return
         if not os.path.isfile(self.projectorsFilename):
             em = QtWidgets.QErrorMessage(self)
-            em.showMessage("{} does not exist".format(self.projectorsFilename))
+            em.showMessage(f"{self.projectorsFilename} does not exist")
             return
         self.dc.triggerTabSimple.lineEdit_projectors.setText(self.projectorsFilename)
         success = self.dc.triggerTabSimple.handleSendProjectors()

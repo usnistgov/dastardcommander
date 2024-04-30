@@ -34,4 +34,4 @@ while True:
         topic, messagedata = message
         print(topic, messagedata)
     else:
-        print("WARNING: message of length {} is {}".format(len(message), message))
+        print(f"WARNING: message of length {len(message)} is {message}")

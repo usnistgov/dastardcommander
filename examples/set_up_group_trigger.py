@@ -42,7 +42,7 @@ def main():
             request = "SourceControl.DeleteGroupTriggerCoupling"
             action = "deleted"
         client.call(request, state)
-        print("Successfully {} group trigger couplings {}".format(action, Connections))
+        print(f"Successfully {action} group trigger couplings {Connections}")
 
     finally:
         client.close()

@@ -235,7 +235,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             d = json.loads(message)
         except Exception as e:
             print(
-                "Error processing status message [topic,msg]: '{}', '{}'".format(topic, message)
+                f"Error processing status message [topic,msg]: '{topic}', '{message}'"
             )
             print(f"Error is: {e}")
             return
@@ -394,7 +394,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
                     mix = d[1]
                     self.doubleSpinBox_MixFraction.setValue(mix)
                 except Exception as e:
-                    print("Could not set mix; selecting 0 (exception: {})".format(e))
+                    print(f"Could not set mix; selecting 0 (exception: {e})")
                     self.doubleSpinBox_MixFraction.setValue(0.0)
 
             elif topic == "EXTERNALTRIGGER":
@@ -436,13 +436,13 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             if sp < 1000:
                 period = f"{sp} ns"
             elif sp < 10000:
-                period = "{:.3f} µs".format(sp / 1000)
+                period = f"{sp / 1000:.3f} µs"
             elif sp < 100000:
-                period = "{:.2f} µs".format(sp / 1000)
+                period = f"{sp / 1000:.2f} µs"
             elif sp < 1000000:
-                period = "{:.1f} µs".format(sp / 1000)
+                period = f"{sp / 1000:.1f} µs"
             else:
-                period = "{:.3f} ms".format(sp / 1e6)
+                period = f"{sp / 1e6:.3f} ms"
 
             ngroups = len(group_info)
             nc_group0 = group_info[0]["Nchan"]
@@ -655,7 +655,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         sources_to_insert = []
         if len(sources) > 4:
             print(
-                "UDP sources '{}' is too long. Truncating to 4 sources".format(sources)
+                f"UDP sources '{sources}' is too long. Truncating to 4 sources"
             )
             sources = sources[:4]
 
@@ -663,7 +663,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         for text in sources:
             parts = text.split(":")
             if len(parts) != 2:
-                print("Could not parse '{}' as host:port".format(text))
+                print(f"Could not parse '{text}' as host:port")
                 return
             host, port = parts[0], int(parts[1])
             found = False
@@ -806,7 +806,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
     def closeReconnect(self, disconnectReason):
         """Close the main window, but don't quit. Instead, ask for a new Dastard connection.
         Display the disconnection reason."""
-        print("disconnecting because: {}".format(disconnectReason))
+        print(f"disconnecting because: {disconnectReason}")
         self.disconnectReason = disconnectReason
         self.reconnect = True
         self.close()
@@ -880,7 +880,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             return result
         else:
             raise ValueError(
-                "invalid sourceID. have {}, want 0,1,2,3 or 4".format(sourceID)
+                f"invalid sourceID. have {sourceID}, want 0,1,2,3 or 4"
             )
 
     def _startTriangle(self):
@@ -1102,10 +1102,10 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         )
         if fileName:
             self.lastdir_mix = os.path.dirname(fileName)
-            print("opening: {}".format(fileName))
+            print(f"opening: {fileName}")
             mixFractions = np.load(fileName)
             mixFractions[np.isnan(mixFractions)] = 0
-            print("mixFractions.shape = {}".format(mixFractions.shape))
+            print(f"mixFractions.shape = {mixFractions.shape}")
             config = {
                 "ChannelIndices": np.arange(1, mixFractions.size * 2, 2).tolist(),
                 "MixFractions": mixFractions.flatten().tolist(),
@@ -1160,7 +1160,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             print("experimental mix config")
             print(config)
         except Exception as e:
-            print("Could not set mix: {}".format(e))
+            print(f"Could not set mix: {e}")
 
     @pyqtSlot()
     def sendExperimentStateLabel(self):
@@ -1315,7 +1315,7 @@ class HostPortDialog(QtWidgets.QDialog):
         if disconnectReason and disconnectReason != "disconnect button":
             # give a clear message about why disconnections happen
             dialog = QtWidgets.QMessageBox()
-            dialog.setText("disconnected because: {}".format(disconnectReason))
+            dialog.setText(f"disconnected because: {disconnectReason}")
             dialog.exec_()
 
     def run(self):

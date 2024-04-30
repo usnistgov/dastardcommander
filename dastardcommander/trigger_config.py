@@ -317,7 +317,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
                 pass
         if len(rx_channums) == 0:
             me = "TriggerConfig.changeGroupTrigger"
-            print("{}: Could not parse channel list '{}'".format(me, rx))
+            print(f"{me}: Could not parse channel list '{rx}'")
             return
         sourcenum = self.groupTriggerSource.value()
         state = {"Connections": {sourcenum: rx_channums}}
@@ -349,7 +349,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
         if ndisabled == 0:
             msg = "All channels are enabled"
         elif ndisabled == 1:
-            msg = "One channel is disabled: {}".format(self.triggerBlocker.special[0])
+            msg = f"One channel is disabled: {self.triggerBlocker.special[0]}"
         else:
             msg = "{} channels are disabled: {}".format(
                 ndisabled, ",".join(map(str, self.triggerBlocker.special))
@@ -397,7 +397,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
                     cnum_list = cnum_list[:35]
                     cnum_list[-1] = "..."
                 cnum_text = "[{:}]".format(",".join(cnum_list))
-            text = "Active group trigger {}: {}".format(name, cnum_text)
+            text = f"Active group trigger {name}: {cnum_text}"
             gui_label.setText(text)
 
     @pyqtSlot()
@@ -421,7 +421,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
         elif msg == 3:
             errfb = True
         elif msg != 1:
-            print("message: TRIGCOUPLING {}, but expect 1, 2 or 3".format(msg))
+            print(f"message: TRIGCOUPLING {msg}, but expect 1, 2 or 3")
         self.coupleFBToErrCheckBox.setChecked(fberr)
         self.coupleErrToFBCheckBox.setChecked(errfb)
 

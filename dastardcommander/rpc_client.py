@@ -33,7 +33,7 @@ class JSONClient:
             # to close a window while editing a QLineEdit (see issue #22).
             # If you skip this test, you get a segfault; this will be graceful.
         if verbose:
-            print("SEND {} {}".format(name, json.dumps(params)))
+            print(f"SEND {name} {json.dumps(params)}")
         request = self._message(name, params)
         reqid = request.get('id')
         msg = self._codec.dumps(request)
