@@ -13,7 +13,6 @@ May 2018 -
 
 # Non-Qt imports
 import json
-import socket
 import subprocess
 import sys
 import os
@@ -42,7 +41,7 @@ from . import projectors
 from . import observe
 from . import workflow
 
-__version__ = "0.2.8"
+__version__ = "0.2.9"
 
 
 def csv2int_array(text, normalize=False):
@@ -82,7 +81,7 @@ QCoreApplication.setOrganizationDomain("nist.gov")
 QCoreApplication.setApplicationName("DastardCommander")
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
     def __init__(self, rpc_client, host, port, settings, parent=None):
         self.client = rpc_client
         self.client.setQtParent(self)
@@ -94,7 +93,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon("dc.png"))
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
         self.setWindowTitle(
-            "Dastard Commander %s    (connected to %s:%d)" % (__version__, host, port)
+            f"Dastard Commander {__version__}    (connected to {host}:{port})"
         )
         self.reconnect = False
         self.disconnectReason = ""
@@ -200,9 +199,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.phaseNegPulses.clicked.connect(self.updateBiasText)
         self.unwrapBiasCheck.clicked.connect(self.updateBiasText)
 
-        self.quietTopics = set(
-            ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
-        )  # TODO: add "ALIVE"?
+        self.quietTopics = {"TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP", "ALIVE"}
 
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
@@ -235,15 +232,14 @@ class MainWindow(QtWidgets.QMainWindow):
             d = json.loads(message)
         except Exception as e:
             print(
-                "Error processing status message [topic,msg]: '%s', '%s'"
-                % (topic, message)
+                f"Error processing status message [topic,msg]: '{topic}', '{message}'"
             )
-            print("Error is: %s" % e)
+            print(f"Error is: {e}")
             return
 
         _suppress_after_number = 20
         if topic not in self.quietTopics or self.nmsg <= _suppress_after_number:
-            print("%s %5d: %s" % (topic, self.nmsg, d))
+            print(f"{topic} {self.nmsg:5d}: {d}")
         if self.nmsg == _suppress_after_number + 1:
             note = f"After message #{_suppress_after_number}, suppressing {self.quietTopics} messages."
             print(note)
@@ -252,7 +248,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.heartbeat(d)
 
         elif topic == "CURRENTTIME":
-            print("CurrentTime message: '%s'" % message)
+            print(f"CurrentTime message: '{message}'")
 
         elif topic == "TRIGGERRATE":
             self.observeTab.handleTriggerRateMessage(d)
@@ -395,7 +391,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     mix = d[1]
                     self.doubleSpinBox_MixFraction.setValue(mix)
                 except Exception as e:
-                    print("Could not set mix; selecting 0 (exception: {})".format(e))
+                    print(f"Could not set mix; selecting 0 (exception: {e})")
                     self.doubleSpinBox_MixFraction.setValue(0.0)
 
             elif topic == "EXTERNALTRIGGER":
@@ -407,7 +403,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.observeWindow.ExperimentStateIncrementer.updateLabel(d)
 
             else:
-                print("%s is not a topic we handle yet." % topic)
+                print(f"{topic} is not a topic we handle yet.")
 
         self.nmsg += 1
         self.last_messages[topic] = message
@@ -437,13 +433,13 @@ class MainWindow(QtWidgets.QMainWindow):
             if sp < 1000:
                 period = f"{sp} ns"
             elif sp < 10000:
-                period = "{:.3f} µs".format(sp / 1000)
+                period = f"{sp / 1000:.3f} µs"
             elif sp < 100000:
-                period = "{:.2f} µs".format(sp / 1000)
+                period = f"{sp / 1000:.2f} µs"
             elif sp < 1000000:
-                period = "{:.1f} µs".format(sp / 1000)
+                period = f"{sp / 1000:.1f} µs"
             else:
-                period = "{:.3f} ms".format(sp / 1e6)
+                period = f"{sp / 1e6:.3f} ms"
 
             ngroups = len(group_info)
             nc_group0 = group_info[0]["Nchan"]
@@ -463,11 +459,13 @@ class MainWindow(QtWidgets.QMainWindow):
         mb = hb["DataMB"]
         hwmb = hb["HWactualMB"]
         t = float(hb["Time"])
+        isrunning = "running" if hb["Running"] else "not running"
+        print(f"Server heartbeat: data are {isrunning}. Received {hwmb:10.6f} MB, processed {mb:10.6f} MB in {t:.6f} s.")
 
         def color(c, bg=None):
-            ss = "QLabel { color : %s; }" % c
+            ss = f"QLabel {{ color : {c}; }}"
             if bg is not None:
-                ss = "QLabel { color : %s; background-color : %s }" % (c, bg)
+                ss = f"QLabel {{ color : {c}; background-color : {bg} }}"
             self.statusFreshLabel.setStyleSheet(ss)
 
         if mb <= 0:
@@ -479,17 +477,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.statusFreshLabel.setText("")
 
         elif t <= 0:
-            self.statusFreshLabel.setText("%7.3f MB in 0 s??" % mb)
+            self.statusFreshLabel.setText(f"{mb:7.3f} MB in 0 s??")
             color("red")
         else:
             rate = mb / t
             if hwmb == mb:
-                self.statusFreshLabel.setText("%7.3f MB/s" % rate)
+                self.statusFreshLabel.setText(f"{rate:7.3f} MB/s")
                 color("green")
             else:
                 hwrate = hwmb / t
                 self.statusFreshLabel.setText(
-                    "%7.3f MB/s received (%7.3f processed)" % (hwrate, rate)
+                    f"{hwrate:7.3f} MB/s received ({rate:7.3f} processed)"
                 )
                 color("orange")
 
@@ -511,7 +509,7 @@ class MainWindow(QtWidgets.QMainWindow):
             args = ["microscope"]
             if not self.sourceIsTDM:
                 args.append("--no-error-channel")
-            args.append("tcp://%s:%d" % (self.host, self.port + 2))
+            args.append(f"tcp://{self.host}:{self.port + 2}")
             sps = subprocess.Popen(args)
             self.microscopes.append(sps)
         except OSError as e:
@@ -548,7 +546,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     ipgui.setText(parts[0])
                     portgui.setValue(int(parts[1]))
                 else:
-                    print("Could not parse hostport='%s'" % hostport)
+                    print(f"Could not parse hostport='{hostport}'")
 
     @pyqtSlot()
     def toggledRoachDeviceActive(self):
@@ -590,7 +588,7 @@ class MainWindow(QtWidgets.QMainWindow):
         wide.setHorizontalStretch(10)
 
         for i, c in enumerate(cards):
-            cb = QtWidgets.QCheckBox("lancero %d" % c)
+            cb = QtWidgets.QCheckBox(f"lancero {c}")
             cb.setChecked(True)
             cb.setSizePolicy(wide)
             self.lanceroCheckBoxes[c] = cb
@@ -600,7 +598,7 @@ class MainWindow(QtWidgets.QMainWindow):
             sb.setMaximum(40)
             sb.setValue(1)
             sb.setSizePolicy(narrow)
-            sb.setToolTip("Card delay for card %d" % c)
+            sb.setToolTip(f"Card delay for card {c}")
             self.lanceroDelays[c] = sb
             layout.addWidget(sb, i + 1, 1)
 
@@ -632,11 +630,11 @@ class MainWindow(QtWidgets.QMainWindow):
         wide.setHorizontalStretch(10)
 
         for i, c in enumerate(cards):
-            checkText = "abaco %d" % c
+            checkText = f"abaco {c}"
             if c == TEST_CARD_NUMBER:
                 checkText += " (test data)"
             cb = QtWidgets.QCheckBox(checkText)
-            cb.setToolTip("Ring buffer shm:xdma%d_c2h_0_buffer exists" % c)
+            cb.setToolTip(f"Ring buffer shm:xdma{c}_c2h_0_buffer exists")
             cb.setChecked(True)
             cb.setSizePolicy(wide)
             self.abacoCheckBoxes[c] = cb
@@ -656,7 +654,7 @@ class MainWindow(QtWidgets.QMainWindow):
         sources_to_insert = []
         if len(sources) > 4:
             print(
-                "UDP sources '{}' is too long. Truncating to 4 sources".format(sources)
+                f"UDP sources '{sources}' is too long. Truncating to 4 sources"
             )
             sources = sources[:4]
 
@@ -664,30 +662,30 @@ class MainWindow(QtWidgets.QMainWindow):
         for text in sources:
             parts = text.split(":")
             if len(parts) != 2:
-                print("Could not parse '{}' as host:port".format(text))
+                print(f"Could not parse '{text}' as host:port")
                 return
             host, port = parts[0], int(parts[1])
             found = False
             for id in unperturbed_guis:
-                guihost = self.__dict__["udpHost%d" % id].text()
-                guiport = self.__dict__["udpPort%d" % id].value()
+                guihost = self.__dict__[f"udpHost{id}"].text()
+                guiport = self.__dict__[f"udpPort{id}"].value()
                 guihost = squeeze_whitespace(guihost)
                 if guiport != port:
                     continue
                 if guihost == host or (
                     guihost in localsynonyms and host in localsynonyms
                 ):
-                    self.__dict__["udpActive%d" % id].setChecked(True)
-                    self.__dict__["udpHost%d" % id].setText(guihost)
+                    self.__dict__[f"udpActive{id}"].setChecked(True)
+                    self.__dict__[f"udpHost{id}"].setText(guihost)
                     found = True
                     unperturbed_guis.remove(id)
                     break
             if not found:
                 sources_to_insert.append((host, port))
         for id, (host, port) in zip(unperturbed_guis, sources_to_insert):
-            self.__dict__["udpActive%d" % id].setChecked(True)
-            self.__dict__["udpHost%d" % id].setText(host)
-            self.__dict__["udpPort%d" % id].setValue(port)
+            self.__dict__[f"udpActive{id}"].setChecked(True)
+            self.__dict__[f"udpHost{id}"].setText(host)
+            self.__dict__[f"udpPort{id}"].setValue(port)
 
     def fillPhaseResetInfo(self, d):
         self.unwrapBiasCheck.setChecked(d["Bias"])
@@ -753,11 +751,11 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = self.lanceroFiberLayout
         self.fiberBoxes = {}
         for i in range(nfibers):
-            box = QtWidgets.QCheckBox("%d" % (i + nfibers))
+            box = QtWidgets.QCheckBox(f"{i + nfibers}")
             layout.addWidget(box, i, 1)
             self.fiberBoxes[i + nfibers] = box
 
-            box = QtWidgets.QCheckBox("%d" % i)
+            box = QtWidgets.QCheckBox(f"{i}")
             layout.addWidget(box, i, 0)
             self.fiberBoxes[i] = box
 
@@ -807,7 +805,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def closeReconnect(self, disconnectReason):
         """Close the main window, but don't quit. Instead, ask for a new Dastard connection.
         Display the disconnection reason."""
-        print("disconnecting because: {}".format(disconnectReason))
+        print(f"disconnecting because: {disconnectReason}")
         self.disconnectReason = disconnectReason
         self.reconnect = True
         self.close()
@@ -881,7 +879,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return result
         else:
             raise ValueError(
-                "invalid sourceID. have {}, want 0,1,2,3 or 4".format(sourceID)
+                f"invalid sourceID. have {sourceID}, want 0,1,2,3 or 4"
             )
 
     def _startTriangle(self):
@@ -928,7 +926,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for k, v in list(self.fiberBoxes.items()):
             if v.isChecked():
                 mask |= 1 << k
-        print("Fiber mask: 0x%4.4x" % mask)
+        print(f"Fiber mask: 0x{mask:4.4x}")
         clock = 125
         if self.lanceroClock50Button.isChecked():
             clock = 50
@@ -983,14 +981,14 @@ class MainWindow(QtWidgets.QMainWindow):
     def _startRoach(self):
         config = {"HostPort": [], "Rates": []}
         for id in (1, 2):
-            if not self.__dict__["roachDeviceCheckBox_%d" % id].isChecked():
+            if not self.__dict__[f"roachDeviceCheckBox_{id}"].isChecked():
                 continue
-            ipwidget = self.__dict__["roachIPLineEdit_%d" % id]
-            portwidget = self.__dict__["roachPortSpinBox_%d" % id]
-            ratewidget = self.__dict__["roachFrameRateDoubleSpinBox_%d" % id]
+            ipwidget = self.__dict__[f"roachIPLineEdit_{id}"]
+            portwidget = self.__dict__[f"roachPortSpinBox_{id}"]
+            ratewidget = self.__dict__[f"roachFrameRateDoubleSpinBox_{id}"]
             host = squeeze_whitespace(ipwidget.text())
             ipwidget.setText(host)
-            hostport = "%s:%d" % (host, portwidget.value())
+            hostport = f"{host}:{portwidget.value()}"
             rate = ratewidget.value()
             config["HostPort"].append(hostport)
             config["Rates"].append(rate)
@@ -1045,13 +1043,13 @@ class MainWindow(QtWidgets.QMainWindow):
         }
 
         for id in (1, 2, 3, 4):
-            if not self.__dict__["udpActive%d" % id].isChecked():
+            if not self.__dict__[f"udpActive{id}"].isChecked():
                 continue
-            ipwidget = self.__dict__["udpHost%d" % id]
-            portwidget = self.__dict__["udpPort%d" % id]
+            ipwidget = self.__dict__[f"udpHost{id}"]
+            portwidget = self.__dict__[f"udpPort{id}"]
             host = squeeze_whitespace(ipwidget.text())
             ipwidget.setText(host)
-            hostport = "%s:%d" % (host, portwidget.value())
+            hostport = f"{host}:{portwidget.value()}"
             config["HostPortUDP"].append(hostport)
 
         okay, _error = self.client.call("SourceControl.ConfigureAbacoSource", config)
@@ -1065,7 +1063,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Starting Abaco")
         return True
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def updateBiasText(self):
         if self.unwrapBiasCheck.isChecked():
             if self.phasePosPulses.isChecked():
@@ -1076,7 +1074,7 @@ class MainWindow(QtWidgets.QMainWindow):
             label = "No bias: [-.50, +.50]"
         self.biasTextLabel.setText(label)
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def loadProjectorsBasis(self):
         if not hasattr(self, "lastdir"):
             startdir = os.path.expanduser("~")
@@ -1087,7 +1085,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.lastdir = os.path.dirname(fileName)
             projectors.sendProjectors(self, fileName, self.channel_names, self.client)
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def loadMix(self):
         options = QFileDialog.Options()
         if not hasattr(self, "lastdir_mix"):
@@ -1103,10 +1101,10 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         if fileName:
             self.lastdir_mix = os.path.dirname(fileName)
-            print("opening: {}".format(fileName))
+            print(f"opening: {fileName}")
             mixFractions = np.load(fileName)
             mixFractions[np.isnan(mixFractions)] = 0
-            print("mixFractions.shape = {}".format(mixFractions.shape))
+            print(f"mixFractions.shape = {mixFractions.shape}")
             config = {
                 "ChannelIndices": np.arange(1, mixFractions.size * 2, 2).tolist(),
                 "MixFractions": mixFractions.flatten().tolist(),
@@ -1161,7 +1159,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print("experimental mix config")
             print(config)
         except Exception as e:
-            print("Could not set mix: {}".format(e))
+            print(f"Could not set mix: {e}")
 
     @pyqtSlot()
     def sendExperimentStateLabel(self):
@@ -1202,7 +1200,7 @@ class MainWindow(QtWidgets.QMainWindow):
             message = f"reply={reply}"
             success = True
         except zmq.Again:
-            message = f"Socket timeout, timeout = {cringe.RCVTIMEO/1000} s"
+            message = f"Socket timeout, timeout = {cringe.RCVTIMEO / 1000} s"
             print(message)
             success = False
         if not success:
@@ -1259,13 +1257,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self,
             "Open Inverted/Disabled channel list", ".",
             "Settings (*.yaml *.yml *.json)")
-        if filename == "":
+        if not filename:
             print("No file requested")
             return
 
         print("Reading inverted/disabled channel list from ", filename)
         try:
-            with open(filename, "r") as fp:
+            with open(filename, "r", encoding="ascii") as fp:
                 if filename.endswith("json"):
                     obj = json.load(fp)
                 else:
@@ -1286,7 +1284,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self,
             "Save Inverted/Disabled channel list", ".",
             "Settings (*.yaml *.yml *.json)")
-        if filename == "":
+        if not filename:
             print("No file requested")
             return
 
@@ -1295,7 +1293,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "inverted": csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True),
             "disabled": self.triggerBlocker.special
         }
-        with open(filename, "w") as fp:
+        with open(filename, "w", encoding="ascii") as fp:
             if filename.endswith("json"):
                 json.dump(obj, fp)
             else:
@@ -1316,7 +1314,7 @@ class HostPortDialog(QtWidgets.QDialog):
         if disconnectReason and disconnectReason != "disconnect button":
             # give a clear message about why disconnections happen
             dialog = QtWidgets.QMessageBox()
-            dialog.setText("disconnected because: {}".format(disconnectReason))
+            dialog.setText(f"disconnected because: {disconnectReason}")
             dialog.exec_()
 
     def run(self):
@@ -1338,6 +1336,15 @@ def squeeze_whitespace(s):
 
 
 def main():
+    msg = f"This is Dastard Commander version {__version__}"
+    try:
+        gitdesc = subprocess.check_output(["git", "describe", "--always"],
+                                          cwd=os.path.dirname(os.path.abspath(__file__))).strip().decode()
+        msg += f" (git tag-commits-hash: {gitdesc})."
+    except subprocess.CalledProcessError:
+        msg += " (git info not found)."
+    print(msg)
+
     if sys.version_info.major <= 2:
         print(
             "WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***"
@@ -1361,7 +1368,7 @@ def main():
             return
 
         # One None is an invalid host:port pair
-        if host is None or port is None or host == "" or port == "":
+        if not host or not port:
             print(
                 "Could not start dcom (Dastard Commander) without a valid host:port selection."
             )
@@ -1369,10 +1376,10 @@ def main():
 
         try:
             client = rpc_client.JSONClient((host, port))
-        except socket.error:
-            print("Could not connect to Dastard at %s:%d" % (host, port))
+        except OSError:
+            print(f"Could not connect to Dastard at {host}:{port}")
             continue
-        print("Dastard is at %s:%d" % (host, port))
+        print(f"Dastard is at {host}:{port}")
 
         dc = MainWindow(client, host, port, settings)
         dc.show()

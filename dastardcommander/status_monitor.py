@@ -18,12 +18,12 @@ class ZMQListener(QtCore.QObject):
         self.socket = context.socket(zmq.SUB)
 
         self.host = host
-        self.baseport = port+1
-        self.address = "tcp://%s:%d" % (self.host, self.baseport)
+        self.baseport = port + 1
+        self.address = f"tcp://{self.host}:{self.baseport}"
         self.socket.connect(self.address)
-        print("Collecting updates from dastard at %s" % self.address)
+        print(f"Collecting updates from dastard at {self.address}")
 
-        self.socket.setsockopt_string(zmq.SUBSCRIBE, u"")
+        self.socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
         self.messages_seen = collections.Counter()
         self.quit_once = False
@@ -48,7 +48,7 @@ class ZMQListener(QtCore.QObject):
             contents = contents.decode()
 
             if topic == "CURRENTTIME":
-                print("Current time: '%s'" % contents)
+                print(f"Current time: '{contents}'")
             self.messages_seen[topic] += 1
             self.message.emit(topic, contents)
 

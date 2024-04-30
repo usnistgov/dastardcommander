@@ -163,7 +163,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.spinBox_nMonotone.setValue(int(s.value("n_monotone", 5)))
         # apparently QSettings sucks with bools, so use an int for the following
         v = int(s.value("disable_zero_threshold", 0))
-        assert v == 1 or v == 0
+        assert v in {0, 1}
         self.checkBox_disableZeroThreshold.setChecked(v == 1)
         self.comboBox_twoTriggers.setCurrentIndex(int(s.value("two_triggers", 0)))
         self.lineEdit_projectors.setText(s.value("projectors_file", ""))
@@ -202,7 +202,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
 
     def channelIndicesSignalOnly(self, exclude_blocked=True):
         """
-        Return a sorted list of the channel indices that correspond to signal channels (i.e., 
+        Return a sorted list of the channel indices that correspond to signal channels (i.e.,
         exclude the TDM error channels).
         If `exclude_blocked` is true, also exclude any listed in the self.triggerBlocker.special
         list of disabled channels.
@@ -215,10 +215,10 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         blocked_indices = [self.channel_indices[n] for n in blocked_numbers]
         enabled_indices = list(sigset - set(blocked_indices))
         if len(enabled_indices) < len(sigset):
-            print("{}/{} channels enabled and {} disabled: {}".format(len(enabled_indices), 
-                len(sigset), len(sigset)-len(enabled_indices), blocked_indices))
+            print(f"{len(enabled_indices)}/{len(sigset)} channels enabled and "
+                  f"{len(sigset) - len(enabled_indices)} disabled: {blocked_indices}")
         else:
-            print("All {} channels are enabled; .".format(len(enabled_indices)))
+            print(f"All {len(enabled_indices)} channels are enabled.")
             print("The disabled list is: ", blocked_indices)
         enabled_indices.sort()
         return enabled_indices

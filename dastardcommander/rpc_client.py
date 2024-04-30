@@ -5,7 +5,7 @@ import socket
 from PyQt5 import QtWidgets
 
 
-class JSONClient(object):
+class JSONClient:
 
     def __init__(self, addr, codec=json, qtParent=None):
         self._socket = socket.create_connection(addr)
@@ -26,14 +26,14 @@ class JSONClient(object):
 
     def call(self, name, params, verbose=True, errorBox=True, throwError=False):
         if self._closed:
-            print("%s(...) ignored because JSON-RPC client is closed." % name)
+            print(f"{name}(...) ignored because JSON-RPC client is closed.")
             return None
             # This might seem like it should be impossible to reach, but it is possible
             # because signals like editingFinished can trigger slots when you try
             # to close a window while editing a QLineEdit (see issue #22).
             # If you skip this test, you get a segfault; this will be graceful.
         if verbose:
-            print("SEND {} {}".format(name, json.dumps(params)))
+            print(f"SEND {name} {json.dumps(params)}")
         request = self._message(name, params)
         reqid = request.get('id')
         msg = self._codec.dumps(request)
@@ -50,9 +50,8 @@ class JSONClient(object):
             return None
 
         if response.get('id') != reqid:
-            raise ValueError("JSON-RPC expected id=%s, received id=%s: %s" %
-                             (reqid, response.get('id'),
-                              response.get('error')))
+            msg = f"JSON-RPC expected id={reqid}, received id={response.get('id')}: {response.get('error')}"
+            raise ValueError(msg)
 
         if response.get('error') is not None:
             message = "Request: {}\n\nError: {}".format(request, response.get('error'))
@@ -60,7 +59,7 @@ class JSONClient(object):
                 print(message)
             if errorBox and self.qtParent is not None:
                 resultBox = QtWidgets.QMessageBox(self.qtParent)
-                resultBox.setText("DASTARD RPC Error\n"+message)
+                resultBox.setText("DASTARD RPC Error\n" + message)
                 resultBox.setWindowTitle("DASTARD RPC Error")
                 # The above line doesn't work on mac, from qt docs "On macOS, the window
                 # title is ignored (as required by the macOS Guidelines)."

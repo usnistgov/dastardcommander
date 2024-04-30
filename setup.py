@@ -2,7 +2,7 @@
 
 """The setup script."""
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     author="GCO, JF",
@@ -17,7 +17,7 @@ setup(
     packages=["dastardcommander"],
     test_suite="tests",
     url="https://github.com/usnistgov/dastardcommander",
-    version="0.2.8",
+    version="0.2.9",
     zip_safe=False,
     package_data={"dastardcommander": ["ui/*.ui", "ui/*.png"]},
     entry_points={

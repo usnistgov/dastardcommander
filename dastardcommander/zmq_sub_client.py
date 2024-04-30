@@ -21,7 +21,7 @@ context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
 print("Collecting updates from dastard server...")
-socket.connect("tcp://%s" % host)
+socket.connect(f"tcp://{host}")
 
 # for topicfilter in ("TRIGGER", "STATUS"):
 #     socket.setsockopt_string(zmq.SUBSCRIBE, topicfilter)
@@ -34,4 +34,4 @@ while True:
         topic, messagedata = message
         print(topic, messagedata)
     else:
-        print("WARNING: message of length {} is {}".format(len(message), message))
+        print(f"WARNING: message of length {len(message)} is {message}")

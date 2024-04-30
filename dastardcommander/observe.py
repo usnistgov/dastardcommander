@@ -7,7 +7,7 @@ import itertools
 
 # Qt5 imports
 from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 import PyQt5.uic
 
 
@@ -59,7 +59,7 @@ class ExperimentStateIncrementer:
         self.updateLabel(stateName)
         self.ignoring = stateName == "IGNORE"
         if self.ignoring:
-            self.ignoreButton.setText('Restart state "%s"' % self.lastValidState)
+            self.ignoreButton.setText(f'Restart state "{self.lastValidState}"')
         else:
             self.lastValidState = stateName
             self.ignoreButton.setText("Set state IGNORE")
@@ -140,7 +140,7 @@ class Observe(QtWidgets.QWidget):
                 # so we check here
                 print("rebuding CRMMap due to len(buttons)==0")
                 self.buildCRMMap()
-                print("now have len(buttons)={}".format(len(self.crm_map.buttons)))
+                print(f"now have len(buttons)={len(self.crm_map.buttons)}")
             self.crm_map.setCountRates(countRates, colorScale)
         integrationComplete = len(self.countsSeens) == integrationTime
         arrayCps = 0
@@ -167,10 +167,10 @@ class Observe(QtWidgets.QWidget):
         return self.doubleSpinBox_colorScale.value()
 
     def setArrayCps(self, arrayCps, integrationComplete, auxCps):
-        s = "{:.2f} cps/array".format(arrayCps)
+        s = f"{arrayCps:.2f} cps/array"
         self.label_arrayCps.setText(s)
         self.label_arrayCps.setEnabled(integrationComplete)
-        sAux = "{:.2f} aux cps".format(auxCps)
+        sAux = f"{auxCps:.2f} aux cps"
         self.label_auxCps.setText(sAux)
 
     def buildCRM(self):
@@ -247,24 +247,24 @@ class Observe(QtWidgets.QWidget):
             file, _ = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Select a TES map file", self.mapfile, "Maps (*.cfg *.txt)"
             )
-            if file == "":
+            if not file:
                 return
         else:
             file, okay = QtWidgets.QInputDialog.getText(
                 self,
                 "Choose map file",
-                "Enter full path to map file on %s (remote server):" % self.host,
+                f"Enter full path to map file on {self.host} (remote server):",
                 QtWidgets.QLineEdit.Normal,
                 self.mapfile,
             )
-            if not okay or file == "":
+            if not okay or not file:
                 return
         okay = self.client.call("MapServer.Load", file)
 
     def handleTESMapFile(self, filename):
         self.mapfile = filename
-        head, tail = os.path.split(filename)
-        self.mapFileLabel.setText("Map File: %s" % tail)
+        _head, tail = os.path.split(filename)
+        self.mapFileLabel.setText(f"Map File: {tail}")
 
     def handleTESMap(self, msg):
         scale = 1.0 / float(msg["Spacing"])
@@ -280,7 +280,7 @@ class Observe(QtWidgets.QWidget):
     def handleExternalTriggerMessage(self, msg):
         n = msg["NumberObservedInLastSecond"]
         self.label_externalTriggersInLastSecond.setText(
-            "{} external triggers in last second".format(n)
+            f"{n} external triggers in last second"
         )
 
     def handleWritingMessage(self, msg):
@@ -290,20 +290,22 @@ class Observe(QtWidgets.QWidget):
 
 
 class CountRateColorBar(QtWidgets.QWidget):
-     "Show the event rate color scale as a color bar"
-     def paintEvent(self, event):
-         qp = QtGui.QPainter(self)
-         qp.setPen(QtCore.Qt.NoPen)
-         size = self.size()
-         w = size.width()
-         h = size.height()
+    "Show the event rate color scale as a color bar"
 
-         Nboxes = max(50, w//2)
-         for i in range(Nboxes):
-             f = float(i)/Nboxes
-             color = self.cmap(f, bytes=True)
-             qp.setBrush(QtGui.QColor(*color))
-             qp.drawRect(int(f*w+0.5), 0, int(float(w)/Nboxes)+1, int(h*1.0))
+    def paintEvent(self, event):
+        qp = QtGui.QPainter(self)
+        qp.setPen(QtCore.Qt.NoPen)
+        size = self.size()
+        w = size.width()
+        h = size.height()
+
+        Nboxes = max(50, w // 2)
+        for i in range(Nboxes):
+            f = float(i) / Nboxes
+            color = self.cmap(f, bytes=True)
+            qp.setBrush(QtGui.QColor(*color))
+            qp.drawRect(int(f * w + 0.5), 0, int(float(w) / Nboxes) + 1, int(h * 1.0))
+
 
 _QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
 
@@ -341,10 +343,10 @@ class CountRateMap(QtWidgets.QScrollArea):
         self.channel_names = channel_names
         self.triggerBlocker = parent.triggerBlocker
         if xy is None:
-            size=22
+            size = 22
             self.initButtons(size=size)
         else:
-            size=22
+            size = 22
             self.initButtons(size=size, xy=xy)
 
         self.colorbar = CountRateColorBar(self)
@@ -403,7 +405,7 @@ class CountRateMap(QtWidgets.QScrollArea):
         button.setStyleSheet(colorString)
         tt = button.toolTip()
         if "DISABLED" not in tt:
-            tt = "[DISABLED] " + tt
+            tt = f"[DISABLED] {tt}"
             button.setToolTip(tt)
 
     def setButtonEnabled(self, name):
@@ -455,7 +457,7 @@ class CountRateMap(QtWidgets.QScrollArea):
                 self.buttons.append(None)
                 continue
 
-            tooltip = "{}, ({} of grp {})".format(name, chnum, groupnum)
+            tooltip = f"{name}, ({chnum} of grp {groupnum})"
             self.addButton(horizdisp, vertdisp, size, size, name, tooltip)
             if horizdisp > max_h:
                 max_h = horizdisp
@@ -472,33 +474,33 @@ class CountRateMap(QtWidgets.QScrollArea):
                 horizdisp = 0
                 vertdisp += 1
         hspacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridbox.addItem(hspacer, 0, max_h+1)
+        self.gridbox.addItem(hspacer, 0, max_h + 1)
         vspacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridbox.addItem(vspacer, max_v+1, 0)
+        self.gridbox.addItem(vspacer, max_v + 1, 0)
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
-        self.owner.maxRateLabel.setText("Max rate: {:.2f}/sec".format(colorScale))
+        self.owner.maxRateLabel.setText(f"Max rate: {colorScale:.2f}/sec")
         assert len(countRates) == len(self.buttons)
         for i, cr in enumerate(countRates):
             button = self.buttons[i]
             if button is None:
                 continue
             if cr < 10:
-                buttonText = "{:.2f}".format(cr)
+                buttonText = f"{cr:.2f}"
             elif cr < 100:
-                buttonText = "{:.1f}".format(cr)
+                buttonText = f"{cr:.1f}"
             else:
-                buttonText = "{:.0f}".format(cr)
+                buttonText = f"{cr:.0f}"
             button.setText(buttonText)
 
             if button.triggers_blocked:
                 textcolor = self.disabledForeground
-                scaledrate = min(0.5*cr/colorScale, 1)
+                scaledrate = min(0.5 * cr / colorScale, 1)
                 bgcolor = self.cmap_disabled(scaledrate, bytes=True)
             else:
                 textcolor = self.enabledForeground
                 bgcolor = self.cmap(cr / colorScale, bytes=True)
-            colorString = "rgb({},{},{})".format(bgcolor[0], bgcolor[1], bgcolor[2])
+            colorString = f"rgb({bgcolor[0]},{bgcolor[1]},{bgcolor[2]})"
             colorString = f"QPushButton {{color: {textcolor}; background-color: {colorString};}}"
             button.setStyleSheet(colorString)

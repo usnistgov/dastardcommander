@@ -68,7 +68,7 @@ class SpecialChannels:
 
     def read_config(self):
         try:
-            with open(self.config, "r") as fp:
+            with open(self.config, "r", encoding="ascii") as fp:
                 data = json.load(fp)
             for field in data:
                 if field in self.FIELDS_TO_MEMO:
@@ -77,7 +77,7 @@ class SpecialChannels:
             pass
 
     def write_config(self):
-        with open(self.config, "w") as fp:
+        with open(self.config, "w", encoding="ascii") as fp:
             obj = {field: self.__dict__[field] for field in self.FIELDS_TO_MEMO}
             json.dump(obj, fp)
             fp.write("\n")  # ensure \n at EOF

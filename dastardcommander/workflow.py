@@ -4,30 +4,28 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSettings, pyqtSignal
 
 import numpy as np
-import json
 import time
 import subprocess
 import os
 import glob
 import sys
-from collections import OrderedDict
 
 # usercode imports
-import dastardcommander.projectors as projectors
 
 
-class ProjectorCaller(object):
+class ProjectorCaller:
     "A class that can make projectors."
 
     def __init__(self):
         pass
 
-    def scriptcall(self, scriptname, args, wait=True):
+    @staticmethod
+    def scriptcall(scriptname, args, wait=True):
         cmd = ["nice", "-n", "19"]
         cmd.append(scriptname)
         cmd.extend(args)
         print(cmd)
-        print("Running '%s'" % " ".join(cmd))
+        print(f"""Running '{" ".join(cmd)}'""")
         # we don't use check_call here because Popen prints output in real time, while check_call does not
         p = subprocess.Popen(cmd)
         if wait:
@@ -41,7 +39,8 @@ class ProjectorCaller(object):
             args = args[:2] + ["--invert_data"] + args[2:]
         self.scriptcall("make_projectors", args)
 
-    def plotBasis(self, outName):
+    @staticmethod
+    def plotBasis(outName):
         raise Exception("not yet implemented")
 
 
@@ -87,18 +86,18 @@ class Workflow(QtWidgets.QWidget):
         """
         self.pulseFilename = "/Users/oneilg/mass/mass/regression_test/regress_chan*.ljh"
         self.noiseFilename = "/Users/oneilg/mass/mass/regression_test/regress_noise_chan*.ljh"
-        self.label_noiseFile.setText("current noise file: %s" % self.noiseFilename)
-        self.label_pulseFile.setText("current pulse file: %s" % self.pulseFilename)
+        self.label_noiseFile.setText(f"current noise file: {self.noiseFilename}")
+        self.label_pulseFile.setText(f"current pulse file: {self.pulseFilename}")
         self.pushButton_createProjectors.setEnabled(True)
 
     def reset(self):
         self.noiseFilename = None
-        self.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
+        self.label_noiseFile.setText(f"noise data: {self.noiseFilename}")
         self.pulseFilename = None
-        self.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
+        self.label_pulseFile.setText(f"pulse data: {self.pulseFilename}")
         self.projectorsFilename = None
         self.pushButton_createProjectors.setEnabled(False)
-        self.label_projectors.setText("projectors file: %s" % self.projectorsFilename)
+        self.label_projectors.setText(f"projectors file: {self.projectorsFilename}")
         self.projectorsPlotFilename = None
         self.pushButton_viewProjectorsPlot.setEnabled(False)
         self.pushButton_loadProjectors.setEnabled(False)
@@ -127,15 +126,15 @@ class Workflow(QtWidgets.QWidget):
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
         progressBar = QtWidgets.QProgressDialog("taking noise...", "Stop Early", 0,
-                                                TIME_UNITS_TO_WAIT-1, parent=self)
+                                                TIME_UNITS_TO_WAIT - 1, parent=self)
         progressBar.setModal(True)  # prevent users from clicking elsewhere in gui
         progressBar.show()
         for i in range(TIME_UNITS_TO_WAIT):
             time.sleep(0.1)
             # remember filenames
             self.noiseFilename = self.dc.writingTab.fileNameExampleEdit.text()
-            self.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
-            progressBar.setLabelText("noise, {} records".format(self.numberWritten))
+            self.label_noiseFile.setText(f"noise data: {self.noiseFilename}")
+            progressBar.setLabelText(f"noise, {self.numberWritten} records")
             progressBar.setValue(i)
             QtWidgets.QApplication.processEvents()  # process gui events
             if progressBar.wasCanceled():
@@ -163,7 +162,7 @@ class Workflow(QtWidgets.QWidget):
         # dont know how to do this yet, so lets just wait for 3 seconds
         # its more important than in the noise case to count written records
         RECORDS_PER_CHANNEL = 1000
-        RECORDS_TOTAL = RECORDS_PER_CHANNEL*self.NumberOfChans
+        RECORDS_TOTAL = RECORDS_PER_CHANNEL * self.NumberOfChans
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
         progressBar = QtWidgets.QProgressDialog("taking pulses...", "Stop Early",
@@ -176,9 +175,9 @@ class Workflow(QtWidgets.QWidget):
             time.sleep(0.1)
             # remember filenames
             self.pulseFilename = self.dc.writingTab.fileNameExampleEdit.text()
-            self.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
+            self.label_pulseFile.setText(f"pulse data: {self.pulseFilename}")
             progressBar.setLabelText(
-                "pulses, {}/{} records".format(self.numberWritten, RECORDS_TOTAL))
+                f"pulses, {self.numberWritten}/{RECORDS_TOTAL} records")
             progressBar.setValue(self.numberWritten)
             QtWidgets.QApplication.processEvents()  # process gui events
             if progressBar.wasCanceled():
@@ -194,7 +193,7 @@ class Workflow(QtWidgets.QWidget):
 
     def openPdf(self, path):
         if not path.endswith(".pdf"):
-            raise Exception("path should end with .pdf, got {}".format(path))
+            raise Exception(f"path should end with .pdf, got {path}")
         print(sys.platform)
         print(self.noisePlotFilename)
         if sys.platform.startswith('darwin'):
@@ -202,37 +201,37 @@ class Workflow(QtWidgets.QWidget):
         elif sys.platform.startswith('linux'):
             cmd = ["evince", path]
         else:
-            raise Exception("pdf view not implement for platform = {}".format(sys.platform))
-        print(repr(cmd)+"\n")
+            raise Exception(f"pdf view not implement for platform = {sys.platform}")
+        print(repr(cmd) + "\n")
         subprocess.Popen(cmd)
 
     def handleCreateProjectors(self):
         # call pope script
-        outName = self.pulseFilename[:-9]+"model.hdf5"
-        plotName = self.pulseFilename[:-9]+"model_plots.pdf"
+        outName = self.pulseFilename[:-9] + "model.hdf5"
+        plotName = self.pulseFilename[:-9] + "model_plots.pdf"
         g = glob.glob(self.pulseFilename)
         if len(g) == 0:
-            raise Exception("could not find any files matching {}".format(self.pulseFilename))
+            raise Exception(f"could not find any files matching {self.pulseFilename}")
         pulseFile = g[0]
         gn = glob.glob(self.noiseFilename)
         if len(g) == 0:
-            raise Exception("could not find any files matching {}".format(self.noiseFilename))
+            raise Exception(f"could not find any files matching {self.noiseFilename}")
         noiseFile = gn[0]
         print(outName, pulseFile, noiseFile)
         if os.path.isfile(outName):
-            print("{} exists, skipping make_projectors".format(outName))
+            print(f"{outName} exists, skipping make_projectors")
         else:
             try:
                 self.pcaller.createBasis(pulseFile, noiseFile,
                                          self.checkBox_invertPulses.isChecked())
             except OSError as e:
                 dialog = QtWidgets.QMessageBox()
-                dialog.setText("Create Projectors failed: {}".format(e))
+                dialog.setText(f"Create Projectors failed: {e}")
                 dialog.exec_()
                 return
 
         self.projectorsFilename = outName
-        self.label_projectors.setText("projectors: %s" % self.projectorsFilename)
+        self.label_projectors.setText(f"projectors: {self.projectorsFilename}")
 
         self.projectorsPlotFilename = plotName
         self.pushButton_viewProjectorsPlot.setEnabled(True)
@@ -248,7 +247,7 @@ class Workflow(QtWidgets.QWidget):
             return
         if not os.path.isfile(self.projectorsFilename):
             em = QtWidgets.QErrorMessage(self)
-            em.showMessage("{} does not exist".format(self.projectorsFilename))
+            em.showMessage(f"{self.projectorsFilename} does not exist")
             return
         self.dc.triggerTabSimple.lineEdit_projectors.setText(self.projectorsFilename)
         success = self.dc.triggerTabSimple.handleSendProjectors()

@@ -7,7 +7,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 import os
 
 
-class TriggerConfig(QtWidgets.QWidget):
+class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
     """Provide the UI inside the Triggering tab.
 
     Most of the UI is copied from MATTER, but the Python implementation in this
@@ -136,7 +136,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 if int(num) not in self.triggerBlocker.special:
                     unblocked_chan.append(num)
         cnum = ",".join(unblocked_chan)
-        return "%s:%s" % (prefix, cnum)
+        return f"{prefix}:{cnum}"
 
     @pyqtSlot()
     def channelListTextChanged(self):
@@ -156,10 +156,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 continue
             prefix, cnums = line.split(":", 1)
             if prefix not in self.channel_prefixes:
-                print(
-                    "Channel prefix %s not in known prefixes: %s"
-                    % (prefix, self.channel_prefixes)
-                )
+                print(f"Channel prefix {prefix} not in known prefixes: {self.channel_prefixes}")
                 continue
             for cnum in cnums.split(","):
                 # Ignore the "" that follows a trailing comma
@@ -170,7 +167,7 @@ class TriggerConfig(QtWidgets.QWidget):
                     idx = self.channel_names.index(name)
                     self.chosenChannels.append(idx)
                 except ValueError:
-                    print("Channel '%s' is not known" % (name))
+                    print(f"Channel '{name}' is not known")
         self.channelChooserBox.setCurrentIndex(0)
 
     def getstate(self, name):
@@ -276,7 +273,7 @@ class TriggerConfig(QtWidgets.QWidget):
             if state is None:
                 edit.setText("")
                 continue
-            edit.setText("%f" % (state * scale))
+            edit.setText(f"{state * scale}")
 
         # Get the Auto Veto Level right
         avr = self.getstate("AutoVetoRange")
@@ -287,7 +284,7 @@ class TriggerConfig(QtWidgets.QWidget):
         for (riseFallComboBox, rising, falling) in (
             (self.levelRiseFallBoth, "LevelRising", "LevelFalling"),
             (self.edgeRiseFallBoth, "EdgeRising", "EdgeFalling"),
-            ):
+        ):
             r = self.getstate(rising)
             f = self.getstate(falling)
             if r and f:
@@ -320,7 +317,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 pass
         if len(rx_channums) == 0:
             me = "TriggerConfig.changeGroupTrigger"
-            print("{}: Could not parse channel list '{}'".format(me, rx))
+            print(f"{me}: Could not parse channel list '{rx}'")
             return
         sourcenum = self.groupTriggerSource.value()
         state = {"Connections": {sourcenum: rx_channums}}
@@ -352,7 +349,7 @@ class TriggerConfig(QtWidgets.QWidget):
         if ndisabled == 0:
             msg = "All channels are enabled"
         elif ndisabled == 1:
-            msg = "One channel is disabled: {}".format(self.triggerBlocker.special[0])
+            msg = f"One channel is disabled: {self.triggerBlocker.special[0]}"
         else:
             msg = "{} channels are disabled: {}".format(
                 ndisabled, ",".join(map(str, self.triggerBlocker.special))
@@ -370,7 +367,7 @@ class TriggerConfig(QtWidgets.QWidget):
         notrig_state["AutoTrigger"] = False
         notrig_state["EdgeTrigger"] = False
         notrig_state["LevelTrigger"] = False
-        notrig_state["EMTState"]={"EdgeMulti": False, "EdgeMultiNoise": False}
+        notrig_state["EMTState"] = {"EdgeMulti": False, "EdgeMultiNoise": False}
         self.configureDastardTriggers(notrig_state)
 
     def handleGroupTriggerMessage(self, msg):
@@ -400,7 +397,7 @@ class TriggerConfig(QtWidgets.QWidget):
                     cnum_list = cnum_list[:35]
                     cnum_list[-1] = "..."
                 cnum_text = "[{:}]".format(",".join(cnum_list))
-            text = "Active group trigger {}: {}".format(name, cnum_text)
+            text = f"Active group trigger {name}: {cnum_text}"
             gui_label.setText(text)
 
     @pyqtSlot()
@@ -424,7 +421,7 @@ class TriggerConfig(QtWidgets.QWidget):
         elif msg == 3:
             errfb = True
         elif msg != 1:
-            print("message: TRIGCOUPLING {}, but expect 1, 2 or 3".format(msg))
+            print(f"message: TRIGCOUPLING {msg}, but expect 1, 2 or 3")
         self.coupleFBToErrCheckBox.setChecked(fberr)
         self.coupleErrToFBCheckBox.setChecked(errfb)
 

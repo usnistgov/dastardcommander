@@ -1,13 +1,10 @@
-import sys
 import os
-import json
 import time
 import numpy as np
-import struct
 import PyQt5
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from dastardcommander import rpc_client, status_monitor
+
 
 class DisableHyperDialog(QtWidgets.QDialog):
 
@@ -58,7 +55,7 @@ class DisableHyperDialog(QtWidgets.QDialog):
 
     @pyqtSlot()
     def updateProgress(self):
-        self.progressBar.setValue(self.progressBar.value()+1)
+        self.progressBar.setValue(self.progressBar.value() + 1)
 
 
 class DisableHyperWorker(QtCore.QObject):
@@ -106,7 +103,7 @@ class DisableHyperWorker(QtCore.QObject):
 
         # 3) Collect trigger rate data
         staleTriggerRateMessageID, msg = self.dcom.lastTriggerRateMessage
-        trigcounts = np.zeros(len(msg["CountsSeen"]), dtype=np.int)
+        trigcounts = np.zeros(len(msg["CountsSeen"]), dtype=int)
         duration = 0.0
         t0 = time.time()
         integration_time = 10.0
@@ -128,7 +125,7 @@ class DisableHyperWorker(QtCore.QObject):
 
             if time.time() - t0 > integration_time:
                 break
-        
+
         duration /= 1e9  # convert ns to seconds
         if duration <= 0:
             self.message.emit(f"ERROR: no trigger rate messages were received in {integration_time} seconds.")
@@ -154,7 +151,7 @@ class DisableHyperWorker(QtCore.QObject):
                 "AutoTrigger": False,
                 "EdgeTrigger": False,
                 "LevelTrigger": False,
-                }
+            }
             self.dcom.client.call("SourceControl.ConfigureTriggers", ts)
             disabled_channums = []
             for idx in disable:
@@ -173,11 +170,11 @@ class DisableHyperWorker(QtCore.QObject):
                 "EdgeFalling": not self.positive,
                 "EdgeLevel": self.threshold,
                 "LevelTrigger": False,
-                }
+            }
             self.dcom.client.call("SourceControl.ConfigureTriggers", ts)
 
         if not self.save_quiet:
-            delay = 5000 # ms
+            delay = 5000  # ms
             QtCore.QTimer.singleShot(delay, self.endSilentTRIGGER)
         self.message.emit("Hyperactive channels are disabled. You may close this window.\n")
         self.finished.emit()
