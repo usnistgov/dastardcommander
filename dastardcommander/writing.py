@@ -76,7 +76,7 @@ class WritingControl(QtWidgets.QWidget):
         written_message = f"{Nwritten}"
         if self.stopAtNRecords.isEnabled():
             Nmax = self.stopAtNRecords.value()
-            pct = Nwritten*100.0/Nmax
+            pct = Nwritten * 100.0 / Nmax
             written_message += f" ({pct:.2f}% of the automatic shutoff value)"
             if Nmax > 0 and Nwritten >= Nmax and self.writing:
                 self.stop()

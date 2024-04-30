@@ -81,9 +81,9 @@ class LevelTrigConfig(QtWidgets.QDialog):
             id: BaselineFinder(positive, self.recordsPerChan) for id in channels_to_configure
         }
         self.nchanIncomplete = len(channels_to_configure)
-        self.progressBar.setMaximum(self.recordsPerChan*self.nchanIncomplete)
+        self.progressBar.setMaximum(self.recordsPerChan * self.nchanIncomplete)
         self.zmqthread = QtCore.QThread()
-        self.zmqlistener = status_monitor.ZMQListener(self.dcom.host, 1+self.dcom.port)
+        self.zmqlistener = status_monitor.ZMQListener(self.dcom.host, 1 + self.dcom.port)
         self.zmqlistener.pulserecord.connect(self.updateReceived)
 
         self.zmqlistener.moveToThread(self.zmqthread)
@@ -183,7 +183,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
             # nsamp = values[4]
             data = np.frombuffer(data_message, dtype=data_fmt)
             blf.newValues(data)
-            self.progressBar.setValue(self.progressBar.value()+1)
+            self.progressBar.setValue(self.progressBar.value() + 1)
             if blf.completed:
                 self.nchanIncomplete -= 1
             if self.nchanIncomplete <= 0:
@@ -194,7 +194,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
             return
 
 
-class BaselineFinder():
+class BaselineFinder:
     """
     An object to estimate the baseline of a channel's data.
 

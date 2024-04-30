@@ -18,12 +18,12 @@ class ZMQListener(QtCore.QObject):
         self.socket = context.socket(zmq.SUB)
 
         self.host = host
-        self.baseport = port+1
+        self.baseport = port + 1
         self.address = f"tcp://{self.host}:{self.baseport}"
         self.socket.connect(self.address)
         print(f"Collecting updates from dastard at {self.address}")
 
-        self.socket.setsockopt_string(zmq.SUBSCRIBE, u"")
+        self.socket.setsockopt_string(zmq.SUBSCRIBE, "")
 
         self.messages_seen = collections.Counter()
         self.quit_once = False

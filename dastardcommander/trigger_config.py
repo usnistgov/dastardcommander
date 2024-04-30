@@ -276,7 +276,7 @@ class TriggerConfig(QtWidgets.QWidget):
             if state is None:
                 edit.setText("")
                 continue
-            edit.setText(f"{state*scale}")
+            edit.setText(f"{state * scale}")
 
         # Get the Auto Veto Level right
         avr = self.getstate("AutoVetoRange")

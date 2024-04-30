@@ -299,12 +299,12 @@ class CountRateColorBar(QtWidgets.QWidget):
         w = size.width()
         h = size.height()
 
-        Nboxes = max(50, w//2)
+        Nboxes = max(50, w // 2)
         for i in range(Nboxes):
-            f = float(i)/Nboxes
+            f = float(i) / Nboxes
             color = self.cmap(f, bytes=True)
             qp.setBrush(QtGui.QColor(*color))
-            qp.drawRect(int(f*w+0.5), 0, int(float(w)/Nboxes)+1, int(h*1.0))
+            qp.drawRect(int(f * w + 0.5), 0, int(float(w) / Nboxes) + 1, int(h * 1.0))
 
 
 _QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
@@ -474,9 +474,9 @@ class CountRateMap(QtWidgets.QScrollArea):
                 horizdisp = 0
                 vertdisp += 1
         hspacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridbox.addItem(hspacer, 0, max_h+1)
+        self.gridbox.addItem(hspacer, 0, max_h + 1)
         vspacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridbox.addItem(vspacer, max_v+1, 0)
+        self.gridbox.addItem(vspacer, max_v + 1, 0)
 
     def setCountRates(self, countRates, colorScale):
         colorScale = float(colorScale)
@@ -496,7 +496,7 @@ class CountRateMap(QtWidgets.QScrollArea):
 
             if button.triggers_blocked:
                 textcolor = self.disabledForeground
-                scaledrate = min(0.5*cr/colorScale, 1)
+                scaledrate = min(0.5 * cr / colorScale, 1)
                 bgcolor = self.cmap_disabled(scaledrate, bytes=True)
             else:
                 textcolor = self.enabledForeground

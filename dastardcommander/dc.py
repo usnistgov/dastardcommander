@@ -13,7 +13,6 @@ May 2018 -
 
 # Non-Qt imports
 import json
-import socket
 import subprocess
 import sys
 import os
@@ -511,7 +510,7 @@ class MainWindow(QtWidgets.QMainWindow):
             args = ["microscope"]
             if not self.sourceIsTDM:
                 args.append("--no-error-channel")
-            args.append(f"tcp://{self.host}:{self.port+2}")
+            args.append(f"tcp://{self.host}:{self.port + 2}")
             sps = subprocess.Popen(args)
             self.microscopes.append(sps)
         except OSError as e:
@@ -753,7 +752,7 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = self.lanceroFiberLayout
         self.fiberBoxes = {}
         for i in range(nfibers):
-            box = QtWidgets.QCheckBox(f"{i+nfibers}")
+            box = QtWidgets.QCheckBox(f"{i + nfibers}")
             layout.addWidget(box, i, 1)
             self.fiberBoxes[i + nfibers] = box
 
@@ -1202,7 +1201,7 @@ class MainWindow(QtWidgets.QMainWindow):
             message = f"reply={reply}"
             success = True
         except zmq.Again:
-            message = f"Socket timeout, timeout = {cringe.RCVTIMEO/1000} s"
+            message = f"Socket timeout, timeout = {cringe.RCVTIMEO / 1000} s"
             print(message)
             success = False
         if not success:
@@ -1369,7 +1368,7 @@ def main():
 
         try:
             client = rpc_client.JSONClient((host, port))
-        except socket.error:
+        except OSError:
             print("Could not connect to Dastard at {host}:{port}")
             continue
         print("Dastard is at {host}:{port}")

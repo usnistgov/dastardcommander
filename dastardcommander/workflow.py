@@ -13,7 +13,7 @@ import sys
 # usercode imports
 
 
-class ProjectorCaller(object):
+class ProjectorCaller:
     "A class that can make projectors."
 
     def __init__(self):
@@ -124,7 +124,7 @@ class Workflow(QtWidgets.QWidget):
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
         progressBar = QtWidgets.QProgressDialog("taking noise...", "Stop Early", 0,
-                                                TIME_UNITS_TO_WAIT-1, parent=self)
+                                                TIME_UNITS_TO_WAIT - 1, parent=self)
         progressBar.setModal(True)  # prevent users from clicking elsewhere in gui
         progressBar.show()
         for i in range(TIME_UNITS_TO_WAIT):
@@ -160,7 +160,7 @@ class Workflow(QtWidgets.QWidget):
         # dont know how to do this yet, so lets just wait for 3 seconds
         # its more important than in the noise case to count written records
         RECORDS_PER_CHANNEL = 1000
-        RECORDS_TOTAL = RECORDS_PER_CHANNEL*self.NumberOfChans
+        RECORDS_TOTAL = RECORDS_PER_CHANNEL * self.NumberOfChans
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
         progressBar = QtWidgets.QProgressDialog("taking pulses...", "Stop Early",
@@ -200,13 +200,13 @@ class Workflow(QtWidgets.QWidget):
             cmd = ["evince", path]
         else:
             raise Exception("pdf view not implement for platform = {}".format(sys.platform))
-        print(repr(cmd)+"\n")
+        print(repr(cmd) + "\n")
         subprocess.Popen(cmd)
 
     def handleCreateProjectors(self):
         # call pope script
-        outName = self.pulseFilename[:-9]+"model.hdf5"
-        plotName = self.pulseFilename[:-9]+"model_plots.pdf"
+        outName = self.pulseFilename[:-9] + "model.hdf5"
+        plotName = self.pulseFilename[:-9] + "model_plots.pdf"
         g = glob.glob(self.pulseFilename)
         if len(g) == 0:
             raise Exception("could not find any files matching {}".format(self.pulseFilename))

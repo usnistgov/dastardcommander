@@ -55,7 +55,7 @@ class DisableHyperDialog(QtWidgets.QDialog):
 
     @pyqtSlot()
     def updateProgress(self):
-        self.progressBar.setValue(self.progressBar.value()+1)
+        self.progressBar.setValue(self.progressBar.value() + 1)
 
 
 class DisableHyperWorker(QtCore.QObject):
@@ -103,7 +103,7 @@ class DisableHyperWorker(QtCore.QObject):
 
         # 3) Collect trigger rate data
         staleTriggerRateMessageID, msg = self.dcom.lastTriggerRateMessage
-        trigcounts = np.zeros(len(msg["CountsSeen"]), dtype=np.int)
+        trigcounts = np.zeros(len(msg["CountsSeen"]), dtype=int)
         duration = 0.0
         t0 = time.time()
         integration_time = 10.0

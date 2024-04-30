@@ -32,7 +32,7 @@ def toMatBase64(array):
     """
     nrow, ncol = array.shape
     dt = np.dtype([('version', np.uint32), ('magic', np.uint8, (4,)), ("nrow", np.int64),
-                   ("ncol", np.int64), ("zeros", np.int64, 2), ("data", np.float64, nrow*ncol)])
+                   ("ncol", np.int64), ("zeros", np.int64, 2), ("data", np.float64, nrow * ncol)])
     a = np.array([(1, [ord("G"), ord("F"), ord("A"), 0], nrow, ncol, [0, 0], array.ravel())], dt)
     s_bytes = base64.b64encode(a)
     s = s_bytes.decode(encoding="ascii")
