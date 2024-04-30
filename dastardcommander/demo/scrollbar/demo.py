@@ -15,7 +15,7 @@ import sys
 
 # Qt5 imports
 import PyQt5.uic
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 
 class DemoDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):

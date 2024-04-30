@@ -4,8 +4,7 @@ import base64
 from collections import OrderedDict
 import json
 
-import PyQt5
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 #  0 -  3  Version = 1          (uint32)
 #  4       'G'                  (byte)

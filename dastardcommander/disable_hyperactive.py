@@ -1,13 +1,9 @@
-import sys
 import os
-import json
 import time
 import numpy as np
-import struct
 import PyQt5
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from dastardcommander import rpc_client, status_monitor
 
 class DisableHyperDialog(QtWidgets.QDialog):
 

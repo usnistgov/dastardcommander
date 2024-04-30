@@ -7,7 +7,7 @@ import itertools
 
 # Qt5 imports
 from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 import PyQt5.uic
 
 
@@ -290,20 +290,22 @@ class Observe(QtWidgets.QWidget):
 
 
 class CountRateColorBar(QtWidgets.QWidget):
-     "Show the event rate color scale as a color bar"
-     def paintEvent(self, event):
-         qp = QtGui.QPainter(self)
-         qp.setPen(QtCore.Qt.NoPen)
-         size = self.size()
-         w = size.width()
-         h = size.height()
+    "Show the event rate color scale as a color bar"
 
-         Nboxes = max(50, w//2)
-         for i in range(Nboxes):
-             f = float(i)/Nboxes
-             color = self.cmap(f, bytes=True)
-             qp.setBrush(QtGui.QColor(*color))
-             qp.drawRect(int(f*w+0.5), 0, int(float(w)/Nboxes)+1, int(h*1.0))
+    def paintEvent(self, event):
+        qp = QtGui.QPainter(self)
+        qp.setPen(QtCore.Qt.NoPen)
+        size = self.size()
+        w = size.width()
+        h = size.height()
+
+        Nboxes = max(50, w//2)
+        for i in range(Nboxes):
+            f = float(i)/Nboxes
+            color = self.cmap(f, bytes=True)
+            qp.setBrush(QtGui.QColor(*color))
+            qp.drawRect(int(f*w+0.5), 0, int(float(w)/Nboxes)+1, int(h*1.0))
+
 
 _QT_DEFAULT_FONT = ""  # This is the easiest way to specify the default font
 
@@ -341,10 +343,10 @@ class CountRateMap(QtWidgets.QScrollArea):
         self.channel_names = channel_names
         self.triggerBlocker = parent.triggerBlocker
         if xy is None:
-            size=22
+            size = 22
             self.initButtons(size=size)
         else:
-            size=22
+            size = 22
             self.initButtons(size=size, xy=xy)
 
         self.colorbar = CountRateColorBar(self)

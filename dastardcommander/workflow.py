@@ -4,16 +4,13 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QSettings, pyqtSignal
 
 import numpy as np
-import json
 import time
 import subprocess
 import os
 import glob
 import sys
-from collections import OrderedDict
 
 # usercode imports
-import dastardcommander.projectors as projectors
 
 
 class ProjectorCaller(object):
