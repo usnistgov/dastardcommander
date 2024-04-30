@@ -5,6 +5,7 @@ import PyQt5
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
+
 class DisableHyperDialog(QtWidgets.QDialog):
 
     dataComplete = pyqtSignal()
@@ -124,7 +125,7 @@ class DisableHyperWorker(QtCore.QObject):
 
             if time.time() - t0 > integration_time:
                 break
-        
+
         duration /= 1e9  # convert ns to seconds
         if duration <= 0:
             self.message.emit(f"ERROR: no trigger rate messages were received in {integration_time} seconds.")
@@ -150,7 +151,7 @@ class DisableHyperWorker(QtCore.QObject):
                 "AutoTrigger": False,
                 "EdgeTrigger": False,
                 "LevelTrigger": False,
-                }
+            }
             self.dcom.client.call("SourceControl.ConfigureTriggers", ts)
             disabled_channums = []
             for idx in disable:
@@ -169,11 +170,11 @@ class DisableHyperWorker(QtCore.QObject):
                 "EdgeFalling": not self.positive,
                 "EdgeLevel": self.threshold,
                 "LevelTrigger": False,
-                }
+            }
             self.dcom.client.call("SourceControl.ConfigureTriggers", ts)
 
         if not self.save_quiet:
-            delay = 5000 # ms
+            delay = 5000  # ms
             QtCore.QTimer.singleShot(delay, self.endSilentTRIGGER)
         self.message.emit("Hyperactive channels are disabled. You may close this window.\n")
         self.finished.emit()
