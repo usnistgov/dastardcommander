@@ -19,7 +19,8 @@ class ProjectorCaller:
     def __init__(self):
         pass
 
-    def scriptcall(self, scriptname, args, wait=True):
+    @staticmethod
+    def scriptcall(scriptname, args, wait=True):
         cmd = ["nice", "-n", "19"]
         cmd.append(scriptname)
         cmd.extend(args)
@@ -38,7 +39,8 @@ class ProjectorCaller:
             args = args[:2] + ["--invert_data"] + args[2:]
         self.scriptcall("make_projectors", args)
 
-    def plotBasis(self, outName):
+    @staticmethod
+    def plotBasis(outName):
         raise Exception("not yet implemented")
 
 

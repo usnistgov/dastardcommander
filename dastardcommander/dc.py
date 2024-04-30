@@ -40,6 +40,7 @@ from . import writing
 from . import projectors
 from . import observe
 from . import workflow
+import locale
 
 __version__ = "0.2.8"
 
@@ -81,7 +82,7 @@ QCoreApplication.setOrganizationDomain("nist.gov")
 QCoreApplication.setApplicationName("DastardCommander")
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
     def __init__(self, rpc_client, host, port, settings, parent=None):
         self.client = rpc_client
         self.client.setQtParent(self)
@@ -234,8 +235,7 @@ class MainWindow(QtWidgets.QMainWindow):
             d = json.loads(message)
         except Exception as e:
             print(
-                "Error processing status message [topic,msg]: '%s', '%s'"
-                % (topic, message)
+                "Error processing status message [topic,msg]: '{}', '{}'".format(topic, message)
             )
             print(f"Error is: {e}")
             return
@@ -1258,13 +1258,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self,
             "Open Inverted/Disabled channel list", ".",
             "Settings (*.yaml *.yml *.json)")
-        if filename == "":
+        if not filename:
             print("No file requested")
             return
 
         print("Reading inverted/disabled channel list from ", filename)
         try:
-            with open(filename, "r") as fp:
+            with open(filename, "r", encoding=locale.getpreferredencoding(False)) as fp:
                 if filename.endswith("json"):
                     obj = json.load(fp)
                 else:
@@ -1285,7 +1285,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self,
             "Save Inverted/Disabled channel list", ".",
             "Settings (*.yaml *.yml *.json)")
-        if filename == "":
+        if not filename:
             print("No file requested")
             return
 
@@ -1294,7 +1294,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "inverted": csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True),
             "disabled": self.triggerBlocker.special
         }
-        with open(filename, "w") as fp:
+        with open(filename, "w", encoding=locale.getpreferredencoding(False)) as fp:
             if filename.endswith("json"):
                 json.dump(obj, fp)
             else:
@@ -1360,7 +1360,7 @@ def main():
             return
 
         # One None is an invalid host:port pair
-        if host is None or port is None or host == "" or port == "":
+        if not host or not port:
             print(
                 "Could not start dcom (Dastard Commander) without a valid host:port selection."
             )

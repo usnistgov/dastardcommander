@@ -247,7 +247,7 @@ class Observe(QtWidgets.QWidget):
             file, _ = QtWidgets.QFileDialog.getOpenFileName(
                 self, "Select a TES map file", self.mapfile, "Maps (*.cfg *.txt)"
             )
-            if file == "":
+            if not file:
                 return
         else:
             file, okay = QtWidgets.QInputDialog.getText(
@@ -257,7 +257,7 @@ class Observe(QtWidgets.QWidget):
                 QtWidgets.QLineEdit.Normal,
                 self.mapfile,
             )
-            if not okay or file == "":
+            if not okay or not file:
                 return
         okay = self.client.call("MapServer.Load", file)
 
@@ -405,7 +405,7 @@ class CountRateMap(QtWidgets.QScrollArea):
         button.setStyleSheet(colorString)
         tt = button.toolTip()
         if "DISABLED" not in tt:
-            tt = "[DISABLED] " + tt
+            tt = f"[DISABLED] {tt}"
             button.setToolTip(tt)
 
     def setButtonEnabled(self, name):

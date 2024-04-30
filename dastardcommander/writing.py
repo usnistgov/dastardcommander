@@ -35,7 +35,7 @@ class WritingControl(QtWidgets.QWidget):
         self.checkBox_OFF.clicked.connect(self.updateWritingActiveMessages)
 
         cbd = self.changeBaseDirectoryButton
-        if host == "localhost" or host == "127.0.0.1":
+        if host in {"localhost", "127.0.0.1"}:
             cbd.pressed.connect(self.pathSelect)
             cbd.setToolTip("Launch dialog to choose data writing path")
         else:

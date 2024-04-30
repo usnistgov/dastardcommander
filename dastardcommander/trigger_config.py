@@ -7,7 +7,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 import os
 
 
-class TriggerConfig(QtWidgets.QWidget):
+class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
     """Provide the UI inside the Triggering tab.
 
     Most of the UI is copied from MATTER, but the Python implementation in this
@@ -156,10 +156,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 continue
             prefix, cnums = line.split(":", 1)
             if prefix not in self.channel_prefixes:
-                print(
-                    "Channel prefix %s not in known prefixes: %s"
-                    % (prefix, self.channel_prefixes)
-                )
+                print(f"Channel prefix {prefix} not in known prefixes: {self.channel_prefixes}")
                 continue
             for cnum in cnums.split(","):
                 # Ignore the "" that follows a trailing comma

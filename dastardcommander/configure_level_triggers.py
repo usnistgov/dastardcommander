@@ -229,7 +229,7 @@ class BaselineFinder:
         median = np.median(data)
 
         if median > 65535 or median < 0:
-            median = median % 65536
+            median %= 65536
         assert median >= 0
 
         self.medians.append(median)
