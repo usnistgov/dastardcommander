@@ -1264,7 +1264,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
 
         print("Reading inverted/disabled channel list from ", filename)
         try:
-            with open(filename, "r", encoding=locale.getpreferredencoding(False)) as fp:
+            with open(filename, "r", encoding="ascii") as fp:
                 if filename.endswith("json"):
                     obj = json.load(fp)
                 else:
@@ -1294,7 +1294,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             "inverted": csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True),
             "disabled": self.triggerBlocker.special
         }
-        with open(filename, "w", encoding=locale.getpreferredencoding(False)) as fp:
+        with open(filename, "w", encoding="ascii") as fp:
             if filename.endswith("json"):
                 json.dump(obj, fp)
             else:
