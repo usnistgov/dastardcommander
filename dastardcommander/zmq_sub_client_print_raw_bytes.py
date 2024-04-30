@@ -21,7 +21,7 @@ context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
 print("Collecting updates from dastard server...")
-socket.connect("tcp://%s" % host)
+socket.connect(f"tcp://{host}")
 
 # for topicfilter in ("TRIGGER", "STATUS"):
 #     socket.setsockopt_string(zmq.SUBSCRIBE, topicfilter)

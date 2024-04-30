@@ -24,7 +24,7 @@ class ProjectorCaller(object):
         cmd.append(scriptname)
         cmd.extend(args)
         print(cmd)
-        print("Running '%s'" % " ".join(cmd))
+        print(f"""Running '{" ".join(cmd)}'""")
         # we don't use check_call here because Popen prints output in real time, while check_call does not
         p = subprocess.Popen(cmd)
         if wait:
@@ -84,18 +84,18 @@ class Workflow(QtWidgets.QWidget):
         """
         self.pulseFilename = "/Users/oneilg/mass/mass/regression_test/regress_chan*.ljh"
         self.noiseFilename = "/Users/oneilg/mass/mass/regression_test/regress_noise_chan*.ljh"
-        self.label_noiseFile.setText("current noise file: %s" % self.noiseFilename)
-        self.label_pulseFile.setText("current pulse file: %s" % self.pulseFilename)
+        self.label_noiseFile.setText(f"current noise file: {self.noiseFilename}")
+        self.label_pulseFile.setText(f"current pulse file: {self.pulseFilename}")
         self.pushButton_createProjectors.setEnabled(True)
 
     def reset(self):
         self.noiseFilename = None
-        self.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
+        self.label_noiseFile.setText(f"noise data: {self.noiseFilename}")
         self.pulseFilename = None
-        self.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
+        self.label_pulseFile.setText(f"pulse data: {self.pulseFilename}")
         self.projectorsFilename = None
         self.pushButton_createProjectors.setEnabled(False)
-        self.label_projectors.setText("projectors file: %s" % self.projectorsFilename)
+        self.label_projectors.setText(f"projectors file: {self.projectorsFilename}")
         self.projectorsPlotFilename = None
         self.pushButton_viewProjectorsPlot.setEnabled(False)
         self.pushButton_loadProjectors.setEnabled(False)
@@ -131,7 +131,7 @@ class Workflow(QtWidgets.QWidget):
             time.sleep(0.1)
             # remember filenames
             self.noiseFilename = self.dc.writingTab.fileNameExampleEdit.text()
-            self.label_noiseFile.setText("noise data: %s" % self.noiseFilename)
+            self.label_noiseFile.setText(f"noise data: {self.noiseFilename}")
             progressBar.setLabelText("noise, {} records".format(self.numberWritten))
             progressBar.setValue(i)
             QtWidgets.QApplication.processEvents()  # process gui events
@@ -173,7 +173,7 @@ class Workflow(QtWidgets.QWidget):
             time.sleep(0.1)
             # remember filenames
             self.pulseFilename = self.dc.writingTab.fileNameExampleEdit.text()
-            self.label_pulseFile.setText("pulse data: %s" % self.pulseFilename)
+            self.label_pulseFile.setText(f"pulse data: {self.pulseFilename}")
             progressBar.setLabelText(
                 "pulses, {}/{} records".format(self.numberWritten, RECORDS_TOTAL))
             progressBar.setValue(self.numberWritten)
@@ -229,7 +229,7 @@ class Workflow(QtWidgets.QWidget):
                 return
 
         self.projectorsFilename = outName
-        self.label_projectors.setText("projectors: %s" % self.projectorsFilename)
+        self.label_projectors.setText(f"projectors: {self.projectorsFilename}")
 
         self.projectorsPlotFilename = plotName
         self.pushButton_viewProjectorsPlot.setEnabled(True)

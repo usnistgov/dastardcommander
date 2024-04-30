@@ -26,7 +26,7 @@ class JSONClient(object):
 
     def call(self, name, params, verbose=True, errorBox=True, throwError=False):
         if self._closed:
-            print("%s(...) ignored because JSON-RPC client is closed." % name)
+            print(f"{name}(...) ignored because JSON-RPC client is closed.")
             return None
             # This might seem like it should be impossible to reach, but it is possible
             # because signals like editingFinished can trigger slots when you try
@@ -50,9 +50,8 @@ class JSONClient(object):
             return None
 
         if response.get('id') != reqid:
-            raise ValueError("JSON-RPC expected id=%s, received id=%s: %s" %
-                             (reqid, response.get('id'),
-                              response.get('error')))
+            msg = f"JSON-RPC expected id={reqid}, received id={response.get('id')}: {response.get('error')}"
+            raise ValueError(msg)
 
         if response.get('error') is not None:
             message = "Request: {}\n\nError: {}".format(request, response.get('error'))

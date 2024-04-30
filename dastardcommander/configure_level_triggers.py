@@ -190,7 +190,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
                 self.dataComplete.emit()
 
         except Exception as e:
-            print("Error processing pulse record is: %s" % e)
+            print(f"Error processing pulse record is: {e}")
             return
 
 

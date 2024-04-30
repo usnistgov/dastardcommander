@@ -59,7 +59,7 @@ class ExperimentStateIncrementer:
         self.updateLabel(stateName)
         self.ignoring = stateName == "IGNORE"
         if self.ignoring:
-            self.ignoreButton.setText('Restart state "%s"' % self.lastValidState)
+            self.ignoreButton.setText(f'Restart state "{self.lastValidState}"')
         else:
             self.lastValidState = stateName
             self.ignoreButton.setText("Set state IGNORE")
@@ -253,7 +253,7 @@ class Observe(QtWidgets.QWidget):
             file, okay = QtWidgets.QInputDialog.getText(
                 self,
                 "Choose map file",
-                "Enter full path to map file on %s (remote server):" % self.host,
+                f"Enter full path to map file on {self.host} (remote server):",
                 QtWidgets.QLineEdit.Normal,
                 self.mapfile,
             )
@@ -264,7 +264,7 @@ class Observe(QtWidgets.QWidget):
     def handleTESMapFile(self, filename):
         self.mapfile = filename
         _head, tail = os.path.split(filename)
-        self.mapFileLabel.setText("Map File: %s" % tail)
+        self.mapFileLabel.setText(f"Map File: {tail}")
 
     def handleTESMap(self, msg):
         scale = 1.0 / float(msg["Spacing"])

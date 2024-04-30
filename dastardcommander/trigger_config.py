@@ -136,7 +136,7 @@ class TriggerConfig(QtWidgets.QWidget):
                 if int(num) not in self.triggerBlocker.special:
                     unblocked_chan.append(num)
         cnum = ",".join(unblocked_chan)
-        return "%s:%s" % (prefix, cnum)
+        return f"{prefix}:{cnum}"
 
     @pyqtSlot()
     def channelListTextChanged(self):
@@ -170,7 +170,7 @@ class TriggerConfig(QtWidgets.QWidget):
                     idx = self.channel_names.index(name)
                     self.chosenChannels.append(idx)
                 except ValueError:
-                    print("Channel '%s' is not known" % (name))
+                    print(f"Channel '{name}' is not known")
         self.channelChooserBox.setCurrentIndex(0)
 
     def getstate(self, name):
@@ -276,7 +276,7 @@ class TriggerConfig(QtWidgets.QWidget):
             if state is None:
                 edit.setText("")
                 continue
-            edit.setText("%f" % (state * scale))
+            edit.setText(f"{state*scale}")
 
         # Get the Auto Veto Level right
         avr = self.getstate("AutoVetoRange")
@@ -287,7 +287,7 @@ class TriggerConfig(QtWidgets.QWidget):
         for (riseFallComboBox, rising, falling) in (
             (self.levelRiseFallBoth, "LevelRising", "LevelFalling"),
             (self.edgeRiseFallBoth, "EdgeRising", "EdgeFalling"),
-            ):
+        ):
             r = self.getstate(rising)
             f = self.getstate(falling)
             if r and f:
@@ -370,7 +370,7 @@ class TriggerConfig(QtWidgets.QWidget):
         notrig_state["AutoTrigger"] = False
         notrig_state["EdgeTrigger"] = False
         notrig_state["LevelTrigger"] = False
-        notrig_state["EMTState"]={"EdgeMulti": False, "EdgeMultiNoise": False}
+        notrig_state["EMTState"] = {"EdgeMulti": False, "EdgeMultiNoise": False}
         self.configureDastardTriggers(notrig_state)
 
     def handleGroupTriggerMessage(self, msg):
