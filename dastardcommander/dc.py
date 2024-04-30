@@ -41,7 +41,7 @@ from . import projectors
 from . import observe
 from . import workflow
 
-__version__ = "0.2.8"
+__version__ = "0.2.9"
 
 
 def csv2int_array(text, normalize=False):
@@ -199,9 +199,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.phaseNegPulses.clicked.connect(self.updateBiasText)
         self.unwrapBiasCheck.clicked.connect(self.updateBiasText)
 
-        self.quietTopics = set(
-            ["TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP"]
-        )  # TODO: add "ALIVE"?
+        self.quietTopics = {"TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP", "ALIVE"}
 
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
@@ -461,6 +459,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         mb = hb["DataMB"]
         hwmb = hb["HWactualMB"]
         t = float(hb["Time"])
+        isrunning = "running" if hb["Running"] else "not running"
+        print(f"Server heartbeat: data are {isrunning}. Received {hwmb:10.6f} MB, processed {mb:10.6f} MB in {t:.6f} s.")
 
         def color(c, bg=None):
             ss = f"QLabel {{ color : {c}; }}"
@@ -1336,6 +1336,7 @@ def squeeze_whitespace(s):
 
 
 def main():
+    print(f"This is Dastard Commander version {__version__}")
     if sys.version_info.major <= 2:
         print(
             "WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***"
@@ -1368,9 +1369,9 @@ def main():
         try:
             client = rpc_client.JSONClient((host, port))
         except OSError:
-            print("Could not connect to Dastard at {host}:{port}")
+            print(f"Could not connect to Dastard at {host}:{port}")
             continue
-        print("Dastard is at {host}:{port}")
+        print(f"Dastard is at {host}:{port}")
 
         dc = MainWindow(client, host, port, settings)
         dc.show()
