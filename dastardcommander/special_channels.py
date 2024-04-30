@@ -1,6 +1,5 @@
 import json
 import os
-import locale
 
 
 class SpecialChannels:

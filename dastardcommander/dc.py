@@ -40,7 +40,6 @@ from . import writing
 from . import projectors
 from . import observe
 from . import workflow
-import locale
 
 __version__ = "0.2.8"
 
@@ -927,7 +926,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         for k, v in list(self.fiberBoxes.items()):
             if v.isChecked():
                 mask |= 1 << k
-        print(f"Fiber mask: 0x{mask: 4.4x}")
+        print(f"Fiber mask: 0x{mask:4.4x}")
         clock = 125
         if self.lanceroClock50Button.isChecked():
             clock = 50
