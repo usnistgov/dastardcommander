@@ -78,7 +78,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
     def handleRecordLengthOrPercentPretrigChange(self):
         rl = self.spinBox_recordLength.value()
         percent = self.spinBox_percentPretrigger.value()
-        pt = rl * percent / 100
+        pt = int(rl * percent / 100)
         self.spinBox_pretrigLength.blockSignals(True)
         self.spinBox_pretrigLength.setValue(pt)
         self.spinBox_pretrigLength.blockSignals(False)
