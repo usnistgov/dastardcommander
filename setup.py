@@ -17,7 +17,7 @@ setup(
     packages=["dastardcommander"],
     test_suite="tests",
     url="https://github.com/usnistgov/dastardcommander",
-    version="0.2.9",
+    version="0.2.10",
     zip_safe=False,
     package_data={"dastardcommander": ["ui/*.ui", "ui/*.png"]},
     entry_points={
