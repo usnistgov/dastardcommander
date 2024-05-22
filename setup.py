@@ -9,7 +9,7 @@ setup(
     author_email="galen.oneil@nist.gov",
     python_requires=">=3.8",
     description="Gui for DASTARD.",
-    install_requires=["numpy", "PyQt5", "h5py", "zmq", "matplotlib", "pyyaml"],
+    install_requires=["numpy", "PyQt5", "h5py", "pyzmq", "matplotlib", "pyyaml"],
     license="MIT license",
     include_package_data=True,
     keywords="dastardcommander",
