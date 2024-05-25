@@ -41,6 +41,13 @@ from . import projectors
 from . import observe
 from . import workflow
 
+try:
+    from ._version import version as __version__
+    from ._version import version_tuple
+except ImportError:
+    __version__ = "unknown version"
+    version_tuple = (0, 0, "unknown version")
+
 
 def csv2int_array(text, normalize=False):
     """Convert a string of numerical values separated by whitespace and/or commas to a list of int.
@@ -1335,12 +1342,6 @@ def squeeze_whitespace(s):
 
 def main():
     msg = f"This is Dastard Commander version {__version__}"
-    try:
-        gitdesc = subprocess.check_output(["git", "describe", "--always"],
-                                          cwd=os.path.dirname(os.path.abspath(__file__))).strip().decode()
-        msg += f" (git tag-commits-hash: {gitdesc})."
-    except subprocess.CalledProcessError:
-        msg += " (git info not found)."
     print(msg)
 
     if sys.version_info.major <= 2:

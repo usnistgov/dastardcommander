@@ -1,7 +1,6 @@
 [project]
 name = "dastardcommander"
-version = "0.2.10"
-# dynamic = ["version"]
+dynamic = ["version"]
 description = "Gui for DASTARD."
 authors = [
     {name = "Joe Fowler", email = "drjoefowler@gmail.com"},
