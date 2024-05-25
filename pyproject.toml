@@ -1,0 +1,36 @@
+[project]
+name = "dastardcommander"
+version = "0.2.10"
+# dynamic = ["version"]
+description = "Gui for DASTARD."
+authors = [
+    {name = "Joe Fowler", email = "drjoefowler@gmail.com"},
+    {name = "Galen O'Neilx", email = "galen.oneil@nist.gov"},
+]
+dependencies = [
+    "PyQt5",
+    "h5py",
+    "matplotlib",
+    "numpy",
+    "pyyaml",
+    "pyzmq",
+]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {text = "MIT license"}
+keywords = ["dastardcommander", "dastard"]
+
+[project.urls]
+Homepage = "https://github.com/usnistgov/dastardcommander"
+
+[project.scripts]
+dcom = "dastardcommander.dc:main"
+[build-system]
+requires = ["setuptools>=61", "setuptools_scm>=8", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+dastardcommander = ["ui/*.ui", "ui/*.png"]
+
+[tool.setuptools_scm]
+version_file = "dastardcommander/_version.py"

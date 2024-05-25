@@ -41,8 +41,6 @@ from . import projectors
 from . import observe
 from . import workflow
 
-__version__ = "0.2.9"
-
 
 def csv2int_array(text, normalize=False):
     """Convert a string of numerical values separated by whitespace and/or commas to a list of int.
