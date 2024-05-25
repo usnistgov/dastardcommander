@@ -1343,14 +1343,21 @@ def squeeze_whitespace(s):
 
 def version_message():
     "Convert auto-generated __version__ into a 4-line version message."
-    ver, gd = __version__.split("+")
-    githash, versiondate = gd.split(".")
-    return "\n".join([
-        f"This is Dastard Commander {__version__}",
-        f"-> Version:    {ver}",
-        f"-> Git commit: {githash[1:]}",
-        f"-> Date:       {versiondate[1:]}"
-    ])
+    try:
+        ver, gd = __version__.split("+")
+        lines = [
+            f"This is Dastard Commander {__version__}",
+            f"-> Version:    {ver}",
+        ]
+        gdparts = gd.split(".")
+        for part in gdparts:
+            if part.startswith("g"):
+                lines.append(f"-> Git commit: {part[1:]}")
+            elif part.startswith("d"):
+                lines.append(f"-> Date:       {part[1:]}")
+        return "\n".join(lines)
+    except Exception:
+        return "This is Dastard Commander (version unknown)"
 
 
 def main():
