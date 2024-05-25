@@ -2,6 +2,10 @@
 
 from . import dc
 __all__ = ["dc", "rpc_client"]
-__version__ = dc.__version__
-__author__ = """GCO, JF"""
-__email__ = 'galen.oneil@nist.gov'
+
+try:
+    from ._version import version as __version__
+    from ._version import version_tuple
+except ImportError:
+    __version__ = "unknown version"
+    version_tuple = (0, 0, "unknown version")

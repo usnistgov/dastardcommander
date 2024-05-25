@@ -41,7 +41,12 @@ from . import projectors
 from . import observe
 from . import workflow
 
-__version__ = "0.2.9"
+try:
+    from ._version import version as __version__
+    from ._version import version_tuple
+except ImportError:
+    __version__ = "unknown version"
+    version_tuple = (0, 0, "unknown version")
 
 
 def csv2int_array(text, normalize=False):
@@ -92,9 +97,10 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon("dc.png"))
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
-        self.setWindowTitle(
-            f"Dastard Commander {__version__}    (connected to {host}:{port})"
-        )
+
+        short_ver = __version__.split("+")[0]
+        title = f"Dastard Commander ({short_ver})    Connected to {host}:{port}"
+        self.setWindowTitle(title)
         self.reconnect = False
         self.disconnectReason = ""
         self.disconnectButton.clicked.connect(
@@ -1335,15 +1341,20 @@ def squeeze_whitespace(s):
     return "".join(s.split())
 
 
+def version_message():
+    "Convert auto-generated __version__ into a 4-line version message."
+    ver, gd = __version__.split("+")
+    githash, versiondate = gd.split(".")
+    return "\n".join([
+        f"This is Dastard Commander {__version__}",
+        f"-> Version:    {ver}",
+        f"-> Git commit: {githash[1:]}",
+        f"-> Date:       {versiondate[1:]}"
+    ])
+
+
 def main():
-    msg = f"This is Dastard Commander version {__version__}"
-    try:
-        gitdesc = subprocess.check_output(["git", "describe", "--always"],
-                                          cwd=os.path.dirname(os.path.abspath(__file__))).strip().decode()
-        msg += f" (git tag-commits-hash: {gitdesc})."
-    except subprocess.CalledProcessError:
-        msg += " (git info not found)."
-    print(msg)
+    print(version_message())
 
     if sys.version_info.major <= 2:
         print(

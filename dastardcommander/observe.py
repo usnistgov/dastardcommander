@@ -459,10 +459,8 @@ class CountRateMap(QtWidgets.QScrollArea):
 
             tooltip = f"{name}, ({chnum} of grp {groupnum})"
             self.addButton(horizdisp, vertdisp, size, size, name, tooltip)
-            if horizdisp > max_h:
-                max_h = horizdisp
-            if vertdisp > max_v:
-                max_v = vertdisp
+            max_h = max(horizdisp, max_h)
+            max_v = max(vertdisp, max_v)
             horizdisp += 1
             chnum += 1
             i += 1
