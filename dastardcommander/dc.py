@@ -1349,15 +1349,16 @@ def version_message():
             f"This is Dastard Commander {__version__}",
             f"-> Version:    {ver}",
         ]
-        if "." in gd:
-            githash, versiondate = gd.split(".")
-            lines.append(f"-> Git commit: {githash[1:]}")
-            lines.append(f"-> Date:       {versiondate}")
-        else:
-            lines.append(f"-> Git commit: {gd[1:]}")
+        gdparts = gd.split(".")
+        for part in gdparts:
+            if part.startswith("g"):
+                lines.append(f"-> Git commit: {part[1:]}")
+            elif part.startswith("d"):
+                lines.append(f"-> Date:       {part[1:]}")
         return "\n".join(lines)
-    finally:
+    except Exception:
         return "This is Dastard Commander (version unknown)"
+
 
 def main():
     print(version_message())
