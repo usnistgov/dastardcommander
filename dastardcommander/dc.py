@@ -97,9 +97,10 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowIcon(QtGui.QIcon("dc.png"))
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
-        self.setWindowTitle(
-            f"Dastard Commander {__version__}    (connected to {host}:{port})"
-        )
+
+        short_ver = __version__.split("+")[0]
+        title = f"Dastard Commander ({short_ver})    Connected to {host}:{port}"
+        self.setWindowTitle(title)
         self.reconnect = False
         self.disconnectReason = ""
         self.disconnectButton.clicked.connect(
@@ -1340,9 +1341,20 @@ def squeeze_whitespace(s):
     return "".join(s.split())
 
 
+def version_message():
+    "Convert auto-generated __version__ into a 4-line version message."
+    ver, gd = __version__.split("+")
+    githash, versiondate = gd.split(".")
+    return "\n".join([
+        f"This is Dastard Commander {__version__}",
+        f"-> Version:    {ver}",
+        f"-> Git commit: {githash[1:]}",
+        f"-> Date:       {versiondate[1:]}"
+    ])
+
+
 def main():
-    msg = f"This is Dastard Commander version {__version__}"
-    print(msg)
+    print(version_message())
 
     if sys.version_info.major <= 2:
         print(
