@@ -50,7 +50,7 @@ class WritingControl(QtWidgets.QWidget):
                 exampleFilename = message["FilenamePattern"] % ("chan*", "ljh")
             else:
                 exampleFilename = ""
-            self.startedWriting(exampleFilename)
+            self.startedWriting(exampleFilename, message)
         else:
             self.stoppedWriting()
         self.updatePath(message["BasePath"])
@@ -119,13 +119,19 @@ class WritingControl(QtWidgets.QWidget):
         self.writingPauseButton.setEnabled(False)
         self.updateWritingActiveMessages()
 
-    def startedWriting(self, exampleFilename):
+    def startedWriting(self, exampleFilename, message):
         print("STARTED WRITING")
         self.writing = True
         self.writingStartButton.setText("Stop Writing")
         self.fileNameExampleEdit.setText(exampleFilename)
         self.writingCommentsButton.setEnabled(True)
         self.writingPauseButton.setEnabled(True)
+        for box, varname in zip(
+            (self.checkBox_LJH22, self.checkBox_LJH3, self.checkBox_OFF),
+            ("WriteLJH22", "WriteLJH3", "WriteOFF")
+        ):
+            if varname in message:
+                box.setChecked(message[varname])
         self.updateWritingActiveMessages()
 
     @pyqtSlot()
