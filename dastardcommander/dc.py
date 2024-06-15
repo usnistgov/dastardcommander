@@ -12,6 +12,7 @@ May 2018 -
 """
 
 # Non-Qt imports
+import argparse
 import json
 import subprocess
 import sys
@@ -1344,29 +1345,41 @@ def squeeze_whitespace(s):
 def version_message():
     "Convert auto-generated __version__ into a 4-line version message."
     try:
-        ver, gd = __version__.split("+")
+        parts = __version__.split("+")
+        ver = parts[0]
+        gd = ""
+        if len(parts) > 1:
+            gd = parts[1]
         lines = [
             f"This is Dastard Commander {__version__}",
             f"-> Version:    {ver}",
         ]
-        gdparts = gd.split(".")
-        for part in gdparts:
-            if part.startswith("g"):
-                lines.append(f"-> Git commit: {part[1:]}")
-            elif part.startswith("d"):
-                lines.append(f"-> Date:       {part[1:]}")
+        if gd:
+            gdparts = gd.split(".")
+            for part in gdparts:
+                if part.startswith("g"):
+                    lines.append(f"-> Git commit: {part[1:]}")
+                elif part.startswith("d"):
+                    lines.append(f"-> Date:       {part[1:]}")
         return "\n".join(lines)
     except Exception:
         return "This is Dastard Commander (version unknown)"
 
 
 def main():
+    parser = argparse.ArgumentParser(
+                    prog='Dastard commander',
+                    description='A GUI to control DASTARD'
+                    )
+    parser.add_argument("-v", "--version", action="store_true")
+    args = parser.parse_args()
     print(version_message())
+    if args.version:
+        return
 
     if sys.version_info.major <= 2:
-        print(
-            "WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***"
-        )
+        msg = "WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***"
+        print(msg)
     settings = QSettings("NIST Quantum Sensors", "dastardcommander")
 
     app = QtWidgets.QApplication(sys.argv)
