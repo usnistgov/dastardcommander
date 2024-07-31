@@ -1070,7 +1070,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         print("Starting Abaco")
         return True
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def updateBiasText(self):
         if self.unwrapBiasCheck.isChecked():
             if self.phasePosPulses.isChecked():
@@ -1081,7 +1081,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             label = "No bias: [-.50, +.50]"
         self.biasTextLabel.setText(label)
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def loadProjectorsBasis(self):
         if not hasattr(self, "lastdir"):
             startdir = os.path.expanduser("~")
@@ -1092,7 +1092,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             self.lastdir = os.path.dirname(fileName)
             projectors.sendProjectors(self, fileName, self.channel_names, self.client)
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def loadMix(self):
         options = QFileDialog.Options()
         if not hasattr(self, "lastdir_mix"):
@@ -1368,9 +1368,9 @@ def version_message():
 
 def main():
     parser = argparse.ArgumentParser(
-                    prog='Dastard commander',
-                    description='A GUI to control DASTARD'
-                    )
+        prog='Dastard commander',
+        description='A GUI to control DASTARD'
+    )
     parser.add_argument("-v", "--version", action="store_true")
     args = parser.parse_args()
     print(version_message())
