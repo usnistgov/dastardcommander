@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>718</width>
+    <width>770</width>
     <height>669</height>
    </rect>
   </property>
@@ -162,7 +162,7 @@
         <item>
          <widget class="QStackedWidget" name="dataSourcesStackedWidget">
           <property name="currentIndex">
-           <number>1</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="trianglePage">
            <layout class="QGridLayout" name="gridLayout_7">
@@ -515,7 +515,7 @@
                   <property name="lineWidth">
                    <number>1</number>
                   </property>
-                  <layout class="QVBoxLayout" name="chanNumberingLayout">
+                  <layout class="QVBoxLayout" name="verticalLayout_7">
                    <item>
                     <widget class="QLabel" name="chanNumberingLabel">
                      <property name="text">
@@ -533,6 +533,22 @@
                      </property>
                      <property name="checked">
                       <bool>true</bool>
+                     </property>
+                     <attribute name="buttonGroup">
+                      <string notr="true">buttonGroup</string>
+                     </attribute>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="channels0button">
+                     <property name="toolTip">
+                      <string>Number channels consecutively from 1</string>
+                     </property>
+                     <property name="text">
+                      <string>0...(N-1)</string>
+                     </property>
+                     <property name="checked">
+                      <bool>false</bool>
                      </property>
                      <attribute name="buttonGroup">
                       <string notr="true">buttonGroup</string>
@@ -1846,8 +1862,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>718</width>
-     <height>24</height>
+     <width>770</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuConnection">
