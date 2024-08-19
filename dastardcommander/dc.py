@@ -949,6 +949,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         chansep_columns = 0
         chansep_cards = 0
         firstrow = 1
+        if self.channels0button.isChecked():
+            firstrow=0
         if self.channels1kcardbutton.isChecked():
             chansep_cards = 1000
         if self.channels10kcard1kcolButton.isChecked():
