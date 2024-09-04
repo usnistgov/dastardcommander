@@ -96,8 +96,9 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.settings = settings
 
         QtWidgets.QMainWindow.__init__(self, parent)
-        self.setWindowIcon(QtGui.QIcon("dc.png"))
-        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/dc.ui"), self)
+        my_dir = os.path.dirname(__file__)
+        self.setWindowIcon(QtGui.QIcon(os.path.join(my_dir,"ui/dc.png")))
+        PyQt5.uic.loadUi(os.path.join(my_dir, "ui/dc.ui"), self)
 
         short_ver = __version__.split("+")[0]
         title = f"Dastard Commander ({short_ver})    Connected to {host}:{port}"
