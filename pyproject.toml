@@ -7,7 +7,7 @@ authors = [
     {name = "Galen O'Neilx", email = "galen.oneil@nist.gov"},
 ]
 dependencies = [
-    "pyqt",
+    "PyQt5",
     "h5py",
     "matplotlib",
     "numpy",
