@@ -14,6 +14,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
     class is new."""
 
     changedTriggerStateSig = pyqtSignal()
+    changedBlockList = pyqtSignal()
 
     def __init__(self, parent, client):
         QtWidgets.QWidget.__init__(self, parent)
@@ -342,6 +343,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
         assert len(self.triggerBlocker.special) == 0
         if changed:
             self.updateDisabledList()
+        self.changedBlockList.emit()
 
     @pyqtSlot()
     def updateDisabledList(self):

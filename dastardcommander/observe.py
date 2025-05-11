@@ -107,6 +107,8 @@ class Observe(QtWidgets.QWidget):
             self.label_experimentState,
             self,
         )
+        self.blocklist_changed.connect(self.updateDisabledCount)
+
 
     blocklist_changed = pyqtSignal()
     block_channel = pyqtSignal(int)
@@ -182,6 +184,7 @@ class Observe(QtWidgets.QWidget):
         prevCB = self.colorbarLayout.itemAt(1)
         self.colorbarLayout.removeItem(prevCB)
         self.colorbarLayout.insertWidget(1, self.crm_grid.colorbar)
+        self.updateDisabledCount()
 
     def deleteCRMGrid(self):
         if self.crm_grid is not None:
@@ -235,6 +238,13 @@ class Observe(QtWidgets.QWidget):
             if map is None:
                 continue
             map.enableAllChannels()
+
+    @pyqtSlot()    
+    def updateDisabledCount(self):
+        ndisabled = len(self.triggerBlocker.special)
+        n = len(self.channel_names)        
+        msg = f"{ndisabled} channels disabled of {n} total"
+        self.label_disabled_count.setText(msg)
 
     def handleAutoScaleClicked(self):
         self.doubleSpinBox_colorScale.setEnabled(
