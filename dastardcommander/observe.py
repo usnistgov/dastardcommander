@@ -242,8 +242,9 @@ class Observe(QtWidgets.QWidget):
     @pyqtSlot()    
     def updateDisabledCount(self):
         ndisabled = len(self.triggerBlocker.special)
-        n = len(self.channel_names)        
-        msg = f"{ndisabled} channels disabled of {n} total"
+        n = len(self.channel_names)    
+        nenabled = n-ndisabled    
+        msg = f"{ndisabled} disabled, {nenabled} enabled of {n} channels"
         self.label_disabled_count.setText(msg)
 
     def handleAutoScaleClicked(self):
