@@ -91,7 +91,7 @@
          <widget class="QComboBox" name="comboBox_twoTriggers">
           <item>
            <property name="text">
-            <string>Zero Records</string>
+            <string>Zero records</string>
            </property>
           </item>
           <item>
@@ -102,6 +102,11 @@
           <item>
            <property name="text">
             <string>Two overlapping full length records</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>One record with pileup</string>
            </property>
           </item>
          </widget>

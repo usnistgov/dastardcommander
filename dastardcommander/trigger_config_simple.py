@@ -22,6 +22,7 @@ class TwoPulseChoice(Enum):
     NO_RECORD = 0
     CONTAMINATED = 1
     VARIABLE_LENGTH = 2
+    ONE_RECORD = 3
 
     def to_str(self):
         if self == TwoPulseChoice.NO_RECORD:
@@ -30,6 +31,8 @@ class TwoPulseChoice(Enum):
             return "Two overlapping full length records"
         elif self == TwoPulseChoice.VARIABLE_LENGTH:
             return "Two shorter records"
+        elif self == TwoPulseChoice.ONE_RECORD:
+            return "One record with pileup"
         else:
             raise Exception()
 
@@ -122,6 +125,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
             "EdgeMultiMakeShortRecords": s == TwoPulseChoice.VARIABLE_LENGTH.to_str(),
             "EdgeMultiMakeContaminatedRecords": s
             == TwoPulseChoice.CONTAMINATED.to_str(),
+            "EdgeMultiMakeSingleRecords": s == TwoPulseChoice.ONE_RECORD.to_str(),
             "EdgeMultiVerifyNMonotone": self.spinBox_nMonotone.value(),
             "EdgeMultiLevel": self.spinBox_level.value(),
             "EdgeMultiDisableZeroThreshold": self.checkBox_disableZeroThreshold.isChecked(),
