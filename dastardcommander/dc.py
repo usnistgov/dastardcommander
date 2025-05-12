@@ -175,6 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             cdb.clicked.connect(tab.pushedClearDisabled)
         self.observeTab.blocklist_changed.connect(self.triggerTab.updateDisabledList)
         self.observeTab.block_channel.connect(self.triggerTab.blockTriggering)
+        self.triggerTab.changedBlockList.connect(self.observeTab.updateDisabledCount)
         self.triggerTab.updateDisabledList()
         self.lastTriggerRateMessage = (-1, {})
 
