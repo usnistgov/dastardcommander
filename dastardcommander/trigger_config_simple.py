@@ -210,12 +210,27 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         exclude the TDM error channels).
         If `exclude_blocked` is true, also exclude any listed in the self.triggerBlocker.special
         list of disabled channels.
+
+        If any channel numbers are blocked, but don't exist, we assume the channel numbering
+        has changed. Therefore, delete the blocked list.
         """
         signal_indices = self.dcom.channelIndicesSignalOnly()
         if not exclude_blocked:
             return signal_indices
         sigset = set(signal_indices)
         blocked_numbers = self.triggerBlocker.special
+
+        # Check for blocked channels that are no longer valid channel numbers. If any are found,
+        # reset the blocked index list. Fixes #159.
+        for n in blocked_numbers:
+            if n not in self.channel_indices:
+                print("**** WARNING:")
+                print(f"\tChannel {n} is in the list to be blocked but is not a valid channel number.")
+                print("\tThis is probably because the list of blocked channels is out of date.")
+                print("\tResetting the disabled-channel list.")
+                self.triggerBlocker.clear()
+                return signal_indices
+
         blocked_indices = [self.channel_indices[n] for n in blocked_numbers]
         enabled_indices = list(sigset - set(blocked_indices))
         if len(enabled_indices) < len(sigset):
