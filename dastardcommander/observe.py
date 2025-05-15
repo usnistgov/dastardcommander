@@ -109,7 +109,6 @@ class Observe(QtWidgets.QWidget):
         )
         self.blocklist_changed.connect(self.updateDisabledCount)
 
-
     blocklist_changed = pyqtSignal()
     block_channel = pyqtSignal(int)
 
@@ -239,11 +238,11 @@ class Observe(QtWidgets.QWidget):
                 continue
             map.enableAllChannels()
 
-    @pyqtSlot()    
+    @pyqtSlot()
     def updateDisabledCount(self):
         ndisabled = len(self.triggerBlocker.special)
-        n = len(self.channel_names)    
-        nenabled = n-ndisabled    
+        n = len(self.channel_names)
+        nenabled = n - ndisabled
         msg = f"{ndisabled} disabled, {nenabled} enabled of {n} channels"
         self.label_disabled_count.setText(msg)
 
