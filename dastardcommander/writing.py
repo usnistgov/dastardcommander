@@ -80,8 +80,17 @@ class WritingControl(QtWidgets.QWidget):
             written_message += f" ({pct:.2f}% of the automatic shutoff value)"
             if Nmax > 0 and Nwritten >= Nmax and self.writing:
                 self.stop()
-        self.label_numberWritten.setText("Number Written Total: {}\nNumber Written by Channel: {}".format(
-            written_message, d["NumberWritten"]))
+
+        labeltext = [f"Number Written Total: {written_message}",
+                     "Number Written by Channel:"]
+        nw = d["NumberWritten"]
+        nitems = len(nw)
+        nperline = 16
+        for i in range(1 + (nitems-1) // nperline):
+            items = " ".join([f"{x:6d}" for x in nw[nperline*i:nperline*(i+1)]])
+            labeltext.append(f"\t{items}")
+        print(labeltext)
+        self.label_numberWritten.setText("\n".join(labeltext))
 
     def start(self):
         if self.writing:
