@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>788</width>
-    <height>688</height>
+    <width>802</width>
+    <height>528</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -39,21 +39,27 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QFrame" name="recordSizeFrame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="frameShape">
         <enum>QFrame::Panel</enum>
        </property>
        <layout class="QGridLayout" name="recordDetailLayout">
         <property name="leftMargin">
-         <number>3</number>
+         <number>12</number>
         </property>
         <property name="topMargin">
-         <number>3</number>
+         <number>6</number>
         </property>
         <property name="rightMargin">
-         <number>3</number>
+         <number>12</number>
         </property>
         <property name="bottomMargin">
-         <number>3</number>
+         <number>6</number>
         </property>
         <property name="horizontalSpacing">
          <number>6</number>
@@ -61,33 +67,17 @@
         <property name="verticalSpacing">
          <number>4</number>
         </property>
-        <item row="2" column="1">
-         <widget class="QLabel" name="pretrigLengthLabel">
-          <property name="text">
-           <string>Pretrigger samples</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0" colspan="2">
-         <widget class="QLabel" name="label_19">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Record size</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="1">
          <widget class="QLabel" name="recordLengthLabel">
           <property name="text">
            <string>Samples per record</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="pretrigLengthLabel">
+          <property name="text">
+           <string>Pretrigger samples</string>
           </property>
          </widget>
         </item>
@@ -119,6 +109,19 @@
            <string>% Pretrigger</string>
           </property>
          </widget>
+        </item>
+        <item row="4" column="1">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item row="2" column="0">
          <widget class="QSpinBox" name="pretrigLengthSpinBox">
@@ -155,174 +158,182 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
+        <item row="0" column="0" colspan="2">
+         <widget class="QLabel" name="label_19">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
+          <property name="text">
+           <string>Record size</string>
           </property>
-         </spacer>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="channelsChosenLayout">
-       <property name="leftMargin">
-        <number>2</number>
+      <widget class="QFrame" name="horizontalFrame_2">
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
        </property>
-       <property name="topMargin">
-        <number>2</number>
-       </property>
-       <property name="rightMargin">
-        <number>2</number>
-       </property>
-       <property name="bottomMargin">
-        <number>2</number>
-       </property>
-       <item>
-        <widget class="QFrame" name="horizontalFrame_2">
-         <property name="frameShape">
-          <enum>QFrame::Panel</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_4" columnstretch="2,1">
-          <item row="1" column="0">
-           <widget class="QPlainTextEdit" name="channelsChosenEdit">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-              <horstretch>2</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>160</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>160</width>
-              <height>10</height>
-             </size>
-            </property>
-            <property name="tabChangesFocus">
-             <bool>true</bool>
-            </property>
-           </widget>
+       <layout class="QGridLayout" name="gridLayout_4" columnstretch="2,0">
+        <property name="leftMargin">
+         <number>12</number>
+        </property>
+        <property name="topMargin">
+         <number>6</number>
+        </property>
+        <property name="rightMargin">
+         <number>12</number>
+        </property>
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
+        <item row="1" column="0">
+         <widget class="QPlainTextEdit" name="channelsChosenEdit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>160</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="sizeIncrement">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>160</width>
+            <height>10</height>
+           </size>
+          </property>
+          <property name="tabChangesFocus">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QComboBox" name="channelChooserBox">
+          <property name="toolTip">
+           <string>Fill the channel list (above) with standard groupings</string>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>user defined</string>
+           </property>
           </item>
-          <item row="1" column="1">
-           <widget class="QPlainTextEdit" name="disabledTextEdit">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>100</width>
-              <height>10</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Channels not allowed to trigger (toggle single channels in Observe tab)</string>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-            <property name="plainText">
-             <string>All channels are enabled</string>
-            </property>
-           </widget>
+          <item>
+           <property name="text">
+            <string>All channels</string>
+           </property>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="channelsChosenLabel">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Channels chosen:</string>
-            </property>
-           </widget>
+          <item>
+           <property name="text">
+            <string>Signal channels</string>
+           </property>
           </item>
-          <item row="2" column="0">
-           <widget class="QComboBox" name="channelChooserBox">
-            <property name="toolTip">
-             <string>Fill the channel list (above) with standard groupings</string>
-            </property>
-            <property name="currentIndex">
-             <number>0</number>
-            </property>
-            <item>
-             <property name="text">
-              <string>user defined</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>All channels</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Signal channels</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>TDM error channels</string>
-             </property>
-            </item>
-           </widget>
+          <item>
+           <property name="text">
+            <string>TDM error channels</string>
+           </property>
           </item>
-          <item row="2" column="1">
-           <widget class="QPushButton" name="clearDisabledButton">
-            <property name="toolTip">
-             <string>Clear the list of disabled channels</string>
-            </property>
-            <property name="text">
-             <string>Enable all channels</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="disable_label">
-            <property name="text">
-             <string>Disabled channels (never trigger):</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPlainTextEdit" name="disabledTextEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>10</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Channels not allowed to trigger (toggle single channels in Observe tab)</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="plainText">
+           <string>All channels are enabled</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="clearDisabledButton">
+          <property name="toolTip">
+           <string>Clear the list of disabled channels</string>
+          </property>
+          <property name="text">
+           <string>Enable all channels</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="disable_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Disabled channels (never trigger):</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="channelsChosenLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Channels chosen:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </item>
     </layout>
    </item>
@@ -830,60 +841,15 @@
         </item>
        </layout>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Group Triggering</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="groupTriggerActiveSrc">
-          <property name="text">
-           <string>Active group trigger sources: &lt;none&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="groupTriggerActiveRx">
-          <property name="text">
-           <string>Active group trigger receivers: &lt;none&gt;</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="7" column="0">
-       <layout class="QGridLayout" name="couplingGridLayout" columnstretch="0,0" columnminimumwidth="0,0">
+      <item row="6" column="0">
+       <layout class="QGridLayout" name="couplingGridLayout" columnstretch="3,1" columnminimumwidth="0,0">
         <property name="topMargin">
          <number>2</number>
         </property>
         <property name="bottomMargin">
          <number>2</number>
         </property>
-        <item row="0" column="0">
-         <widget class="QCheckBox" name="coupleFBToErrCheckBox">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="toolTip">
-           <string>If checked, any trigger in a FB channel will also trigger
-the corresponding Error chan (Lancero only).</string>
-          </property>
-          <property name="text">
-           <string>Couple Feedback --&gt; Error (for SQUID checking)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
+        <item row="1" column="1">
          <widget class="QCheckBox" name="coupleErrToFBCheckBox">
           <property name="enabled">
            <bool>false</bool>
@@ -897,7 +863,35 @@ trigger the corresponding FB chan (Lancero only).</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
+        <item row="0" column="1">
+         <widget class="QCheckBox" name="coupleFBToErrCheckBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>If checked, any trigger in a FB channel will also trigger
+the corresponding Error chan (Lancero only).</string>
+          </property>
+          <property name="text">
+           <string>Couple Feedback --&gt; Error (SQUID checks)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="groupTriggerActiveRx">
+          <property name="text">
+           <string>Active group trigger receivers: &lt;none&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="groupTriggerActiveSrc">
+          <property name="text">
+           <string>Active group trigger sources: &lt;none&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
          <widget class="QPushButton" name="groupTriggerClearAll">
           <property name="text">
            <string>Clear all group triggers and coupling</string>
@@ -905,6 +899,16 @@ trigger the corresponding FB chan (Lancero only).</string>
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Group Triggering</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -925,8 +929,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedAutoTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>161</x>
-     <y>370</y>
+     <x>175</x>
+     <y>267</y>
     </hint>
     <hint type="destinationlabel">
      <x>138</x>
@@ -941,8 +945,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedAutoTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>660</x>
-     <y>370</y>
+     <x>471</x>
+     <y>267</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -957,8 +961,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>161</x>
-     <y>399</y>
+     <x>175</x>
+     <y>296</y>
     </hint>
     <hint type="destinationlabel">
      <x>106</x>
@@ -973,8 +977,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>660</x>
-     <y>399</y>
+     <x>471</x>
+     <y>296</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -989,8 +993,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>660</x>
-     <y>434</y>
+     <x>471</x>
+     <y>331</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1005,8 +1009,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>299</x>
-     <y>441</y>
+     <x>298</x>
+     <y>338</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1021,8 +1025,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>161</x>
-     <y>425</y>
+     <x>175</x>
+     <y>322</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1037,8 +1041,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedEdgeTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>161</x>
-     <y>444</y>
+     <x>175</x>
+     <y>341</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -1101,8 +1105,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedLevelTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>299</x>
-     <y>406</y>
+     <x>298</x>
+     <y>303</y>
     </hint>
     <hint type="destinationlabel">
      <x>308</x>
@@ -1117,8 +1121,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedLevelUnits()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>778</x>
-     <y>347</y>
+     <x>589</x>
+     <y>244</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>
@@ -1133,8 +1137,8 @@ trigger the corresponding FB chan (Lancero only).</string>
    <slot>changedAutoTrigConfig()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>239</x>
-     <y>364</y>
+     <x>295</x>
+     <y>267</y>
     </hint>
     <hint type="destinationlabel">
      <x>217</x>
