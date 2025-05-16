@@ -97,7 +97,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
 
         QtWidgets.QMainWindow.__init__(self, parent)
         my_dir = os.path.dirname(__file__)
-        self.setWindowIcon(QtGui.QIcon(os.path.join(my_dir,"ui/dc.png")))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(my_dir, "ui/dc.png")))
         PyQt5.uic.loadUi(os.path.join(my_dir, "ui/dc.ui"), self)
 
         short_ver = __version__.split("+")[0]
@@ -952,7 +952,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         chansep_cards = 0
         firstrow = 1
         if self.channels0button.isChecked():
-            firstrow=0
+            firstrow = 0
         if self.channels1kcardbutton.isChecked():
             chansep_cards = 1000
         if self.channels10kcard1kcolButton.isChecked():
