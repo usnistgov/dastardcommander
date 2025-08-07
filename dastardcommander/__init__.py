@@ -1,6 +1,6 @@
 """Top-level package for Realtime GUI."""
 
-from . import dc
+# from . import dc # dont import dc here because it causes problem when importing EasyClientDastard from ipython
 __all__ = ["dc", "rpc_client"]
 
 try:
@@ -9,3 +9,5 @@ try:
 except ImportError:
     __version__ = "unknown version"
     version_tuple = (0, 0, "unknown version")
+
+from .easy_client_dastard import EasyClientDastard
