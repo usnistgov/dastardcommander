@@ -208,7 +208,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.phaseNegPulses.clicked.connect(self.updateBiasText)
         self.unwrapBiasCheck.clicked.connect(self.updateBiasText)
 
-        self.quietTopics = {"TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", "DATADROP", "ALIVE"}
+        self.quietTopics = {"TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", 
+                            "DATADROP", "ALIVE", "RAWDATABLOCK"}
 
         # The ZMQ update monitor. Must run in its own QThread.
         self.nmsg = 0
