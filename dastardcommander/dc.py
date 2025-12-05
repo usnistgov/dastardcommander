@@ -1371,6 +1371,8 @@ def version_message():
 
 
 def main():
+    from .buffer_rmem import rmem_check_command_line_instructions
+    rmem_check_command_line_instructions()
     parser = argparse.ArgumentParser(
         prog='Dastard commander',
         description='A GUI to control DASTARD'

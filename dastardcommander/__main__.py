@@ -1,3 +1,5 @@
 import dastardcommander
 import dastardcommander.dc
+from .buffer_rmem import rmem_check_command_line_instructions
+rmem_check_command_line_instructions()
 dastardcommander.dc.main()
