@@ -228,7 +228,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         QtCore.QTimer.singleShot(0, self.zmqthread.start)
 
         # A timer to monitor for the heartbeat. If this ever times out, it's because
-        # too long has elapsed without receiving a heartbeat from Dstard.  Then we
+        # too long has elapsed without receiving a heartbeat from Dastard.  Then we
         # have to close the main window.
         self.hbTimer = QtCore.QTimer()
         deadDastardMsg = "missing heartbeat: Dastard server has stopped (or disconnected)"
