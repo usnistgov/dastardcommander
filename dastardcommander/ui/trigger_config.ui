@@ -798,7 +798,10 @@
            <string>Let this channel cause group triggers</string>
           </property>
           <property name="maximum">
-           <number>9999</number>
+           <number>65535</number>
+          </property>
+          <property name="minimum">
+           <number>0</number>
           </property>
           <property name="value">
            <number>1</number>
