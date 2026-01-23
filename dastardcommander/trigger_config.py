@@ -5,6 +5,14 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 
 # other non qt imports
 import os
+import re
+
+
+def strip_non_numeric_prefix_regex(s):
+    "Use regex to strip any leading non-digit characters from s, returning the result"
+    # The pattern matches all non-digit characters (\\D) from the start (^)
+    # and replaces them with an empty string.
+    return re.sub(r'^\D*', '', s)
 
 
 class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
@@ -384,18 +392,21 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
             allrx.update(rx)
 
         # Update the two GUI labels that list the active sources and receivers
-        for cnum_set, name, gui_label in zip(
+        for chan_idx_set, name, gui_label in zip(
             (allsrc, allrx),
             ("sources", "receivers"),
             (self.groupTriggerActiveSrc, self.groupTriggerActiveRx),
         ):
             cnum_text = "<none>"
-            if len(cnum_set) > 0:
-                cnumbers = list(cnum_set)
-                cnumbers.sort()
-                cnum_list = [str(x) for x in cnumbers]
+            if len(chan_idx_set) > 0:
+                chanindices = [int(c) for c in chan_idx_set]
+                chanindices.sort()
+                # Convert channel indices (in the message) to channel numbers (for the GUI). See issue #173.
+                names = [self.channel_names[idx] for idx in chanindices]
+                cnum_list = list(map(strip_non_numeric_prefix_regex, names))
+
                 # Truncate a too-long list (replace last with ellipsis)
-                if len(cnumbers) > 35:
+                if len(cnum_list) >= 35:
                     cnum_list = cnum_list[:35]
                     cnum_list[-1] = "..."
                 cnum_text = "[{:}]".format(",".join(cnum_list))
