@@ -318,18 +318,22 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
         # Parse trigger list
         rx = self.groupTriggerReceivers.text()
         rxsplit = rx.replace(",", " ").split()  # split on comma and/or white space
-        rx_channums = []
+        rx_chanindices = []
         for x in rxsplit:
             try:
-                rx_channums.append(int(x))
+                cnum = int(x)
+                idx = self.channel_indices[cnum]
+                rx_chanindices.append(idx)
             except ValueError:
                 pass
-        if len(rx_channums) == 0:
+        if len(rx_chanindices) == 0:
             me = "TriggerConfig.changeGroupTrigger"
             print(f"{me}: Could not parse channel list '{rx}'")
             return
         sourcenum = self.groupTriggerSource.value()
-        state = {"Connections": {sourcenum: rx_channums}}
+        sourceidx = self.channel_indices[sourcenum]
+        # rx_chanindices = [self.channel_indices[c] for c in rx_channums]
+        state = {"Connections": {sourceidx: rx_chanindices}}
         request = "SourceControl.AddGroupTriggerCoupling"
         if not add:
             request = "SourceControl.DeleteGroupTriggerCoupling"
@@ -401,6 +405,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
             if len(chan_idx_set) > 0:
                 chanindices = [int(c) for c in chan_idx_set]
                 chanindices.sort()
+
                 # Convert channel indices (in the message) to channel numbers (for the GUI). See issue #173.
                 names = [self.channel_names[idx] for idx in chanindices]
                 cnum_list = list(map(strip_non_numeric_prefix_regex, names))

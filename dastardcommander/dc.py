@@ -191,6 +191,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.channel_indices = {}  # a map from channel number to index
         self.triggerTabSimple.channel_indices = self.channel_indices
         self.triggerTab.channel_names = self.channel_names
+        self.triggerTab.channel_indices = self.channel_indices
         self.observeTab.channel_names = self.channel_names
         self.observeWindow.channel_names = self.channel_names
         self.triggerTab.channel_prefixes = self.channel_prefixes
