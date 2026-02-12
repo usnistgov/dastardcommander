@@ -191,6 +191,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.channel_indices = {}  # a map from channel number to index
         self.triggerTabSimple.channel_indices = self.channel_indices
         self.triggerTab.channel_names = self.channel_names
+        self.triggerTab.channel_indices = self.channel_indices
         self.observeTab.channel_names = self.channel_names
         self.observeWindow.channel_names = self.channel_names
         self.triggerTab.channel_prefixes = self.channel_prefixes
@@ -208,7 +209,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.phaseNegPulses.clicked.connect(self.updateBiasText)
         self.unwrapBiasCheck.clicked.connect(self.updateBiasText)
 
-        self.quietTopics = {"TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER", 
+        self.quietTopics = {"TRIGGERRATE", "NUMBERWRITTEN", "EXTERNALTRIGGER",
                             "DATADROP", "ALIVE", "RAWDATABLOCK"}
 
         # The ZMQ update monitor. Must run in its own QThread.
@@ -232,7 +233,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         # have to close the main window.
         self.hbTimer = QtCore.QTimer()
         deadDastardMsg = "missing heartbeat: Dastard server has stopped (or disconnected)"
-        self.hbTimer.timeout.connect(lambda: self.closeReconnect(deadDastardMsg))            
+        self.hbTimer.timeout.connect(lambda: self.closeReconnect(deadDastardMsg))
         self.hbTimeout = 5000  # that is, 5000 ms
         self.hbTimer.start(self.hbTimeout)
         self.fullyConfigured = False
@@ -412,6 +413,10 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             elif topic == "STATELABEL":
                 self.observeTab.ExperimentStateIncrementer.updateLabel(d)
                 self.observeWindow.ExperimentStateIncrementer.updateLabel(d)
+
+            elif topic == "DATADROP":
+                # Silently ignore
+                pass
 
             else:
                 print(f"{topic} is not a topic we handle yet.")
