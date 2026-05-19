@@ -1,6 +1,6 @@
 # Qt5 imports
 import PyQt5.uic
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QSettings
 from PyQt5 import QtWidgets
 
 # other non  user imports
@@ -37,8 +37,14 @@ class WritingControl(QtWidgets.QWidget):
         self.dbInfoButton.clicked.connect(self.updateDBInfo)
 
         # DB info for the dataruns table
-        self.dataruns_info = {"Users": "test users", "Sample": "no sample", "Purpose": "unknown", "Intention": "testing"}
+        self.settings = QSettings()
         self.dataruns_info_valid = False
+        self.dataruns_info = {
+            "Users": self.settings.value("users", "unknown users"),
+            "Sample": self.settings.value("sample", "no sample"),
+            "Purpose": self.settings.value("purpose", "unknown"),
+            "Intention": self.settings.value("intention", "unknown"),
+        }
 
         cbd = self.changeBaseDirectoryButton
         if host in {"localhost", "127.0.0.1"}:
@@ -236,8 +242,13 @@ class RunInfo(QtWidgets.QDialog):
         self.purpose_lineEdit.setText(parent.dataruns_info["Purpose"])
         self.sample_lineEdit.setText(parent.dataruns_info["Sample"])
         self.users_lineEdit.setText(parent.dataruns_info["Users"])
+        self.settings = parent.settings
 
     def get_datarun_info(self):
+        self.settings.setValue("intention", self.intention_comboBox.currentText())
+        self.settings.setValue("purpose", self.purpose_lineEdit.text())
+        self.settings.setValue("sample", self.sample_lineEdit.text())
+        self.settings.setValue("users", self.users_lineEdit.text())
         return {
             "Intention": self.intention_comboBox.currentText(),
             "Users": self.users_lineEdit.text(),
