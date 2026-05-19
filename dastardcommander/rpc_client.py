@@ -51,7 +51,7 @@ class JSONClient:
             raise ValueError(msg)
 
         if response.get("error") is not None:
-            message = "Request: {}\n\nError: {}".format(request, response.get("error"))
+            message = f"Request: {request}\n\nError: {response.get('error')}"
             if verbose:
                 print(message)
             if errorBox and self.qtParent is not None:

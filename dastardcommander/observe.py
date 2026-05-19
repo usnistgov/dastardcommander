@@ -39,7 +39,8 @@ class ExperimentStateIncrementer:
             return s
 
     def updateLabel(self, stateName):
-        self.label.setText("Current State: {} at {}".format(stateName, time.strftime("%H:%M:%S on %a")))
+        now = time.strftime("%H:%M:%S on %a")
+        self.label.setText(f"Current State: {stateName} at {now}")
 
     def handleNewStateButton(self):
         self.sendState(self.nextLabel())

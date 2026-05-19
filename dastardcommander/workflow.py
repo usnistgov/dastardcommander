@@ -31,7 +31,8 @@ class ProjectorCaller:
         if wait:
             returncode = p.wait()
             if returncode != 0:
-                raise OSError("return code on '{}': {}".format(" ".join(cmd), returncode))
+                fullcmd = " ".join(cmd)
+                raise OSError(f"return code on '{fullcmd}': {returncode}")
 
     def createBasis(self, pulseFile, noiseFile, invertPulses):
         args = ["--n_basis", "5", pulseFile, noiseFile]

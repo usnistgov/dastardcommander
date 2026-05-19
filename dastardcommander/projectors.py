@@ -135,7 +135,7 @@ def sendProjectors(qtparent, fileName, channel_names, client):
     # n_expected = np.sum([s.startswith("chan") for s in channel_names])
 
     for channelIndex, config in list(configs.items()):
-        # print("sending ProjectorsBasis for {}".format(channelIndex))
+        # print("sending ProjectorsBasis for channelIndex)
         okay, error = client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
         if okay:
             success_chans.append(channelIndex)

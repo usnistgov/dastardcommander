@@ -359,7 +359,8 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
         elif ndisabled == 1:
             msg = f"One channel is disabled: {self.triggerBlocker.special[0]}"
         else:
-            msg = "{} channels are disabled: {}".format(ndisabled, ",".join(map(str, self.triggerBlocker.special)))
+            disabled = ",".join(map(str, self.triggerBlocker.special))
+            msg = f"{ndisabled} channels are disabled: {disabled}"
         self.disabledTextEdit.setPlainText(msg)
         self.channelChooserChanged()  # update that text box
 
@@ -406,7 +407,8 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
                 if len(cnum_list) >= 35:
                     cnum_list = cnum_list[:35]
                     cnum_list[-1] = "..."
-                cnum_text = "[{:}]".format(",".join(cnum_list))
+                cnumbers = ",".join(cnum_list)
+                cnum_text = f"[{cnumbers}]"
             text = f"Active group trigger {name}: {cnum_text}"
             gui_label.setText(text)
 

@@ -1,6 +1,7 @@
 import json
 import itertools
 import socket
+from PyQt5 import QtWidgets
 
 DEBUG = True
 
@@ -45,7 +46,7 @@ class JSONClient:
             print(response)
 
         if response.get("id") != id:
-            raise Exception("expected id={}, received id={}: {}".format(id, response.get("id"), response.get("error")))
+            raise Exception(f"expected id={id}, received id={response.get('id')}: {response.get('error')}")
 
         if response.get("error") is not None:
             if verbose:
@@ -55,7 +56,8 @@ class JSONClient:
                 raise Exception(response.get("error"))
             else:
                 em = QtWidgets.QErrorMessage(self.qtParent)
-                em.showMessage("DASTARD Error: \n{}".format(response.get("error")))
+                error = response.get("error")
+                em.showMessage(f"DASTARD Error: \n{error}")
 
         return response.get("result")
 
