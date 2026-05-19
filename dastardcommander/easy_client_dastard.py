@@ -59,7 +59,7 @@ class EasyClientDastard:
         self.statusSub.setsockopt(zmq.RCVTIMEO, 1000)  # this doesn't seem to do anything
         self.statusSub.setsockopt(zmq.LINGER, 0)
         self.statusSub.connect(address)
-        print("Collecting updates from dastard at %s" % address)
+        print(f"Collecting updates from dastard at {address}")
         self.statusSub.setsockopt_string(zmq.SUBSCRIBE, "")
         self.messagesSeen = collections.Counter()
 
@@ -100,11 +100,11 @@ class EasyClientDastard:
 
     def _handleStatusMessage(self, topic, contents):
         if DEBUG:
-            print("topic=%s" % topic)
+            print(f"topic={topic}")
             print(contents)
-        if topic in ["CURRENTTIME"]:
+        if topic in {"CURRENTTIME"}:
             if DEBUG:
-                print("skipping topic %s" % topic)
+                print(f"skipping topic {topic}")
             return
         d = json.loads(contents)
         if DEBUG:
@@ -175,7 +175,7 @@ class EasyClientDastard:
         self.rpc.call("SourceControl.ConfigureMixFraction", config)
 
     def requestData(self, nsamples):
-        config = {"N": int(nsamples)}
+        {"N": int(nsamples)}
         result_npz_path = self.rpc.call("SourceControl.StoreRawDataBlock", nsamples)
         return result_npz_path
 

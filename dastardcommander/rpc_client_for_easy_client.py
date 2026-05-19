@@ -22,7 +22,7 @@ class JSONClient:
 
     def call(self, name, params, verbose=True):
         if self._closed:
-            print("%s(...) ignored because JSON-RPC client is closed." % name)
+            print(f"{name}(...) ignored because JSON-RPC client is closed.")
             return None
             # This might seem like it should be impossible to reach, but it is possible
             # because signals like editingFinished can trigger slots when you try
@@ -45,7 +45,7 @@ class JSONClient:
             print(response)
 
         if response.get("id") != id:
-            raise Exception("expected id=%s, received id=%s: %s" % (id, response.get("id"), response.get("error")))
+            raise Exception("expected id={}, received id={}: {}".format(id, response.get("id"), response.get("error")))
 
         if response.get("error") is not None:
             if verbose:
@@ -55,7 +55,7 @@ class JSONClient:
                 raise Exception(response.get("error"))
             else:
                 em = QtWidgets.QErrorMessage(self.qtParent)
-                em.showMessage("DASTARD Error: \n%s" % response.get("error"))
+                em.showMessage("DASTARD Error: \n{}".format(response.get("error")))
 
         return response.get("result")
 
