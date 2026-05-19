@@ -1,10 +1,10 @@
 from . import rpc_client_for_easy_client
-import numpy
-import zmq
-import time
 import collections
 import json
 import numpy as np
+import os
+import time
+import zmq
 
 DEBUG = True
 rpc_client_for_easy_client.DEBUG = False
@@ -55,7 +55,7 @@ class EasyClientDastard:
     def _connectStatusSub(self):
         """connect to the status update port of dastard"""
         self.statusSub = self.context.socket(zmq.SUB)
-        address = "tcp://%s:%d" % (self.host, self.baseport + 1)
+        address = f"tcp://{self.host}:{self.baseport + 1}"
         self.statusSub.setsockopt(zmq.RCVTIMEO, 1000)  # this doesn't seem to do anything
         self.statusSub.setsockopt(zmq.LINGER, 0)
         self.statusSub.connect(address)
@@ -66,7 +66,7 @@ class EasyClientDastard:
     def _connectRPC(self):
         """connect to the rpc port of dastard"""
         self.rpc = rpc_client_for_easy_client.JSONClient((self.host, self.baseport))
-        print("Dastard is at %s:%d" % (self.host, self.baseport))
+        print(f"Dastard is at {self.host}:{self.baseport}")
 
     def _getStatus(self):
         self._sourceRecieved = False
@@ -163,10 +163,10 @@ class EasyClientDastard:
 
     def setMix(self, mixFractions):
         if (
-            len(numpy.shape(mixFractions)) == 0
+            len(np.shape(mixFractions)) == 0
         ):  # voltage is a single number, make a array out of it, and set all channels to the same value
-            mixFractions = numpy.ones((self.numColumns, self.numRows)) * mixFractions
-        if not numpy.all(numpy.shape(mixFractions) == (self.numColumns, self.numRows)):
+            mixFractions = np.ones((self.numColumns, self.numRows)) * mixFractions
+        if not np.all(np.shape(mixFractions) == (self.numColumns, self.numRows)):
             raise ValueError("mixFractions should either a number or a list/array with (numColumns, numRows) elements")
         config = {
             "ChannelIndices": np.arange(1, self.numColumns * self.numRows * 2, 2).tolist(),
@@ -182,7 +182,6 @@ class EasyClientDastard:
     def getNewData(self, npts):
         npz_filename = self.requestData(npts)
         # wait for the file to exist
-        import os
 
         tstart = time.time()
         expect_s = self.samplePeriod * npts
@@ -223,7 +222,10 @@ class EasyClientDastard:
         return 1 / self.samplePeriod
 
     def __repr__(self):
-        return f"EasyClientDastard {self.ncol} columns X {self.nrow} rows, linePeriod {self.lsync}, clockMhz {self.clockMhz}, nsamp {self.nsamp}"
+        return (
+            f"EasyClientDastard {self.ncol} columns X {self.nrow} rows, "
+            + f"linePeriod {self.lsync}, clockMhz {self.clockMhz}, nsamp {self.nsamp}"
+        )
 
 
 if __name__ == "__main__":
