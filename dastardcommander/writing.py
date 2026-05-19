@@ -33,9 +33,11 @@ class WritingControl(QtWidgets.QWidget):
         self.writingPauseButton.clicked.connect(self.pause)
         self.checkBox_LJH22.clicked.connect(self.updateWritingActiveMessages)
         self.checkBox_OFF.clicked.connect(self.updateWritingActiveMessages)
+        self.dbInfoButton.clicked.connect(self.updateDBInfo)
 
         # DB info for the dataruns table
         self.dataruns_info = {"Users": "test users", "Sample": "no sample", "Purpose": "unknown", "Intention": "testing"}
+        self.dataruns_info_valid = False
 
         cbd = self.changeBaseDirectoryButton
         if host in {"localhost", "127.0.0.1"}:
@@ -115,8 +117,24 @@ class WritingControl(QtWidgets.QWidget):
                 "WriteLJH3": self.checkBox_LJH3.isChecked(),
                 "WriteOFF": self.checkBox_OFF.isChecked(),
             }
-            request.update(self.dataruns_info)
+            # If no valid dataruns info, try 3 times to get the user to fill in the dialog, then give up
+            ntries = 3
+            for _ in range(ntries):
+                if self.dataruns_info_valid:
+                    break
+                self.updateDBInfo()
+            if self.dataruns_info_valid:
+                request.update(self.dataruns_info)
 
+        self.client.call("SourceControl.WriteControl", request)
+
+    def changedbinfo(self):
+        if not self.writing:
+            return
+        request = {
+            "Request": "ChangeDBInfo",
+        }
+        request.update(self.dataruns_info)
         self.client.call("SourceControl.WriteControl", request)
 
     def stoppedWriting(self):
@@ -140,6 +158,17 @@ class WritingControl(QtWidgets.QWidget):
             if varname in message:
                 box.setChecked(message[varname])
         self.updateWritingActiveMessages()
+
+    @pyqtSlot()
+    def updateDBInfo(self):
+        dialog = RunInfo(self)
+        if dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            self.dataruns_info.update(dialog.get_datarun_info())
+            self.dataruns_info_valid = True
+            print(f"Data: {self.dataruns_info}")
+            if self.writing:
+                self.changedbinfo()
+            return
 
     @pyqtSlot()
     def updateWritingActiveMessages(self):
@@ -181,3 +210,23 @@ class WritingControl(QtWidgets.QWidget):
         dialog.setOption(QtWidgets.QInputDialog.UsePlainTextEditForTextInput)
         dialog.textValueSelected.connect(lambda x: self.client.call("SourceControl.WriteComment", dialog.textValue()))
         dialog.show()
+
+
+class RunInfo(QtWidgets.QDialog):
+    def __init__(self, parent):
+        super().__init__()
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/runinfo_dialog.ui"), self)
+        index = self.intention_comboBox.findText(parent.dataruns_info["Intention"])
+        index = max(index, 0)  # default to first item if text not found
+        self.intention_comboBox.setCurrentIndex(index)
+        self.purpose_lineEdit.setText(parent.dataruns_info["Purpose"])
+        self.sample_lineEdit.setText(parent.dataruns_info["Sample"])
+        self.users_lineEdit.setText(parent.dataruns_info["Users"])
+
+    def get_datarun_info(self):
+        return {
+            "Intention": self.intention_comboBox.currentText(),
+            "Users": self.users_lineEdit.text(),
+            "Purpose": self.purpose_lineEdit.text(),
+            "Sample": self.sample_lineEdit.text(),
+        }

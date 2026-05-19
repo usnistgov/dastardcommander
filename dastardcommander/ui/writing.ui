@@ -82,6 +82,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="dbInfoButton">
+       <property name="text">
+        <string>DB Info</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="writingCommentsButton">
        <property name="enabled">
         <bool>false</bool>
