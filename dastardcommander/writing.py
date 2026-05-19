@@ -23,6 +23,7 @@ class WritingControl(QtWidgets.QWidget):
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/writing.ui"), self)
         self.host = host
         self.writing = False
+        self.noisestate = False
         self.writingStartButton.setChecked(False)
         self.writingCommentsButton.setEnabled(False)
         self.writingPauseButton.setEnabled(False)
@@ -46,6 +47,18 @@ class WritingControl(QtWidgets.QWidget):
         else:
             cbd.setEnabled(False)
             cbd.setToolTip("Dialog to choose data writing path disabled for remote clients.")
+
+    @pyqtSlot()
+    def setNoiseState(self, isnoise):
+        self.noisestate = isnoise
+
+    @pyqtSlot()
+    def setNoiseMode(self):
+        self.noisestate = True
+
+    @pyqtSlot()
+    def setPulseMode(self):
+        self.noisestate = False
 
     def handleWritingMessage(self, message):
         print(message)
@@ -216,7 +229,11 @@ class RunInfo(QtWidgets.QDialog):
     def __init__(self, parent):
         super().__init__()
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/runinfo_dialog.ui"), self)
-        index = self.intention_comboBox.findText(parent.dataruns_info["Intention"])
+        self.noisestate = parent.noisestate
+        intention = parent.dataruns_info["Intention"]
+        if intention in {"Pulses", "Noise"}:
+            intention = "Pulses / Noise"
+        index = self.intention_comboBox.findText(intention)
         index = max(index, 0)  # default to first item if text not found
         self.intention_comboBox.setCurrentIndex(index)
         self.purpose_lineEdit.setText(parent.dataruns_info["Purpose"])
@@ -224,8 +241,11 @@ class RunInfo(QtWidgets.QDialog):
         self.users_lineEdit.setText(parent.dataruns_info["Users"])
 
     def get_datarun_info(self):
+        intention = self.intention_comboBox.currentText()
+        if intention == "Pulses / Noise":
+            intention = "Noise" if self.noisestate else "Pulses"
         return {
-            "Intention": self.intention_comboBox.currentText(),
+            "Intention": intention,
             "Users": self.users_lineEdit.text(),
             "Purpose": self.purpose_lineEdit.text(),
             "Sample": self.sample_lineEdit.text(),
