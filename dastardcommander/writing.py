@@ -49,10 +49,6 @@ class WritingControl(QtWidgets.QWidget):
             cbd.setToolTip("Dialog to choose data writing path disabled for remote clients.")
 
     @pyqtSlot()
-    def setNoiseState(self, isnoise):
-        self.noisestate = isnoise
-
-    @pyqtSlot()
     def setNoiseMode(self):
         self.noisestate = True
 
@@ -138,6 +134,8 @@ class WritingControl(QtWidgets.QWidget):
                 self.updateDBInfo()
             if self.dataruns_info_valid:
                 request.update(self.dataruns_info)
+            if request["Intention"] == "Pulses / Noise":
+                request["Intention"] = "Noise" if self.noisestate else "Pulses"
 
         self.client.call("SourceControl.WriteControl", request)
 
@@ -229,7 +227,6 @@ class RunInfo(QtWidgets.QDialog):
     def __init__(self, parent):
         super().__init__()
         PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/runinfo_dialog.ui"), self)
-        self.noisestate = parent.noisestate
         intention = parent.dataruns_info["Intention"]
         if intention in {"Pulses", "Noise"}:
             intention = "Pulses / Noise"
@@ -241,11 +238,8 @@ class RunInfo(QtWidgets.QDialog):
         self.users_lineEdit.setText(parent.dataruns_info["Users"])
 
     def get_datarun_info(self):
-        intention = self.intention_comboBox.currentText()
-        if intention == "Pulses / Noise":
-            intention = "Noise" if self.noisestate else "Pulses"
         return {
-            "Intention": intention,
+            "Intention": self.intention_comboBox.currentText(),
             "Users": self.users_lineEdit.text(),
             "Purpose": self.purpose_lineEdit.text(),
             "Sample": self.sample_lineEdit.text(),

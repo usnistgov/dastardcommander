@@ -146,6 +146,10 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
 
         self.writingTab = writing.WritingControl(None, host, self.client)
         self.tabWriting.layout().addWidget(self.writingTab)
+        self.triggerTab.noiseModeButton.clicked.connect(self.writingTab.setNoiseMode)
+        self.triggerTab.pulseModeButton.clicked.connect(self.writingTab.setPulseMode)
+        self.triggerTabSimple.pushButton_sendNoise.clicked.connect(self.writingTab.setNoiseMode)
+        self.triggerTabSimple.pushButton_sendPulse.clicked.connect(self.writingTab.setPulseMode)
 
         self.observeWindow = observe.Observe(parent=None, host=host, client=self.client)
         self.observeTab = observe.Observe(parent=None, host=host, client=self.client)
@@ -168,6 +172,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
 
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
         self.workflowTab.projectorsLoadedSig.connect(self.writingTab.checkBox_OFF.setChecked)
+        self.workflowTab.pushButton_takeNoise.clicked.connect(self.writingTab.setNoiseMode)
+        self.workflowTab.pushButton_takePulses.clicked.connect(self.writingTab.setPulseMode)
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
