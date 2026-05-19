@@ -39,9 +39,7 @@ class ExperimentStateIncrementer:
             return s
 
     def updateLabel(self, stateName):
-        self.label.setText(
-            "Current State: {} at {}".format(stateName, time.strftime("%H:%M:%S on %a"))
-        )
+        self.label.setText("Current State: {} at {}".format(stateName, time.strftime("%H:%M:%S on %a")))
 
     def handleNewStateButton(self):
         self.sendState(self.nextLabel())
@@ -51,9 +49,7 @@ class ExperimentStateIncrementer:
             "Label": stateName,
             "WaitForError": True,
         }
-        _, err = self.parent.client.call(
-            "SourceControl.SetExperimentStateLabel", config
-        )
+        _, err = self.parent.client.call("SourceControl.SetExperimentStateLabel", config)
         if err:
             return
         self.updateLabel(stateName)
@@ -195,9 +191,7 @@ class Observe(QtWidgets.QWidget):
         self.deleteCRMMap()
         print(f"Building CountRateMap with {self.ngroups} channel groups")
         print(f"There are {len(self.channel_names)} channel names.")
-        self.crm_map = CountRateMap(
-            self, self.ngroups, self.chan_per_group, self.channel_names, xy=self.pixelMap
-        )
+        self.crm_map = CountRateMap(self, self.ngroups, self.chan_per_group, self.channel_names, xy=self.pixelMap)
         # if we build the crm_map before we know the source and know channel_names
         # (eg before a dastard source is started) we will need to rebuild it later
         self.MapTab.layout().addWidget(self.crm_map, 0)
@@ -247,16 +241,12 @@ class Observe(QtWidgets.QWidget):
         self.label_disabled_count.setText(msg)
 
     def handleAutoScaleClicked(self):
-        self.doubleSpinBox_colorScale.setEnabled(
-            not self.pushButton_autoScale.isChecked()
-        )
+        self.doubleSpinBox_colorScale.setEnabled(not self.pushButton_autoScale.isChecked())
         self.lastTotalRate = 0  # make sure auto scale actually happens
 
     def handleLoadMap(self):
         if self.host == "localhost":
-            file, _ = QtWidgets.QFileDialog.getOpenFileName(
-                self, "Select a TES map file", self.mapfile, "Maps (*.cfg *.txt)"
-            )
+            file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select a TES map file", self.mapfile, "Maps (*.cfg *.txt)")
             if not file:
                 return
         else:
@@ -281,17 +271,13 @@ class Observe(QtWidgets.QWidget):
         minx = np.min([p["X"] for p in msg["Pixels"]])
         maxy = np.max([p["Y"] for p in msg["Pixels"]])
         print("MinX = ", minx, " MaxY=", maxy)
-        self.pixelMap = [
-            ((p["X"] - minx) * scale, (maxy - p["Y"]) * scale) for p in msg["Pixels"]
-        ]
+        self.pixelMap = [((p["X"] - minx) * scale, (maxy - p["Y"]) * scale) for p in msg["Pixels"]]
         print("handleTESMap with spacing ", msg["Spacing"], " scale ", scale)
         self.buildCRMMap()
 
     def handleExternalTriggerMessage(self, msg):
         n = msg["NumberObservedInLastSecond"]
-        self.label_externalTriggersInLastSecond.setText(
-            f"{n} external triggers in last second"
-        )
+        self.label_externalTriggersInLastSecond.setText(f"{n} external triggers in last second")
 
     def handleWritingMessage(self, msg):
         if msg["Active"]:
@@ -409,9 +395,7 @@ class CountRateMap(QtWidgets.QScrollArea):
         button.triggers_blocked = True
         button.setFont(self.disabledFont)
         button.setText("X")
-        colorString = (
-            f"QPushButton {{color: {self.disabledForeground}; background-color : {self.disabledColor};}}"
-        )
+        colorString = f"QPushButton {{color: {self.disabledForeground}; background-color : {self.disabledColor};}}"
         button.setStyleSheet(colorString)
         tt = button.toolTip()
         if "DISABLED" not in tt:
@@ -434,7 +418,7 @@ class CountRateMap(QtWidgets.QScrollArea):
 
     def enableAllChannels(self):
         """The list of blocked channels has been cleared. Enable all GUI elements."""
-        for (name, button) in self.named_buttons.items():
+        for name, button in self.named_buttons.items():
             if button.triggers_blocked:
                 self.setButtonEnabled(name)
 

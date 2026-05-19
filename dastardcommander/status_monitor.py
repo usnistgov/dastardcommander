@@ -10,7 +10,6 @@ class ZMQListener(QtCore.QObject):
     pulserecord = QtCore.pyqtSignal(bytes, bytes)
 
     def __init__(self, host, port):
-
         QtCore.QObject.__init__(self)
 
         # Socket to talk to server

@@ -7,7 +7,6 @@ from PyQt5.QtCore import pyqtSlot, pyqtSignal
 
 
 class DisableHyperDialog(QtWidgets.QDialog):
-
     dataComplete = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -19,7 +18,8 @@ class DisableHyperDialog(QtWidgets.QDialog):
 
         self.textBrowser.setReadOnly(True)
         self.startButton.clicked.connect(self.startConfiguration)
-#         self.dataComplete.connect(self.finishConfiguration)
+
+    #         self.dataComplete.connect(self.finishConfiguration)
 
     @pyqtSlot()
     def startConfiguration(self):

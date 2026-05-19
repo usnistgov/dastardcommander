@@ -12,7 +12,7 @@ def strip_non_numeric_prefix_regex(s):
     "Use regex to strip any leading non-digit characters from s, returning the result"
     # The pattern matches all non-digit characters (\\D) from the start (^)
     # and replaces them with an empty string.
-    return re.sub(r'^\D*', '', s)
+    return re.sub(r"^\D*", "", s)
 
 
 class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
@@ -27,16 +27,10 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
     def __init__(self, parent, client):
         QtWidgets.QWidget.__init__(self, parent)
         self.client = client
-        PyQt5.uic.loadUi(
-            os.path.join(os.path.dirname(__file__), "ui/trigger_config.ui"), self
-        )
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/trigger_config.ui"), self)
         self.recordLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
-        self.pretrigLengthSpinBox.editingFinished.connect(
-            self.sendRecordLengthsToServer
-        )
-        self.pretrigPercentSpinBox.editingFinished.connect(
-            self.sendRecordLengthsToServer
-        )
+        self.pretrigLengthSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
+        self.pretrigPercentSpinBox.editingFinished.connect(self.sendRecordLengthsToServer)
         self.channelChooserBox.activated.connect(self.channelChooserChanged)
         self.channelsChosenEdit.textChanged.connect(self.channelListTextChanged)
         self.auto1psModeButton.clicked.connect(self.go1psMode)
@@ -251,7 +245,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
             (self.edgeTrigActive, "EdgeTrigger"),
             (self.levelTrigActive, "LevelTrigger"),
         )
-        for (checkbox, name) in boxes:
+        for checkbox, name in boxes:
             state = self.getstate(name)
             if state is None:
                 checkbox.setTristate(True)
@@ -277,7 +271,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
             (self.edgeEdit, "EdgeLevel", edgescale),
             (self.levelEdit, "LevelLevel", levelscale),
         )
-        for (edit, name, scale) in edits:
+        for edit, name, scale in edits:
             state = self.getstate(name)
             if state is None:
                 edit.setText("")
@@ -290,7 +284,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
             self.autoVetoRange.setValue(avr)
 
         # Get the rising/falling/both/mixed state correct
-        for (riseFallComboBox, rising, falling) in (
+        for riseFallComboBox, rising, falling in (
             (self.levelRiseFallBoth, "LevelRising", "LevelFalling"),
             (self.edgeRiseFallBoth, "EdgeRising", "EdgeFalling"),
         ):
@@ -365,9 +359,7 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
         elif ndisabled == 1:
             msg = f"One channel is disabled: {self.triggerBlocker.special[0]}"
         else:
-            msg = "{} channels are disabled: {}".format(
-                ndisabled, ",".join(map(str, self.triggerBlocker.special))
-            )
+            msg = "{} channels are disabled: {}".format(ndisabled, ",".join(map(str, self.triggerBlocker.special)))
         self.disabledTextEdit.setPlainText(msg)
         self.channelChooserChanged()  # update that text box
 
@@ -594,6 +586,4 @@ class TriggerConfig(QtWidgets.QWidget):  # noqa: PLR0904
         if samp != self.lastRecordLength or presamp != self.lastPretrigLength:
             self.lastRecordLength = samp
             self.lastPretrigLength = presamp
-            self.client.call(
-                "SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp}
-            )
+            self.client.call("SourceControl.ConfigurePulseLengths", {"Nsamp": samp, "Npre": presamp})

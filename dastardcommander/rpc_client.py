@@ -6,7 +6,6 @@ from PyQt5 import QtWidgets
 
 
 class JSONClient:
-
     def __init__(self, addr, codec=json, qtParent=None):
         self._socket = socket.create_connection(addr)
         self._socket.settimeout(7.0)
@@ -16,13 +15,11 @@ class JSONClient:
         self.qtParent = qtParent
 
     def setQtParent(self, qtParent):
-        """ let this know about Qt so it can pop-up error messages"""
+        """let this know about Qt so it can pop-up error messages"""
         self.qtParent = qtParent
 
     def _message(self, name, params):
-        return dict(id=next(self._id_iter),
-                    params=[params],
-                    method=name)
+        return dict(id=next(self._id_iter), params=[params], method=name)
 
     def call(self, name, params, verbose=True, errorBox=True, throwError=False):
         if self._closed:
@@ -35,7 +32,7 @@ class JSONClient:
         if verbose:
             print(f"SEND {name} {json.dumps(params)}")
         request = self._message(name, params)
-        reqid = request.get('id')
+        reqid = request.get("id")
         msg = self._codec.dumps(request)
         self._socket.sendall(msg.encode())
 
@@ -49,12 +46,12 @@ class JSONClient:
             self.close()
             return None
 
-        if response.get('id') != reqid:
+        if response.get("id") != reqid:
             msg = f"JSON-RPC expected id={reqid}, received id={response.get('id')}: {response.get('error')}"
             raise ValueError(msg)
 
-        if response.get('error') is not None:
-            message = "Request: {}\n\nError: {}".format(request, response.get('error'))
+        if response.get("error") is not None:
+            message = "Request: {}\n\nError: {}".format(request, response.get("error"))
             if verbose:
                 print(message)
             if errorBox and self.qtParent is not None:
@@ -68,7 +65,7 @@ class JSONClient:
                 raise Exception(message)
             else:
                 print("PANIC unhandled response.get(error)")
-        return response.get('result'), response.get("error")
+        return response.get("result"), response.get("error")
 
     def close(self):
         if not self._closed:

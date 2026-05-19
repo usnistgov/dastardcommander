@@ -77,9 +77,7 @@ class LevelTrigConfig(QtWidgets.QDialog):
 
     def launchRecordMonitor(self, channels_to_configure):
         positive = self.positivePulseButton.isChecked()
-        self.channels_seen = {
-            id: BaselineFinder(positive, self.recordsPerChan) for id in channels_to_configure
-        }
+        self.channels_seen = {id: BaselineFinder(positive, self.recordsPerChan) for id in channels_to_configure}
         self.nchanIncomplete = len(channels_to_configure)
         self.progressBar.setMaximum(self.recordsPerChan * self.nchanIncomplete)
         self.zmqthread = QtCore.QThread()

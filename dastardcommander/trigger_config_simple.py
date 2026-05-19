@@ -45,9 +45,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         self.client = dcom.client
         self.dcom = dcom
         self.settings = QSettings()
-        PyQt5.uic.loadUi(
-            os.path.join(os.path.dirname(__file__), "ui/trigger_config_simple.ui"), self
-        )
+        PyQt5.uic.loadUi(os.path.join(os.path.dirname(__file__), "ui/trigger_config_simple.ui"), self)
 
         self.readSettings()
         self.connect()
@@ -61,13 +59,9 @@ class TriggerConfigSimple(QtWidgets.QWidget):
             self.comboBox_twoTriggers.setItemText(i, t.to_str())
 
     def connect(self):
-        self.spinBox_recordLength.valueChanged.connect(
-            self.handleRecordLengthOrPercentPretrigChange
-        )
+        self.spinBox_recordLength.valueChanged.connect(self.handleRecordLengthOrPercentPretrigChange)
         self.spinBox_pretrigLength.valueChanged.connect(self.handlePretrigLengthChange)
-        self.spinBox_percentPretrigger.valueChanged.connect(
-            self.handleRecordLengthOrPercentPretrigChange
-        )
+        self.spinBox_percentPretrigger.valueChanged.connect(self.handleRecordLengthOrPercentPretrigChange)
         self.spinBox_level.valueChanged.connect(self.handleUIChange)
         self.spinBox_nMonotone.valueChanged.connect(self.handleUIChange)
         self.checkBox_disableZeroThreshold.stateChanged.connect(self.handleUIChange)
@@ -123,8 +117,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
             "EdgeMulti": True,
             "EdgeMultiNoise": False,
             "EdgeMultiMakeShortRecords": s == TwoPulseChoice.VARIABLE_LENGTH.to_str(),
-            "EdgeMultiMakeContaminatedRecords": s
-            == TwoPulseChoice.CONTAMINATED.to_str(),
+            "EdgeMultiMakeContaminatedRecords": s == TwoPulseChoice.CONTAMINATED.to_str(),
             "EdgeMultiMakeSingleRecords": s == TwoPulseChoice.ONE_RECORD.to_str(),
             "EdgeMultiVerifyNMonotone": self.spinBox_nMonotone.value(),
             "EdgeMultiLevel": self.spinBox_level.value(),
@@ -160,9 +153,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         s = self.settings
         self.spinBox_recordLength.setValue(int(s.value("record_length", 1024)))
         self.spinBox_pretrigLength.setValue(int(s.value("pretrigger_length", 512)))
-        self.spinBox_percentPretrigger.setValue(
-            float(s.value("percent_pretrigger", 25.0))
-        )
+        self.spinBox_percentPretrigger.setValue(float(s.value("percent_pretrigger", 25.0)))
         self.spinBox_level.setValue(int(s.value("level", 100)))
         self.spinBox_nMonotone.setValue(int(s.value("n_monotone", 5)))
         # apparently QSettings sucks with bools, so use an int for the following
@@ -234,8 +225,10 @@ class TriggerConfigSimple(QtWidgets.QWidget):
         blocked_indices = [self.channel_indices[n] for n in blocked_numbers]
         enabled_indices = list(sigset - set(blocked_indices))
         if len(enabled_indices) < len(sigset):
-            print(f"{len(enabled_indices)}/{len(sigset)} channels enabled and "
-                  f"{len(sigset) - len(enabled_indices)} disabled: {blocked_indices}")
+            print(
+                f"{len(enabled_indices)}/{len(sigset)} channels enabled and "
+                f"{len(sigset) - len(enabled_indices)} disabled: {blocked_indices}"
+            )
         else:
             print(f"All {len(enabled_indices)} channels are enabled.")
             print("The disabled list is: ", blocked_indices)
@@ -268,9 +261,7 @@ class TriggerConfigSimple(QtWidgets.QWidget):
 
     def handleSendProjectors(self):
         fileName = self.lineEdit_projectors.text()
-        success = projectors.sendProjectors(
-            self, fileName, self.dcom.channel_names, self.client
-        )
+        success = projectors.sendProjectors(self, fileName, self.dcom.channel_names, self.client)
         print(f"sendprojectors success success = {success}")
         if success:
             self.settings.setValue("projectors_file", self.lineEdit_projectors.text())

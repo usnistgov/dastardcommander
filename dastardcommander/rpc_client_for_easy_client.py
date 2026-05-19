@@ -1,25 +1,24 @@
 import json
 import itertools
 import socket
+
 DEBUG = True
 
+
 class JSONClient(object):
-    def __init__(self, addr, codec=json, qtParent = None):
+    def __init__(self, addr, codec=json, qtParent=None):
         self._socket = socket.create_connection(addr)
         self._id_iter = itertools.count()
         self._codec = codec
         self._closed = False
         self.qtParent = qtParent
 
-
     def setQtParent(self, qtParent):
-        """ let this know about Qt so it can pop-up error messages"""
+        """let this know about Qt so it can pop-up error messages"""
         self.qtParent = qtParent
 
     def _message(self, name, params):
-        return dict(id=next(self._id_iter),
-                    params=[params],
-                    method=name)
+        return dict(id=next(self._id_iter), params=[params], method=name)
 
     def call(self, name, params, verbose=True):
         if self._closed:
@@ -30,7 +29,7 @@ class JSONClient(object):
             # to close a window while editing a QLineEdit (see issue #22).
             # If you skip this test, you get a segfault; this will be graceful.
         request = self._message(name, params)
-        id = request.get('id')
+        id = request.get("id")
         msg = self._codec.dumps(request)
         self._socket.sendall(msg.encode())
         if DEBUG:
@@ -45,22 +44,20 @@ class JSONClient(object):
             print("response")
             print(response)
 
-        if response.get('id') != id:
-            raise Exception("expected id=%s, received id=%s: %s" %
-                            (id, response.get('id'),
-                             response.get('error')))
+        if response.get("id") != id:
+            raise Exception("expected id=%s, received id=%s: %s" % (id, response.get("id"), response.get("error")))
 
-        if response.get('error') is not None:
+        if response.get("error") is not None:
             if verbose:
                 print(("Yikes! Request is: ", request))
                 print(("Reponse is: ", response))
             if self.qtParent is None:
-                raise Exception(response.get('error'))
+                raise Exception(response.get("error"))
             else:
                 em = QtWidgets.QErrorMessage(self.qtParent)
-                em.showMessage("DASTARD Error: \n%s"%response.get('error'))
+                em.showMessage("DASTARD Error: \n%s" % response.get("error"))
 
-        return response.get('result')
+        return response.get("result")
 
     def close(self):
         self._closed = True

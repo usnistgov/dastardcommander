@@ -144,7 +144,7 @@ class SpecialChannels:
     def save_history(self):
         self.special_history.append(self.special)
         if len(self.special_history) >= self.HISTORY_LENGTH:
-            self.special_history = self.special_history[-self.HISTORY_LENGTH:]
+            self.special_history = self.special_history[-self.HISTORY_LENGTH :]
 
     def clear(self):
         if len(self.special) == 0:
@@ -157,4 +157,5 @@ class SpecialChannels:
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

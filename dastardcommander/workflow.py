@@ -125,8 +125,7 @@ class Workflow(QtWidgets.QWidget):
         TIME_UNITS_TO_WAIT = 30
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
-        progressBar = QtWidgets.QProgressDialog("taking noise...", "Stop Early", 0,
-                                                TIME_UNITS_TO_WAIT - 1, parent=self)
+        progressBar = QtWidgets.QProgressDialog("taking noise...", "Stop Early", 0, TIME_UNITS_TO_WAIT - 1, parent=self)
         progressBar.setModal(True)  # prevent users from clicking elsewhere in gui
         progressBar.show()
         for i in range(TIME_UNITS_TO_WAIT):
@@ -165,8 +164,7 @@ class Workflow(QtWidgets.QWidget):
         RECORDS_TOTAL = RECORDS_PER_CHANNEL * self.NumberOfChans
         # arguments are label text, cancel button text, minimum value, maximum value
         # None for cancel button text makes there be no cancel button
-        progressBar = QtWidgets.QProgressDialog("taking pulses...", "Stop Early",
-                                                0, RECORDS_TOTAL, parent=self)
+        progressBar = QtWidgets.QProgressDialog("taking pulses...", "Stop Early", 0, RECORDS_TOTAL, parent=self)
         progressBar.setModal(True)  # prevent users from clicking elsewhere in gui
         progressBar.show()
         self.dc.tabWidget.setCurrentWidget(self.dc.tabObserve)
@@ -176,8 +174,7 @@ class Workflow(QtWidgets.QWidget):
             # remember filenames
             self.pulseFilename = self.dc.writingTab.fileNameExampleEdit.text()
             self.label_pulseFile.setText(f"pulse data: {self.pulseFilename}")
-            progressBar.setLabelText(
-                f"pulses, {self.numberWritten}/{RECORDS_TOTAL} records")
+            progressBar.setLabelText(f"pulses, {self.numberWritten}/{RECORDS_TOTAL} records")
             progressBar.setValue(self.numberWritten)
             QtWidgets.QApplication.processEvents()  # process gui events
             if progressBar.wasCanceled():
@@ -196,9 +193,9 @@ class Workflow(QtWidgets.QWidget):
             raise Exception(f"path should end with .pdf, got {path}")
         print(sys.platform)
         print(self.noisePlotFilename)
-        if sys.platform.startswith('darwin'):
+        if sys.platform.startswith("darwin"):
             cmd = ["open", path]
-        elif sys.platform.startswith('linux'):
+        elif sys.platform.startswith("linux"):
             cmd = ["evince", path]
         else:
             raise Exception(f"pdf view not implement for platform = {sys.platform}")
@@ -222,8 +219,7 @@ class Workflow(QtWidgets.QWidget):
             print(f"{outName} exists, skipping make_projectors")
         else:
             try:
-                self.pcaller.createBasis(pulseFile, noiseFile,
-                                         self.checkBox_invertPulses.isChecked())
+                self.pcaller.createBasis(pulseFile, noiseFile, self.checkBox_invertPulses.isChecked())
             except OSError as e:
                 dialog = QtWidgets.QMessageBox()
                 dialog.setText(f"Create Projectors failed: {e}")

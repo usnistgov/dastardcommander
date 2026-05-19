@@ -31,8 +31,16 @@ def toMatBase64(array):
     array - an np.array with dtype float64 (or convertable to float64)
     """
     nrow, ncol = array.shape
-    dt = np.dtype([('version', np.uint32), ('magic', np.uint8, (4,)), ("nrow", np.int64),
-                   ("ncol", np.int64), ("zeros", np.int64, 2), ("data", np.float64, nrow * ncol)])
+    dt = np.dtype(
+        [
+            ("version", np.uint32),
+            ("magic", np.uint8, (4,)),
+            ("nrow", np.int64),
+            ("ncol", np.int64),
+            ("zeros", np.int64, 2),
+            ("data", np.float64, nrow * ncol),
+        ]
+    )
     a = np.array([(1, [ord("G"), ord("F"), ord("A"), 0], nrow, ncol, [0, 0], array.ravel())], dt)
     s_bytes = base64.b64encode(a)
     s = s_bytes.decode(encoding="ascii")
@@ -89,7 +97,7 @@ def getConfigs(filename, channelNames):
 # we need to mape from channelName to channelIndex (0-2N-1)
 def getNameNumberToIndex(channelNames):
     nameNumberToIndex = {}
-    for (i, name) in enumerate(channelNames):
+    for i, name in enumerate(channelNames):
         if not name.startswith("chan"):
             continue
         nameNumber = int(name[4:])
@@ -99,6 +107,8 @@ def getNameNumberToIndex(channelNames):
         #     raise Exception(
         #         "all fb channelIndices on a lancero source are odd, we shouldn't load projectors for even channelIndices")
     return nameNumberToIndex
+
+
 #
 # def remapConfigs(configs0, channelNames):
 #     nameNumberToIndex = getNameNumberToIndex(channelNames)
@@ -111,8 +121,8 @@ def getNameNumberToIndex(channelNames):
 def getFileNameWithDialog(qtparent, startdir):
     options = QFileDialog.Options()
     fileName, _ = QFileDialog.getOpenFileName(
-        qtparent, "Find Projectors Basis file", startdir,
-        "Model Files (*_model.hdf5);;All Files (*)", options=options)
+        qtparent, "Find Projectors Basis file", startdir, "Model Files (*_model.hdf5);;All Files (*)", options=options
+    )
     return fileName
 
 
@@ -126,16 +136,18 @@ def sendProjectors(qtparent, fileName, channel_names, client):
 
     for channelIndex, config in list(configs.items()):
         # print("sending ProjectorsBasis for {}".format(channelIndex))
-        okay, error = client.call(
-            "SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
+        okay, error = client.call("SourceControl.ConfigureProjectorsBasis", config, verbose=False, errorBox=False, throwError=False)
         if okay:
             success_chans.append(channelIndex)
         else:
             failures[channelIndex] = error
 
     success = len(failures) == 0
-    result = f"success on channelIndices (not channelName): {sorted(success_chans)}\n" + \
-        "failures:\n" + json.dumps(failures, sort_keys=True, indent=4)
+    result = (
+        f"success on channelIndices (not channelName): {sorted(success_chans)}\n"
+        + "failures:\n"
+        + json.dumps(failures, sort_keys=True, indent=4)
+    )
     if not success:
         resultBox = QtWidgets.QMessageBox(qtparent)
         resultBox.setText(result)
