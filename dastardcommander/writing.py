@@ -34,6 +34,9 @@ class WritingControl(QtWidgets.QWidget):
         self.checkBox_LJH22.clicked.connect(self.updateWritingActiveMessages)
         self.checkBox_OFF.clicked.connect(self.updateWritingActiveMessages)
 
+        # DB info for the dataruns table
+        self.dataruns_info = {"Users": "test users", "Sample": "no sample", "Purpose": "unknown", "Intention": "testing"}
+
         cbd = self.changeBaseDirectoryButton
         if host in {"localhost", "127.0.0.1"}:
             cbd.pressed.connect(self.pathSelect)
@@ -65,8 +68,7 @@ class WritingControl(QtWidgets.QWidget):
         startPath = self.baseDirectoryEdit.text()
         if len(startPath) == 0:
             startPath = "/"
-        result = QtWidgets.QFileDialog.getExistingDirectory(
-            None, "Choose base path", startPath)
+        result = QtWidgets.QFileDialog.getExistingDirectory(None, "Choose base path", startPath)
         print("Result was: ", result)
         if len(result) > 0:
             self.updatePath(result)
@@ -81,13 +83,12 @@ class WritingControl(QtWidgets.QWidget):
             if Nmax > 0 and Nwritten >= Nmax and self.writing:
                 self.stop()
 
-        labeltext = [f"Number Written Total: {written_message}",
-                     "Number Written by Channel:"]
+        labeltext = [f"Number Written Total: {written_message}", "Number Written by Channel:"]
         nw = d["NumberWritten"]
         nitems = len(nw)
         nperline = 16
-        for i in range(1 + (nitems-1) // nperline):
-            items = " ".join([f"{x:6d}" for x in nw[nperline*i:nperline*(i+1)]])
+        for i in range(1 + (nitems - 1) // nperline):
+            items = " ".join([f"{x:6d}" for x in nw[nperline * i : nperline * (i + 1)]])
             labeltext.append(f"\t{items}")
         self.label_numberWritten.setText("\n".join(labeltext))
 
@@ -112,8 +113,9 @@ class WritingControl(QtWidgets.QWidget):
                 "Path": self.baseDirectoryEdit.text(),
                 "WriteLJH22": self.checkBox_LJH22.isChecked(),
                 "WriteLJH3": self.checkBox_LJH3.isChecked(),
-                "WriteOFF": self.checkBox_OFF.isChecked()
+                "WriteOFF": self.checkBox_OFF.isChecked(),
             }
+            request.update(self.dataruns_info)
 
         self.client.call("SourceControl.WriteControl", request)
 
@@ -134,10 +136,7 @@ class WritingControl(QtWidgets.QWidget):
         self.fileNameExampleEdit.setText(exampleFilename)
         self.writingCommentsButton.setEnabled(True)
         self.writingPauseButton.setEnabled(True)
-        for box, varname in zip(
-            (self.checkBox_LJH22, self.checkBox_LJH3, self.checkBox_OFF),
-            ("WriteLJH22", "WriteLJH3", "WriteOFF")
-        ):
+        for box, varname in zip((self.checkBox_LJH22, self.checkBox_LJH3, self.checkBox_OFF), ("WriteLJH22", "WriteLJH3", "WriteOFF")):
             if varname in message:
                 box.setChecked(message[varname])
         self.updateWritingActiveMessages()
@@ -146,7 +145,7 @@ class WritingControl(QtWidgets.QWidget):
     def updateWritingActiveMessages(self):
         labels = (self.label_LJH22, self.label_OFF)
         checks = (self.checkBox_LJH22, self.checkBox_OFF)
-        for (label, check) in zip(labels, checks):
+        for label, check in zip(labels, checks):
             if self.writing and check.isChecked():
                 label.setText("Writing active")
                 color = self.moss
@@ -180,6 +179,5 @@ class WritingControl(QtWidgets.QWidget):
         else:
             dialog.setTextValue(default)
         dialog.setOption(QtWidgets.QInputDialog.UsePlainTextEditForTextInput)
-        dialog.textValueSelected.connect(lambda x: self.client.call(
-            "SourceControl.WriteComment", dialog.textValue()))
+        dialog.textValueSelected.connect(lambda x: self.client.call("SourceControl.WriteComment", dialog.textValue()))
         dialog.show()
