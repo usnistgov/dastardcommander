@@ -82,7 +82,7 @@ def csv2int_array(text, normalize=False):
 # TODO: don't process ui files at run-time, but compile them.
 # note we now use PyQt5.uic.loadUi, but the principle remains that compiling these would speed startup
 
-QCoreApplication.setOrganizationName("Quantum Sensors Group")
+QCoreApplication.setOrganizationName("Quantum Sensors Division")
 QCoreApplication.setOrganizationDomain("nist.gov")
 QCoreApplication.setApplicationName("DastardCommander")
 
@@ -1334,9 +1334,6 @@ def main():
     if args.version:
         return
 
-    if sys.version_info.major <= 2:
-        msg = "WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***"
-        print(msg)
     settings = QSettings("NIST Quantum Sensors", "dastardcommander")
 
     app = QtWidgets.QApplication(sys.argv)

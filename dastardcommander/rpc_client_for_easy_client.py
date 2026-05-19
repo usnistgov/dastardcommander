@@ -5,7 +5,7 @@ import socket
 DEBUG = True
 
 
-class JSONClient(object):
+class JSONClient:
     def __init__(self, addr, codec=json, qtParent=None):
         self._socket = socket.create_connection(addr)
         self._id_iter = itertools.count()
@@ -22,7 +22,7 @@ class JSONClient(object):
 
     def call(self, name, params, verbose=True):
         if self._closed:
-            print(("%s(...) ignored because JSON-RPC client is closed." % name))
+            print("%s(...) ignored because JSON-RPC client is closed." % name)
             return None
             # This might seem like it should be impossible to reach, but it is possible
             # because signals like editingFinished can trigger slots when you try

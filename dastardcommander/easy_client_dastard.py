@@ -59,14 +59,14 @@ class EasyClientDastard:
         self.statusSub.setsockopt(zmq.RCVTIMEO, 1000)  # this doesn't seem to do anything
         self.statusSub.setsockopt(zmq.LINGER, 0)
         self.statusSub.connect(address)
-        print(("Collecting updates from dastard at %s" % address))
+        print("Collecting updates from dastard at %s" % address)
         self.statusSub.setsockopt_string(zmq.SUBSCRIBE, "")
         self.messagesSeen = collections.Counter()
 
     def _connectRPC(self):
         """connect to the rpc port of dastard"""
         self.rpc = rpc_client_for_easy_client.JSONClient((self.host, self.baseport))
-        print(("Dastard is at %s:%d" % (self.host, self.baseport)))
+        print("Dastard is at %s:%d" % (self.host, self.baseport))
 
     def _getStatus(self):
         self._sourceRecieved = False
@@ -100,11 +100,11 @@ class EasyClientDastard:
 
     def _handleStatusMessage(self, topic, contents):
         if DEBUG:
-            print(("topic=%s" % topic))
+            print("topic=%s" % topic)
             print(contents)
         if topic in ["CURRENTTIME"]:
             if DEBUG:
-                print(("skipping topic %s" % topic))
+                print("skipping topic %s" % topic)
             return
         d = json.loads(contents)
         if DEBUG:
@@ -223,9 +223,7 @@ class EasyClientDastard:
         return 1 / self.samplePeriod
 
     def __repr__(self):
-        return "EasyClientDastard {} columns X {} rows, linePeriod {}, clockMhz {}, nsamp {}".format(
-            self.ncol, self.nrow, self.lsync, self.clockMhz, self.nsamp
-        )
+        return f"EasyClientDastard {self.ncol} columns X {self.nrow} rows, linePeriod {self.lsync}, clockMhz {self.clockMhz}, nsamp {self.nsamp}"
 
 
 if __name__ == "__main__":
@@ -242,7 +240,7 @@ if __name__ == "__main__":
             plt.figure()
             plt.plot(data[0, 0, :, 0], label="err (lastind 0)")
             plt.plot(data[0, 0, :, 1], label="fb (lastind 1)")
-            plt.title("send mode = {}".format(sendMode))
+            plt.title(f"send mode = {sendMode}")
             plt.xlabel("framecount")
             plt.ylabel("value")
             plt.legend()
@@ -254,14 +252,14 @@ if __name__ == "__main__":
             for mixFraction in mixFractions:
                 c.setMixChannel(1, mixFraction)
                 data = c.getNewData(0.1)
-                plt.plot(data[0, 0, :, 1], label="mixFrac {}".format(mixFraction))
+                plt.plot(data[0, 0, :, 1], label=f"mixFrac {mixFraction}")
             plt.legend()
             plt.ylabel("fb (lastind = 1)")
             plt.figure()
             for mixFraction in mixFractions:
                 c.setMixChannel(1, 0.0001)
                 data = c.getNewData(0.1)
-                plt.plot(data[0, 0, :, 0], label="mixFrac {}".format(mixFraction))
+                plt.plot(data[0, 0, :, 0], label=f"mixFrac {mixFraction}")
             plt.ylabel("err (lastind = 0)")
             plt.legend()
 
