@@ -1,6 +1,6 @@
 import numpy as np
 import os
-from matplotlib import cm
+import matplotlib as mpl
 import time
 from string import ascii_uppercase
 import itertools
@@ -332,8 +332,8 @@ class CountRateMap(QtWidgets.QScrollArea):
     enabledForeground = "black"
     disabledForeground = "white"
     disabledColor = "black"
-    cmap = cm.get_cmap("Wistia")
-    cmap_disabled = cm.get_cmap("hot")
+    cmap = mpl.colormaps["Wistia"]
+    cmap_disabled = mpl.colormaps["hot"]
 
     def __init__(self, parent, ngroups, chan_per_group, channel_names, xy=None):
         QtWidgets.QScrollArea.__init__(self, parent)
