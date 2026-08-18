@@ -128,7 +128,7 @@ class EasyClientDastard:
             self.clockMhz = d["DastardOutput"]["ClockMHz"]
             self.sequenceLength = d["DastardOutput"]["SequenceLength"]
             self.linePeriod = d["DastardOutput"]["Lsync"]
-        if topic == "ABACO" and self.sourceName == "Abaco":
+        if topic == "RESONATOR" and self.sourceName == "Resonator":
             self.nSamp = None
             self.numColumns = self.numChannels
             self.numRows = 1
@@ -146,7 +146,7 @@ class EasyClientDastard:
         if self.sourceName == "Lancero":
             self.linePeriodSeconds = self.linePeriod / self.clockMhz
             self.samplePeriod = self.linePeriodSeconds * self.numRows
-        elif self.sourceName == "Abaco":
+        elif self.sourceName == "Resonator":
             self.linePeriodSeconds = None
             self.samplePeriod = 8e-6
 
