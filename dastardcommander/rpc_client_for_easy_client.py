@@ -3,14 +3,14 @@ import itertools
 import socket
 DEBUG = True
 
-class JSONClient(object):
-    def __init__(self, addr, codec=json, qtParent = None):
+
+class JSONClient:
+    def __init__(self, addr, codec=json, qtParent=None):
         self._socket = socket.create_connection(addr)
         self._id_iter = itertools.count()
         self._codec = codec
         self._closed = False
         self.qtParent = qtParent
-
 
     def setQtParent(self, qtParent):
         """ let this know about Qt so it can pop-up error messages"""
@@ -23,7 +23,7 @@ class JSONClient(object):
 
     def call(self, name, params, verbose=True):
         if self._closed:
-            print(("%s(...) ignored because JSON-RPC client is closed." % name))
+            print("%s(...) ignored because JSON-RPC client is closed." % name)
             return None
             # This might seem like it should be impossible to reach, but it is possible
             # because signals like editingFinished can trigger slots when you try
@@ -58,7 +58,7 @@ class JSONClient(object):
                 raise Exception(response.get('error'))
             else:
                 em = QtWidgets.QErrorMessage(self.qtParent)
-                em.showMessage("DASTARD Error: \n%s"%response.get('error'))
+                em.showMessage("DASTARD Error: \n%s" % response.get('error'))
 
         return response.get('result')
 
