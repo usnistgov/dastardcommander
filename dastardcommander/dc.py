@@ -105,12 +105,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.setWindowTitle(title)
         self.reconnect = False
         self.disconnectReason = ""
-        self.disconnectButton.clicked.connect(
-            lambda: self.closeReconnect("disconnect button")
-        )
-        self.actionDisconnect.triggered.connect(
-            lambda: self.closeReconnect("disconnect menu item")
-        )
+        self.disconnectButton.clicked.connect(lambda: self.closeReconnect("disconnect button"))
+        self.actionDisconnect.triggered.connect(lambda: self.closeReconnect("disconnect menu item"))
         self.startStopButton.clicked.connect(self.startStop)
         self.dataSourcesStackedWidget.setCurrentIndex(self.dataSource.currentIndex())
         self.actionLoad_Projectors_Basis.triggered.connect(self.loadProjectorsBasis)
@@ -123,14 +119,9 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.actionSave_Disabled_Invert_Chan.triggered.connect(self.saveSpecialChanList)
         self.pushButton_sendEdgeMulti.clicked.connect(self.sendEdgeMulti)
         self.pushButton_sendMix.clicked.connect(self.sendMix)
-        self.pushButton_sendExperimentStateLabel.clicked.connect(
-            self.sendExperimentStateLabel
-        )
-        self.pushButton_pauseExperimental.clicked.connect(
-            self.handlePauseExperimental)
-        self.pushButton_unpauseExperimental.clicked.connect(
-            self.handleUnpauseExperimental
-        )
+        self.pushButton_sendExperimentStateLabel.clicked.connect(self.sendExperimentStateLabel)
+        self.pushButton_pauseExperimental.clicked.connect(self.handlePauseExperimental)
+        self.pushButton_unpauseExperimental.clicked.connect(self.handleUnpauseExperimental)
         self.sourceIsRunning = False
         self.sourceIsTDM = False
         self.cols = 0
@@ -150,12 +141,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
 
         self.phaseResetSamplesBox.editingFinished.connect(self.slotPhaseResetUpdate)
         self.phaseResetMultiplierBox.editingFinished.connect(self.slotPhaseResetUpdate)
-        self.comboBox_AbacoUnwrapEnable.currentIndexChanged.connect(
-            self.slotPhaseUnwrapComboUpdate
-        )
-        self.triggerTab.recordLengthSpinBox.valueChanged.connect(
-            self.slotPhaseResetUpdate
-        )
+        self.comboBox_ResonatorUnwrapEnable.currentIndexChanged.connect(self.slotPhaseUnwrapComboUpdate)
+        self.triggerTab.recordLengthSpinBox.valueChanged.connect(self.slotPhaseResetUpdate)
 
         self.writingTab = writing.WritingControl(None, host, self.client)
         self.tabWriting.layout().addWidget(self.writingTab)
@@ -180,9 +167,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         self.lastTriggerRateMessage = (-1, {})
 
         self.workflowTab = workflow.Workflow(self, parent=self.tabWorkflow)
-        self.workflowTab.projectorsLoadedSig.connect(
-            self.writingTab.checkBox_OFF.setChecked
-        )
+        self.workflowTab.projectorsLoadedSig.connect(self.writingTab.checkBox_OFF.setChecked)
 
         self.microscopes = []
         self.last_messages = defaultdict(str)
@@ -243,9 +228,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         try:
             d = json.loads(message)
         except Exception as e:
-            print(
-                f"Error processing status message [topic,msg]: '{topic}', '{message}'"
-            )
+            print(f"Error processing status message [topic,msg]: '{topic}', '{message}'")
             print(f"Error is: {e}")
             return
 
@@ -272,12 +255,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             if topic == "STATUS":
                 is_running = d["Running"]
                 self._setGuiRunning(is_running)
-                self.triggerTab.updateRecordLengthsFromServer(
-                    d["Nsamples"], d["Npresamp"]
-                )
-                self.triggerTabSimple.handleNsamplesNpresamplesMessage(
-                    d["Nsamples"], d["Npresamp"]
-                )
+                self.triggerTab.updateRecordLengthsFromServer(d["Nsamples"], d["Npresamp"])
+                self.triggerTabSimple.handleNsamplesNpresamplesMessage(d["Nsamples"], d["Npresamp"])
                 self.workflowTab.handleStatusUpdate(d)
 
                 source = d["SourceName"]
@@ -367,7 +346,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
                     prefix = name.rstrip("1234567890")
                     self.channel_prefixes.add(prefix)
                     if prefix == "chan":
-                        number = int(name[len(prefix):])
+                        number = int(name[len(prefix) :])
                         self.channel_indices[number] = index
                 print("New channames: ", self.channel_names)
                 if self.sourceIsTDM:
@@ -443,7 +422,6 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         sb.addWidget(self.statusFreshLabel)
 
     def updateStatusBar(self, is_running, source_name, group_info):
-
         if is_running:
             sp = self.samplePeriod
             if sp < 1000:
@@ -502,9 +480,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
                 color("green")
             else:
                 hwrate = hwmb / t
-                self.statusFreshLabel.setText(
-                    f"{hwrate:7.3f} MB/s received ({rate:7.3f} processed)"
-                )
+                self.statusFreshLabel.setText(f"{hwrate:7.3f} MB/s received ({rate:7.3f} processed)")
                 color("orange")
 
     @pyqtSlot()
@@ -669,9 +645,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         unperturbed_guis = [1, 2, 3, 4]
         sources_to_insert = []
         if len(sources) > 4:
-            print(
-                f"UDP sources '{sources}' is too long. Truncating to 4 sources"
-            )
+            print(f"UDP sources '{sources}' is too long. Truncating to 4 sources")
             sources = sources[:4]
 
         localsynonyms = ("127.0.0.1", "localhost", "localhost.local")
@@ -688,9 +662,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
                 guihost = squeeze_whitespace(guihost)
                 if guiport != port:
                     continue
-                if guihost == host or (
-                    guihost in localsynonyms and host in localsynonyms
-                ):
+                if guihost == host or (guihost in localsynonyms and host in localsynonyms):
                     self.__dict__[f"udpActive{id}"].setChecked(True)
                     self.__dict__[f"udpHost{id}"].setText(guihost)
                     found = True
@@ -746,16 +718,10 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
     def slotPhaseResetUpdate(self):
         sender = self.sender()
         if sender == self.phaseResetSamplesBox:
-            ratio = (
-                self.phaseResetSamplesBox.value()
-                / self.triggerTab.recordLengthSpinBox.value()
-            )
+            ratio = self.phaseResetSamplesBox.value() / self.triggerTab.recordLengthSpinBox.value()
             self.phaseResetMultiplierBox.setValue(ratio)
         elif sender == self.phaseResetMultiplierBox:
-            ns = (
-                self.phaseResetMultiplierBox.value()
-                * self.triggerTab.recordLengthSpinBox.value()
-            )
+            ns = self.phaseResetMultiplierBox.value() * self.triggerTab.recordLengthSpinBox.value()
             self.phaseResetSamplesBox.setValue(int(ns + 0.5))
         elif sender == self.triggerTab.recordLengthSpinBox:
             reclen = self.triggerTab.recordLengthSpinBox.value()
@@ -894,9 +860,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             result = self._startAbaco()
             return result
         else:
-            raise ValueError(
-                f"invalid sourceID. have {sourceID}, want 0,1,2,3 or 4"
-            )
+            raise ValueError(f"invalid sourceID. have {sourceID}, want 0,1,2,3 or 4")
 
     def _startTriangle(self):
         config = {
@@ -980,14 +944,10 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         }
         print("START LANCERO CONFIG")
         print(config)
-        okay, _error = self.client.call(
-            "SourceControl.ConfigureLanceroSource", config, errorBox=True
-        )
+        okay, _error = self.client.call("SourceControl.ConfigureLanceroSource", config, errorBox=True)
         if not okay:
             return False
-        okay, _error = self.client.call(
-            "SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False
-        )
+        okay, _error = self.client.call("SourceControl.Start", "LANCEROSOURCE", errorBox=True, throwError=False)
         if not okay:
             return False
         self.triggerTab.coupleFBToErrCheckBox.setEnabled(True)
@@ -1156,9 +1116,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
 
         # Reset trigger on even-numbered channels if source is TDM and the relevant
         # check box ("Trigger on Error Channels") isn't checked.
-        omitEvenChannels = (
-            self.sourceIsTDM and not self.checkBox_edgeMultiTriggerOnError.isChecked()
-        )
+        omitEvenChannels = self.sourceIsTDM and not self.checkBox_edgeMultiTriggerOnError.isChecked()
         if omitEvenChannels:
             config = {"ChannelIndices": list(range(0, len(self.channel_names), 2))}
             self.client.call("SourceControl.ConfigureTriggers", config)
@@ -1167,9 +1125,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
     def sendMix(self):
         print("sendMIX***********")
         mixFraction = self.doubleSpinBox_MixFraction.value()
-        channels = [
-            i for i in range(1, len(self.channel_names), 2)
-        ]  # only odd channels get mix
+        channels = [i for i in range(1, len(self.channel_names), 2)]  # only odd channels get mix
         mixFractions = [mixFraction for _ in range(len(channels))]
         config = {"ChannelIndices": channels, "MixFractions": mixFractions}
         try:
@@ -1199,9 +1155,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
     def _cringeCommand(self, command):
         cringe_address = "localhost"
         cringe_port = 5509
-        ctx = (
-            zmq.Context()
-        )  # just create a new context each time so we dont need to keep track of it
+        ctx = zmq.Context()  # just create a new context each time so we dont need to keep track of it
         cringe = ctx.socket(zmq.REQ)
         cringe.LINGER = 0  # ms
         cringe.RCVTIMEO = 30 * 1000  # ms
@@ -1211,9 +1165,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         cringe.send_string(command)
         print(f"sent `{command}` to cringe")
         try:
-            reply = (
-                cringe.recv().decode()
-            )  # this blocks until cringe replies, or until RCVTIMEO
+            reply = cringe.recv().decode()  # this blocks until cringe replies, or until RCVTIMEO
             print(f"reply `{reply}` from cringe")
             message = f"reply={reply}"
             success = True
@@ -1238,9 +1190,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
             print("starting lancero")
             success = self._start()  # _startLancero wont set self.sourceIsTDM
             if not success:
-                print(
-                    "failed to start lancero, return early from crateStartAndAutotune"
-                )
+                print("failed to start lancero, return early from crateStartAndAutotune")
                 return
             wait_ms = 500
         else:
@@ -1253,9 +1203,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         return list(range(len(self.channel_names)))
 
     def channelIndicesSignalOnly(self):
-        return [
-            i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")
-        ]
+        return [i for (i, name) in enumerate(self.channel_names) if name.startswith("chan")]
 
     def configLevelTrigs(self):
         configLevelDialog = configure_level_triggers.LevelTrigConfig(self)
@@ -1272,9 +1220,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
     def loadSpecialChanList(self):
         """Load the lists of channels that are disabled and inverted (Abaco-only) from a file."""
         filename, _filter = QFileDialog.getOpenFileName(
-            self,
-            "Open Inverted/Disabled channel list", ".",
-            "Settings (*.yaml *.yml *.json)")
+            self, "Open Inverted/Disabled channel list", ".", "Settings (*.yaml *.yml *.json)"
+        )
         if not filename:
             print("No file requested")
             return
@@ -1299,9 +1246,8 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
     def saveSpecialChanList(self):
         """Save the lists of channels that are disabled and inverted (Abaco-only) to a file."""
         filename, _filter = QFileDialog.getSaveFileName(
-            self,
-            "Save Inverted/Disabled channel list", ".",
-            "Settings (*.yaml *.yml *.json)")
+            self, "Save Inverted/Disabled channel list", ".", "Settings (*.yaml *.yml *.json)"
+        )
         if not filename:
             print("No file requested")
             return
@@ -1309,7 +1255,7 @@ class MainWindow(QtWidgets.QMainWindow):  # noqa: PLR0904
         print("Writing inverted/disabled channel list to ", filename)
         obj = {
             "inverted": csv2int_array(self.invertedChanTextEdit.toPlainText(), normalize=True),
-            "disabled": self.triggerBlocker.special
+            "disabled": self.triggerBlocker.special,
         }
         with open(filename, "w", encoding="ascii") as fp:
             if filename.endswith("json"):
@@ -1324,7 +1270,6 @@ class HostPortDialog(QtWidgets.QDialog):
         self.setWindowIcon(QtGui.QIcon("dc.png"))
         PyQt5.uic.loadUi(
             os.path.join(os.path.dirname(__file__), "ui/host_port.ui"), self
-        )
         self.hostName.setText(host)
         self.basePortSpin.setValue(port)
         self.settings = settings
@@ -1378,10 +1323,7 @@ def version_message():
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        prog='Dastard commander',
-        description='A GUI to control DASTARD'
-    )
+    parser = argparse.ArgumentParser(prog="Dastard commander", description="A GUI to control DASTARD")
     parser.add_argument("-v", "--version", action="store_true")
     args = parser.parse_args()
     print(version_message())
@@ -1398,9 +1340,7 @@ def main():
         # Ask user what host:port to connect to.
         # TODO: accept a command-line argument to specify host:port.
         # If given, we'll bypass this dialog the first time through the loop.
-        d = HostPortDialog(
-            host=host, port=port, disconnectReason=disconnectReason, settings=settings
-        )
+        d = HostPortDialog(host=host, port=port, disconnectReason=disconnectReason, settings=settings)
         host, port = d.run()
         # None, None indicates user cancelled the dialog.
         if host is None and port is None:
@@ -1408,9 +1348,7 @@ def main():
 
         # One None is an invalid host:port pair
         if not host or not port:
-            print(
-                "Could not start dcom (Dastard Commander) without a valid host:port selection."
-            )
+            print("Could not start dcom (Dastard Commander) without a valid host:port selection.")
             return
 
         try:
