@@ -1,7 +1,7 @@
 """Top-level package for Realtime GUI."""
 
 # from . import dc # dont import dc here because it causes problem when importing EasyClientDastard from ipython
-__all__ = ["dc", "rpc_client", "EasyClientDastard"]
+__all__ = ["dc", "rpc_client", "EasyClientDastard"]  # noqa: F822
 
 try:
     from ._version import version as __version__

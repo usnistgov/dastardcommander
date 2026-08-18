@@ -1,27 +1,49 @@
 from . import rpc_client_for_easy_client
-import numpy
-import zmq
-import time
 import collections
 import json
+import os
+import time
+import zmq
 import numpy as np
 
 DEBUG = True
 rpc_client_for_easy_client.DEBUG = False
 
-SUMMARY_HEADER_DTYPE = np.dtype([("chan", np.uint16), ("headerVersion", np.uint8),
-     ("npresamples", np.uint32), ("nsamples", np.uint32), ("pretrig_mean", "f4"), ("peak_value", "f4"),
-     ("pulse_rms", "f4"), ("pulse_average", "f4"), ("residualStdDev", "f4"),
-     ("unixnano", np.uint64), ("trig frame", np.uint64)])
+SUMMARY_HEADER_DTYPE = np.dtype(
+    [
+        ("chan", np.uint16),
+        ("headerVersion", np.uint8),
+        ("npresamples", np.uint32),
+        ("nsamples", np.uint32),
+        ("pretrig_mean", "f4"),
+        ("peak_value", "f4"),
+        ("pulse_rms", "f4"),
+        ("pulse_average", "f4"),
+        ("residualStdDev", "f4"),
+        ("unixnano", np.uint64),
+        ("trig frame", np.uint64),
+    ]
+)
 
-RECORD_HEADER_DTYPE = np.dtype([("chan", np.uint16), ("headerVersion", np.uint8), ("dataTypeCode", np.uint8),
-     ("npresamples", np.uint32), ("nsamples", np.uint32), ("samplePeriod", "f4"), ("voltsPerArb", "f4"),
-     ("unixnano", np.uint64), ("triggerFramecount", np.uint64)])
+RECORD_HEADER_DTYPE = np.dtype(
+    [
+        ("chan", np.uint16),
+        ("headerVersion", np.uint8),
+        ("dataTypeCode", np.uint8),
+        ("npresamples", np.uint32),
+        ("nsamples", np.uint32),
+        ("samplePeriod", "f4"),
+        ("voltsPerArb", "f4"),
+        ("unixnano", np.uint64),
+        ("triggerFramecount", np.uint64),
+    ]
+)
 
 
 class EasyClientDastard:
     """This client will connect to a server's summary channels."""
-    def __init__(self, host='localhost', baseport=5500, setupOnInit=True):
+
+    def __init__(self, host="localhost", baseport=5500, setupOnInit=True):
         self.host = host
         self.baseport = baseport
         self.context = zmq.Context()
@@ -31,20 +53,20 @@ class EasyClientDastard:
             self.setupAndChooseChannels()
 
     def _connectStatusSub(self):
-        """ connect to the status update port of dastard """
+        """connect to the status update port of dastard"""
         self.statusSub = self.context.socket(zmq.SUB)
-        address = "tcp://%s:%d" % (self.host, self.baseport + 1)
+        address = f"tcp://{self.host}:{self.baseport + 1}"
         self.statusSub.setsockopt(zmq.RCVTIMEO, 1000)  # this doesn't seem to do anything
         self.statusSub.setsockopt(zmq.LINGER, 0)
         self.statusSub.connect(address)
-        print("Collecting updates from dastard at %s" % address)
+        print(f"Collecting updates from dastard at {address}")
         self.statusSub.setsockopt_string(zmq.SUBSCRIBE, "")
         self.messagesSeen = collections.Counter()
 
     def _connectRPC(self):
-        """ connect to the rpc port of dastard """
+        """connect to the rpc port of dastard"""
         self.rpc = rpc_client_for_easy_client.JSONClient((self.host, self.baseport))
-        print("Dastard is at %s:%d" % (self.host, self.baseport))
+        print(f"Dastard is at {self.host}:{self.baseport}")
 
     def _getStatus(self):
         self._sourceRecieved = False
@@ -66,6 +88,7 @@ class EasyClientDastard:
             if all([self.messagesSeen[t] > 0 for t in ["STATUS", "LANCERO", "SIMPULSE"]]):
                 if self.sourceName == "Lancero":
                     self.numRows = self.sequenceLength
+                    assert self.numRows is not None
                     self.numColumns = self.numChannels // (2 * self.numRows)
                     assert self.numChannels % (2 * self.numRows) == 0
                 if self.sourceName == "SimPulses":
@@ -78,11 +101,11 @@ class EasyClientDastard:
 
     def _handleStatusMessage(self, topic, contents):
         if DEBUG:
-            print("topic=%s" % topic)
+            print(f"topic={topic}")
             print(contents)
-        if topic in ["CURRENTTIME"]:
+        if topic in {"CURRENTTIME"}:
             if DEBUG:
-                print("skipping topic %s" % topic)
+                print(f"skipping topic {topic}")
             return
         d = json.loads(contents)
         if DEBUG:
@@ -116,8 +139,7 @@ class EasyClientDastard:
             self._oldTriggerDict = d[0]
 
     def setupAndChooseChannels(self, streamFbChannels=True, streamErrorChannels=True):
-        """ sets up the server to stream all Fb Channels or all error channels or both
-        """
+        """sets up the server to stream all Fb Channels or all error channels or both"""
         self._connectRPC()
         self._connectStatusSub()
         self._getStatus()
@@ -141,23 +163,27 @@ class EasyClientDastard:
         self.setMix(0)
 
     def setMix(self, mixFractions):
-        if len(numpy.shape(mixFractions)) == 0:  # voltage is a single number, make a array out of it, and set all channels to the same value
-            mixFractions = numpy.ones((self.numColumns, self.numRows)) * mixFractions
-        if not numpy.all(numpy.shape(mixFractions) == (self.numColumns, self.numRows)):
-            raise ValueError('mixFractions should either a number or a list/array with (numColumns, numRows) elements')
-        config = {"ChannelIndices":  np.arange(1, self.numColumns * self.numRows * 2, 2).tolist(),
-                  "MixFractions": mixFractions.flatten().tolist()}
+        if (
+            len(np.shape(mixFractions)) == 0
+        ):  # voltage is a single number, make a array out of it, and set all channels to the same value
+            mixFractions = np.ones((self.numColumns, self.numRows)) * mixFractions
+        if not np.all(np.shape(mixFractions) == (self.numColumns, self.numRows)):
+            raise ValueError("mixFractions should either a number or a list/array with (numColumns, numRows) elements")
+        config = {
+            "ChannelIndices": np.arange(1, self.numColumns * self.numRows * 2, 2).tolist(),
+            "MixFractions": mixFractions.flatten().tolist(),
+        }
         self.rpc.call("SourceControl.ConfigureMixFraction", config)
 
     def requestData(self, nsamples):
-        config = {"N": int(nsamples)}
+        # config = {"N": int(nsamples)}
         result_npz_path = self.rpc.call("SourceControl.StoreRawDataBlock", nsamples)
         return result_npz_path
 
     def getNewData(self, npts):
         npz_filename = self.requestData(npts)
         # wait for the file to exist
-        import os
+
         tstart = time.time()
         expect_s = self.samplePeriod * npts
         too_long_s = 1.1 * expect_s + 5
@@ -197,12 +223,16 @@ class EasyClientDastard:
         return 1 / self.samplePeriod
 
     def __repr__(self):
-        return f"EasyClientDastard {self.ncol} columns X {self.nrow} rows, linePeriod {self.lsync}, clockMhz {self.clockMhz}, nsamp {self.nsamp}"
+        return (
+            f"EasyClientDastard {self.ncol} columns X {self.nrow} rows, linePeriod {self.lsync}, "
+            + f"clockMhz {self.clockMhz}, nsamp {self.nsamp}"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if True:
         import pylab as plt
+
         plt.ion()
         plt.close("all")
         c = EasyClientDastard()
@@ -224,13 +254,13 @@ if __name__ == '__main__':
             plt.figure()
             for mixFraction in mixFractions:
                 c.setMixChannel(1, mixFraction)
-                data = c.getNewData(.1)
+                data = c.getNewData(0.1)
                 plt.plot(data[0, 0, :, 1], label=f"mixFrac {mixFraction}")
             plt.legend()
             plt.ylabel("fb (lastind = 1)")
             plt.figure()
             for mixFraction in mixFractions:
-                c.setMixChannel(1, .0001)
+                c.setMixChannel(1, 0.0001)
                 data = c.getNewData(0.1)
                 plt.plot(data[0, 0, :, 0], label=f"mixFrac {mixFraction}")
             plt.ylabel("err (lastind = 0)")

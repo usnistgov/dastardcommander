@@ -1388,9 +1388,6 @@ def main():
     if args.version:
         return
 
-    if sys.version_info.major <= 2:
-        msg = "WARNING: *** Only Python 3 is supported. Python 2 no longer guaranteed to work. ***"
-        print(msg)
     settings = QSettings("NIST Quantum Sensors", "dastardcommander")
 
     app = QtWidgets.QApplication(sys.argv)
