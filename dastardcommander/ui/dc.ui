@@ -149,7 +149,7 @@
           </item>
           <item>
            <property name="text">
-            <string>Abaco µMUX</string>
+            <string>Resonator (µMUX, KICS or TKID)</string>
            </property>
           </item>
           <item>
@@ -1088,10 +1088,10 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="abacoPage">
+          <widget class="QWidget" name="resonatorPage">
            <layout class="QGridLayout" name="gridLayout_11">
             <item row="0" column="0">
-             <widget class="QFrame" name="abacoFrame">
+             <widget class="QFrame" name="resonatorFrame">
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>
               </property>
@@ -1110,7 +1110,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Abaco configuration</string>
+                  <string>Resonator configuration</string>
                  </property>
                  <property name="textFormat">
                   <enum>Qt::AutoText</enum>
@@ -1118,9 +1118,9 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="noAbacoLabel">
+                <widget class="QLabel" name="noResonatorLabel">
                  <property name="text">
-                  <string>No Abaco devices found in shared memory</string>
+                  <string>No Resonator devices found in shared memory</string>
                  </property>
                 </widget>
                </item>
@@ -1447,7 +1447,7 @@
                 </layout>
                </item>
                <item>
-                <widget class="QComboBox" name="comboBox_AbacoUnwrapEnable">
+                <widget class="QComboBox" name="comboBox_ResonatorUnwrapEnable">
                  <property name="toolTip">
                   <string>Choose whether to unwrap µMUX data, or assume raw (non-µMUX) data</string>
                  </property>

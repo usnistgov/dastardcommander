@@ -86,8 +86,8 @@ class WritingControl(QtWidgets.QWidget):
         nw = d["NumberWritten"]
         nitems = len(nw)
         nperline = 16
-        for i in range(1 + (nitems-1) // nperline):
-            items = " ".join([f"{x:6d}" for x in nw[nperline*i:nperline*(i+1)]])
+        for i in range(1 + (nitems - 1) // nperline):
+            items = " ".join([f"{x:6d}" for x in nw[nperline * i:nperline * (i + 1)]])
             labeltext.append(f"\t{items}")
         self.label_numberWritten.setText("\n".join(labeltext))
 
