@@ -109,7 +109,7 @@ class WritingControl(QtWidgets.QWidget):
                 "Request": "Start",
                 "Path": self.baseDirectoryEdit.text(),
                 "WriteLJH22": self.checkBox_LJH22.isChecked(),
-                "WriteArrow": self.checkBox_Arrow.isChecked(),
+                "WriteArrows": self.checkBox_Arrow.isChecked(),
                 "WriteOFF": self.checkBox_OFF.isChecked(),
             }
 
@@ -133,7 +133,7 @@ class WritingControl(QtWidgets.QWidget):
         self.writingCommentsButton.setEnabled(True)
         self.writingPauseButton.setEnabled(True)
         for box, varname in zip(
-            (self.checkBox_LJH22, self.checkBox_Arrow, self.checkBox_OFF), ("WriteLJH22", "WriteArrow", "WriteOFF")
+            (self.checkBox_LJH22, self.checkBox_Arrow, self.checkBox_OFF), ("WriteLJH22", "WriteArrows", "WriteOFF")
         ):
             if varname in message:
                 box.setChecked(message[varname])
