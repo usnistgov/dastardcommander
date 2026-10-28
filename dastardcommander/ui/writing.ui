@@ -154,16 +154,20 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QCheckBox" name="checkBox_LJH3">
-       <property name="enabled">
-        <bool>false</bool>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_Arrow">
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff2600;&quot;&gt;Not writing&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="checkBox_Arrow">
        <property name="toolTip">
-        <string>Should we write LJH version 3 files? [not yet possible]</string>
+        <string>Should we write Arrow IPC files?</string>
        </property>
        <property name="text">
-        <string>LJH3 files</string>
+        <string>Arrow files</string>
        </property>
       </widget>
      </item>
